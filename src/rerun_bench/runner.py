@@ -136,7 +136,7 @@ def run_benchmark(
     meta = {
         "schema_version": SCHEMA_VERSION,
         "run_id": run_id,
-        "rerunbench_version": __version__,
+        "rerun_bench_version": __version__,
         "agent": adapter.name,
         "model": adapter.model,
         "agent_options": adapter.options,

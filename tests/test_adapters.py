@@ -8,8 +8,8 @@ from pathlib import Path
 
 import pytest
 
-from rerunbench.adapters import ADAPTERS, get_adapter
-from rerunbench.adapters.base import Usage
+from rerun_bench.adapters import ADAPTERS, get_adapter
+from rerun_bench.adapters.base import Usage
 
 WS = Path("/tmp/ws")
 
@@ -212,8 +212,8 @@ def test_mock_is_deterministic(tmp_path):
 
 
 def test_mock_per_task_pass_prob(tmp_path, all_tasks):
-    from rerunbench import tasks as tasks_mod
-    from rerunbench import workspace as ws
+    from rerun_bench import tasks as tasks_mod
+    from rerun_bench import workspace as ws
 
     t = next(x for x in all_tasks if x.id == "edit-config")
     a = get_adapter("mock", options={"pass_prob": "1", f"pass_prob.{t.id}": "0"})

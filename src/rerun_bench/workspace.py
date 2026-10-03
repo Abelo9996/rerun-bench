@@ -16,7 +16,7 @@ def _ignore(_dir: str, names: list[str]) -> list[str]:
     return [n for n in names if n in IGNORE_DIRS or Path(n).suffix in IGNORE_SUFFIXES]
 
 
-def fresh_copy(src: Path, prefix: str = "rerunbench-") -> Path:
+def fresh_copy(src: Path, prefix: str = "rerun-bench-") -> Path:
     """Copy ``src`` into a brand-new temp directory and return the copy's path."""
     parent = Path(tempfile.mkdtemp(prefix=prefix))
     dest = parent / "workspace"

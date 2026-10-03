@@ -1,4 +1,4 @@
-"""Adapter protocol: how rerunbench drives one coding-agent CLI headlessly."""
+"""Adapter protocol: how rerun-bench drives one coding-agent CLI headlessly."""
 
 from __future__ import annotations
 

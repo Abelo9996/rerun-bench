@@ -1,5 +1,5 @@
 name: Bug report
-description: Something in rerunbench does not work as documented.
+description: Something in rerun-bench does not work as documented.
 labels: [bug]
 body:
   - type: textarea
@@ -18,8 +18,8 @@ body:
   - type: input
     id: version
     attributes:
-      label: rerunbench version
-      placeholder: "rerunbench --version"
+      label: rerun-bench version
+      placeholder: "rerun-bench --version"
     validations:
       required: true
   - type: input

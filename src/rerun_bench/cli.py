@@ -1,4 +1,4 @@
-"""Command-line interface: ``rerunbench list | run | report | verify-tasks``."""
+"""Command-line interface: ``rerun-bench list | run | report | verify-tasks``."""
 
 from __future__ import annotations
 
@@ -156,11 +156,11 @@ def cmd_verify_tasks(args) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="rerunbench",
+        prog="rerun-bench",
         description="Run the same coding tasks N times per agent and report pass rate, "
         "consistency across reruns, and cost spread.",
     )
-    p.add_argument("--version", action="version", version=f"rerunbench {__version__}")
+    p.add_argument("--version", action="version", version=f"rerun-bench {__version__}")
     p.add_argument("--tasks-dir", help="task suite directory (default: bundled suite)")
     sub = p.add_subparsers(dest="cmd", required=True)
 

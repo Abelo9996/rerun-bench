@@ -61,7 +61,7 @@ class VerifyResult:
 
 def default_tasks_dir() -> Path:
     """Locate the task suite: env override, then wheel-bundled copy, then repo checkout."""
-    env = os.environ.get("RERUNBENCH_TASKS_DIR")
+    env = os.environ.get("RERUN_BENCH_TASKS_DIR")
     if env:
         return Path(env)
     here = Path(__file__).resolve().parent
@@ -126,14 +126,14 @@ def select(tasks: list[Task], spec: str) -> list[Task]:
             if by_id[item] not in chosen:
                 chosen.append(by_id[item])
         else:
-            raise TaskError(f"unknown task {item!r}; run `rerunbench list`")
+            raise TaskError(f"unknown task {item!r}; run `rerun-bench list`")
     return chosen
 
 
 def verify(task: Task, workspace: Path) -> VerifyResult:
     """Run the task's verifier against ``workspace``. Deterministic, offline, stdlib-only."""
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONHASHSEED": "0"}
-    env["RERUNBENCH_TASK_DIR"] = str(task.root)
+    env["RERUN_BENCH_TASK_DIR"] = str(task.root)
     try:
         proc = subprocess.run(
             [sys.executable, str(task.verifier)],

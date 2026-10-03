@@ -5,8 +5,8 @@ import re
 
 import pytest
 
-from rerunbench import cli
-from rerunbench.adapters.claude import ClaudeAdapter
+from rerun_bench import cli
+from rerun_bench.adapters.claude import ClaudeAdapter
 
 from .conftest import TASKS_DIR
 
@@ -168,9 +168,9 @@ def test_existing_run_id_is_refused(tmp_path, capsys):
 
 
 def test_auto_run_ids_do_not_collide(tmp_path):
-    from rerunbench import tasks as tasks_mod
-    from rerunbench.adapters import get_adapter
-    from rerunbench.runner import RunPlan, run_benchmark
+    from rerun_bench import tasks as tasks_mod
+    from rerun_bench.adapters import get_adapter
+    from rerun_bench.runner import RunPlan, run_benchmark
 
     t = tasks_mod.select(tasks_mod.discover(TASKS_DIR), "edit-config")
     a = get_adapter("mock")
@@ -180,9 +180,9 @@ def test_auto_run_ids_do_not_collide(tmp_path):
 
 
 def test_adapter_exception_is_recorded(tmp_path, monkeypatch):
-    from rerunbench import tasks as tasks_mod
-    from rerunbench.adapters.mock import MockAdapter
-    from rerunbench.runner import RunPlan, run_benchmark
+    from rerun_bench import tasks as tasks_mod
+    from rerun_bench.adapters.mock import MockAdapter
+    from rerun_bench.runner import RunPlan, run_benchmark
 
     def boom(*a, **k):
         raise RuntimeError("boom")

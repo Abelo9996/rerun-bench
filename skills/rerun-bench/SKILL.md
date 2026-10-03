@@ -1,28 +1,29 @@
 ---
-name: rerunbench
-description: Run the rerunbench consistency benchmark on a coding agent (Claude Code, Codex CLI, opencode, or the free mock agent), read its reports, and add new benchmark tasks. Use this whenever the user wants to measure how reliable or consistent a coding agent or model is across repeated runs, compare agents or CLI versions on pass^k, flip rate or cost variance, produce a rerunbench leaderboard or HTML report, or write a new rerunbench task with a verifier and reference solution, even if they only say "benchmark my agent" or "how flaky is this model".
+name: rerun-bench
+description: Run the rerun-bench consistency benchmark on a coding agent (Claude Code, Codex CLI, opencode, or the free mock agent), read its reports, and add new benchmark tasks. Use this whenever the user wants to measure how reliable or consistent a coding agent or model is across repeated runs, compare agents or CLI versions on pass^k, flip rate or cost variance, produce a rerun-bench leaderboard or HTML report, or write a new rerun-bench task with a verifier and reference solution, even if they only say "benchmark my agent" or "how flaky is this model".
 ---
 
-# rerunbench
+# rerun-bench
 
-rerunbench runs each task in a fixed suite N times per agent and reports pass rate, pass^k
+rerun-bench runs each task in a fixed suite N times per agent and reports pass rate, pass^k
 (all k runs pass), flip rate (two runs disagree) and cost spread. Pass or fail is decided only
 by each task's hidden `verify.py`.
 
-Invoke it as `rerunbench ...` if installed, otherwise
-`uvx --from git+https://github.com/Abelo9996/rerunbench rerunbench ...`.
+Invoke it as `rerun-bench ...` if installed, otherwise
+`uvx --from git+https://github.com/Abelo9996/rerun-bench rerun-bench ...`. Install this skill
+with `npx skills add Abelo9996/rerun-bench`.
 
 ## Run the benchmark
 
 1. Start with the mock agent. It is free and confirms the setup works:
-   `rerunbench run --agent mock --tasks all --runs 5 --out results/`
+   `rerun-bench run --agent mock --tasks all --runs 5 --out results/`
 2. Real agents (`claude`, `codex`, `opencode`) spend the user's money or quota and refuse to
    start without `--yes`. Before adding `--yes`, tell the user how many agent sessions it
    will launch (tasks x runs) and get their explicit go-ahead. Suggest a small first run such
    as `--tasks edit-config --runs 2`.
-   `rerunbench run --agent claude --model sonnet --runs 5 --out results/ --yes`
+   `rerun-bench run --agent claude --model sonnet --runs 5 --out results/ --yes`
 3. Report on everything under a results root:
-   `rerunbench report results/ --format md` (or `html -o report.html`, or `json`).
+   `rerun-bench report results/ --format md` (or `html -o report.html`, or `json`).
 
 Use at least 5 runs per task; with fewer, pass^k and flip rate are too noisy to compare.
 Compare agents on the same task set and the same `--runs`.
@@ -56,7 +57,7 @@ indistinguishable from agent variance. Check behavior by running code rather tha
 source text. Then validate:
 
 ```sh
-rerunbench --tasks-dir tasks verify-tasks --tasks <id> -v   # must print "ok"
+rerun-bench --tasks-dir tasks verify-tasks --tasks <id> -v   # must print "ok"
 uv run pytest                                               # in a repo checkout
 ```
 

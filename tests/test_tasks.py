@@ -2,8 +2,8 @@
 
 import pytest
 
-from rerunbench import tasks as tasks_mod
-from rerunbench import workspace as ws
+from rerun_bench import tasks as tasks_mod
+from rerun_bench import workspace as ws
 
 from .conftest import TASKS_DIR
 

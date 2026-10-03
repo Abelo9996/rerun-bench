@@ -1,4 +1,4 @@
-from rerunbench import workspace as ws
+from rerun_bench import workspace as ws
 
 
 def test_fresh_copy_is_isolated(tmp_path):

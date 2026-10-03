@@ -44,7 +44,7 @@ def build(results_path: Path, k: int | None = None) -> dict:
     task_ids = sorted({t for e in entries for t in e["metrics"]["per_task"]})
     return {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
-        "rerunbench_version": __version__,
+        "rerun_bench_version": __version__,
         "entries": entries,
         "tasks": task_ids,
     }
@@ -122,9 +122,9 @@ def _leader_cells(e: dict) -> list[tuple[str, float | None]]:
 
 def to_markdown(rep: dict) -> str:
     lines = [
-        "# rerunbench report",
+        "# rerun-bench report",
         "",
-        f"Generated {rep['generated_at']} by rerunbench {rep['rerunbench_version']}. "
+        f"Generated {rep['generated_at']} by rerun-bench {rep['rerun_bench_version']}. "
         "k = runs per task. CV columns are the mean within-task coefficient of variation. "
         "Definitions: docs/METRICS.md.",
         "",
@@ -278,11 +278,11 @@ def to_html(rep: dict) -> str:
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<title>rerunbench report</title><style>{CSS}</style></head>
+<title>rerun-bench report</title><style>{CSS}</style></head>
 <body><main>
-<h1>rerunbench report</h1>
-<p class="sub">Same task, run N times. Generated {e(rep["generated_at"])} by rerunbench
-{e(rep["rerunbench_version"])}. {len(rep["entries"])} result set(s), {len(rep["tasks"])} task(s),
+<h1>rerun-bench report</h1>
+<p class="sub">Same task, run N times. Generated {e(rep["generated_at"])} by rerun-bench
+{e(rep["rerun_bench_version"])}. {len(rep["entries"])} result set(s), {len(rep["tasks"])} task(s),
 k = {e(k_note)}.</p>
 <h2>Leaderboard</h2>
 <p class="legend">Click a column to sort. CV columns are the mean within-task coefficient of

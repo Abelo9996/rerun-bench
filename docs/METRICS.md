@@ -1,7 +1,7 @@
 # Metrics
 
 All metrics are computed from the per-run records in `runs.jsonl` by
-`src/rerunbench/metrics.py`. Every formula below has a unit test in `tests/test_metrics.py`.
+`src/rerun_bench/metrics.py`. Every formula below has a unit test in `tests/test_metrics.py`.
 
 ## Notation
 
@@ -12,7 +12,7 @@ For one result set (one agent, model and CLI version):
 - A run passes if and only if `verify.py` exits 0. The agent's own exit code, self-reported
   success, and output text are recorded but never used to score.
 - `k` defaults to `min_t n_t` (the runs per task), so every task has pass@k and pass^k
-  defined. Override with `rerunbench report --k`.
+  defined. Override with `rerun-bench report --k`.
 
 ## Sampling design
 

@@ -31,15 +31,15 @@ jobs:
       - name: Test
         run: uv run pytest
       - name: Task suite self-check
-        run: uv run rerunbench verify-tasks
+        run: uv run rerun-bench verify-tasks
       - name: Mock benchmark smoke test
         shell: bash
         run: |
-          uv run rerunbench run --agent mock --tasks all --runs 3 --out smoke/ --quiet
-          uv run rerunbench report smoke/ --format md
-          uv run rerunbench report smoke/ --format html -o smoke/report.html
-          uv run rerunbench report smoke/ --format json -o smoke/report.json
+          uv run rerun-bench run --agent mock --tasks all --runs 3 --out smoke/ --quiet
+          uv run rerun-bench report smoke/ --format md
+          uv run rerun-bench report smoke/ --format html -o smoke/report.html
+          uv run rerun-bench report smoke/ --format json -o smoke/report.json
           test -s smoke/report.html
       - name: Installed entry point
         shell: bash
-        run: uvx --from . rerunbench --help
+        run: uvx --from . rerun-bench --help

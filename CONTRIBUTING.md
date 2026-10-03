@@ -12,14 +12,14 @@ uv run ruff check . && uv run ruff format --check .
 
 ## Task authoring rules
 
-A rerunbench task measures an agent, so the task itself must contribute zero variance.
+A rerun-bench task measures an agent, so the task itself must contribute zero variance.
 
 1. **Deterministic verifier.** `verify.py` must give the same answer every time for the same
    workspace. No randomness, no wall-clock checks, no dependence on dict or set iteration
    order, no timing thresholds. Set any seeds explicitly.
 2. **Reference solution.** Ship `solution/` with the minimal files that make the task pass.
    The test suite overlays it on `workspace/` and requires the verifier to pass, and requires
-   the untouched workspace to fail. Run `rerunbench verify-tasks --tasks <id> -v`.
+   the untouched workspace to fail. Run `rerun-bench verify-tasks --tasks <id> -v`.
 3. **No network.** Neither the task nor the verifier may need the network. Use only the
    Python standard library in `verify.py` so it runs under `uvx` with no extra installs.
 4. **Hidden checks.** Keep `verify.py` outside `workspace/`. It may read the original

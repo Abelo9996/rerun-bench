@@ -2,7 +2,7 @@ import math
 
 import pytest
 
-from rerunbench import metrics as m
+from rerun_bench import metrics as m
 
 
 def test_wilson_known_values():
