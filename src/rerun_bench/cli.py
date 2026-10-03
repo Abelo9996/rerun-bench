@@ -83,22 +83,33 @@ def cmd_run(args) -> int:
                 flush=True,
             )
 
-    if args.run_id and (out_root / args.run_id).exists():
-        print(f"error: {out_root / args.run_id} already exists", file=sys.stderr)
+    if args.resume and not args.run_id:
+        print("error: --resume needs --run-id naming the run to continue", file=sys.stderr)
         return 2
-    out_dir = run_benchmark(
-        adapter,
-        RunPlan(
-            tasks=selected,
-            runs=args.runs,
-            seed=args.seed,
-            jobs=args.jobs,
-            keep_workspaces=args.keep_workspaces,
-        ),
-        out_root,
-        run_id=args.run_id,
-        progress=progress,
-    )
+    if args.run_id and (out_root / args.run_id).exists() and not args.resume:
+        print(
+            f"error: {out_root / args.run_id} already exists (add --resume to continue it)",
+            file=sys.stderr,
+        )
+        return 2
+    try:
+        out_dir = run_benchmark(
+            adapter,
+            RunPlan(
+                tasks=selected,
+                runs=args.runs,
+                seed=args.seed,
+                jobs=args.jobs,
+                keep_workspaces=args.keep_workspaces,
+            ),
+            out_root,
+            run_id=args.run_id,
+            progress=progress,
+            resume=args.resume,
+        )
+    except ValueError as exc:
+        print(f"error: {exc}", file=sys.stderr)
+        return 2
     print(f"\nwrote {out_dir}")
     if not args.no_report:
         rep = report_mod.build(out_dir)
@@ -189,6 +200,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="adapter option, repeatable (e.g. pass_prob=0.6 for mock)",
     )
     s.add_argument("--keep-workspaces", action="store_true", help="keep per-run temp dirs")
+    s.add_argument(
+        "--resume",
+        action="store_true",
+        help="continue the --run-id directory, running only the task/run pairs it lacks",
+    )
     s.add_argument("--yes", action="store_true", help="confirm a run against a real agent")
     s.add_argument("--quiet", action="store_true")
     s.add_argument("--no-report", action="store_true", help="skip the summary at the end")

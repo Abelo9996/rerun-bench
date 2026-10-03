@@ -192,3 +192,46 @@ def test_adapter_exception_is_recorded(tmp_path, monkeypatch):
     d = run_benchmark(MockAdapter(), RunPlan(t, 2), tmp_path)
     rows = [json.loads(x) for x in (d / "runs.jsonl").read_text().splitlines()]
     assert len(rows) == 2 and all("boom" in r["agent_error"] and not r["passed"] for r in rows)
+
+
+def test_resume_runs_only_missing_pairs(tmp_path, capsys):
+    args = ["run", "--agent", "mock", "--tasks", "edit-config,minimal-fix", "--out", str(tmp_path)]
+    args += ["--run-id", "r", "--quiet", "--no-report"]
+    assert run_cli(*args, "--runs", "1") == 0
+    runs = tmp_path / "r" / "runs.jsonl"
+    first = runs.read_text().splitlines()
+    assert len(first) == 2
+    # Simulate an interrupted write: a truncated trailing line.
+    runs.write_text("\n".join(first) + "\n" + first[0][:40], encoding="utf-8")
+    assert run_cli(*args, "--runs", "3", "--resume") == 0
+    rows = [json.loads(x) for x in runs.read_text().splitlines()]
+    pairs = sorted((r["task_id"], r["run_index"]) for r in rows)
+    assert pairs == sorted((t, i) for t in ("edit-config", "minimal-fix") for i in range(3))
+    assert [json.loads(x) for x in first] == rows[:2], "existing runs are kept as they were"
+    meta = json.loads((tmp_path / "r" / "meta.json").read_text())
+    assert meta["runs_per_task"] == 3 and len(meta["resumed_at"]) == 1
+    assert run_cli(*args, "--runs", "3", "--resume") == 0
+    assert len(runs.read_text().splitlines()) == 6, "nothing left to run"
+
+
+def test_resume_refuses_a_different_agent_or_model(tmp_path, capsys):
+    base = ["run", "--agent", "mock", "--tasks", "edit-config", "--runs", "1"]
+    base += ["--out", str(tmp_path), "--run-id", "r", "--quiet", "--no-report"]
+    assert run_cli(*base) == 0
+    assert run_cli(*base, "--model", "other", "--resume") == 2
+    assert "cannot resume" in capsys.readouterr().err
+    assert run_cli("run", "--agent", "mock", "--resume", "--out", str(tmp_path)) == 2
+
+
+def test_verify_output_has_no_local_paths(tmp_path):
+    from pathlib import Path
+
+    from rerun_bench.runner import _scrub_paths
+
+    ws_dir = tmp_path / "rerun-bench-x" / "workspace"
+    task_root = tmp_path / "tasks" / "t"
+    home = Path.home()
+    text = f"File {ws_dir}/a.py\n{task_root}/verify.py\n{home}/.venv/bin/python\n"
+    out = _scrub_paths(text, ws_dir, task_root)
+    assert str(tmp_path) not in out and str(home) not in out
+    assert "<workspace>/a.py" in out and "<task>/verify.py" in out and "~/.venv" in out
