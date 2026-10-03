@@ -23,9 +23,9 @@ spends nothing and needs no API key, so you can see the whole pipeline before po
 paid agent.
 
 ```sh
-uvx --from git+https://github.com/Abelo9996/rerun-bench rerun-bench list
-uvx --from git+https://github.com/Abelo9996/rerun-bench rerun-bench run --agent mock --tasks all --runs 5 --out results/
-uvx --from git+https://github.com/Abelo9996/rerun-bench rerun-bench report results/ --format html -o report.html
+uvx rerun-bench list
+uvx rerun-bench run --agent mock --tasks all --runs 5 --out results/
+uvx rerun-bench report results/ --format html -o report.html
 ```
 
 Or install once with `uv tool install git+https://github.com/Abelo9996/rerun-bench` and drop

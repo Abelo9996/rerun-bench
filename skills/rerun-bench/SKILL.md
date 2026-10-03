@@ -10,7 +10,7 @@ rerun-bench runs each task in a fixed suite N times per agent and reports pass r
 by each task's hidden `verify.py`.
 
 Invoke it as `rerun-bench ...` if installed, otherwise
-`uvx --from git+https://github.com/Abelo9996/rerun-bench rerun-bench ...`. Install this skill
+`uvx rerun-bench ...`. Install this skill
 with `npx skills add Abelo9996/rerun-bench`.
 
 ## Run the benchmark
