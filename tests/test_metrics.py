@@ -114,6 +114,10 @@ def test_agent_metrics_rollup():
     assert r["wall_time_cv_within_task"] == 0.0
     assert r["cost_per_success_usd"] == pytest.approx(r["total_cost_usd"] / 6)
     assert m.agent_metrics(runs, k=2)["k"] == 2
+    # Costs per task are 0.1, 0.2, 0.3, 0.4; tokens 100..400; 12 runs of 10 s each.
+    assert r["median_cost_usd"] == pytest.approx(0.25)
+    assert r["tokens_median"] == 250 and r["output_tokens_median"] is None
+    assert r["wall_time_total_s"] == pytest.approx(120.0)
 
 
 def test_agent_metrics_missing_cost():
@@ -131,3 +135,4 @@ def test_agent_metrics_missing_cost():
     r = m.agent_metrics(runs)
     assert r["total_cost_usd"] is None and r["cost_reported_runs"] == 0
     assert r["mean_cost_usd"] is None and r["cost_cv_within_task"] is None
+    assert r["median_cost_usd"] is None and r["tokens_median"] is None

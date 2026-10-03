@@ -198,14 +198,18 @@ def agent_metrics(
         "total_cost_usd": total_cost,
         "cost_reported_runs": len(known_costs),
         "mean_cost_usd": statistics.fmean(known_costs) if known_costs else None,
+        "median_cost_usd": statistics.median(known_costs) if known_costs else None,
         "cost_per_success_usd": (total_cost / c_total)
         if (total_cost is not None and c_total)
         else None,
         "cost_cv_within_task": _mean([m["cost_usd"]["cv"] for m in per_task.values()]),
         "tokens_mean": spread([r.get("total_tokens") for r in runs])["mean"],
+        "tokens_median": spread([r.get("total_tokens") for r in runs])["median"],
+        "output_tokens_median": spread([r.get("output_tokens") for r in runs])["median"],
         "tokens_cv_within_task": _mean([m["total_tokens"]["cv"] for m in per_task.values()]),
         "wall_time_mean_s": spread([r.get("wall_time_s") for r in runs])["mean"],
         "wall_time_median_s": spread([r.get("wall_time_s") for r in runs])["median"],
+        "wall_time_total_s": sum(r.get("wall_time_s") or 0.0 for r in runs),
         "wall_time_cv_within_task": _mean([m["wall_time_s"]["cv"] for m in per_task.values()]),
         "approach_similarity": _mean([m["approach_similarity"] for m in per_task.values()]),
         "per_task": per_task,

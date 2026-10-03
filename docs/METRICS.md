@@ -59,12 +59,17 @@ The leaderboard reports the **mean within-task CV**: compute CV across reruns of
 then average over tasks. CV across all runs would mostly measure how different the tasks are
 from each other, not how consistent the agent is.
 
-Other cost figures: total cost, mean cost per run, and **cost per success** =
-`total cost / total passes`.
+Other cost figures: total cost, mean and median cost per run, and **cost per success** =
+`total cost / total passes`. The JSON report also has the median total tokens, median
+output tokens and summed wall time over all runs of a result set.
 
 Missing data: a CLI that does not report a value yields `null`, never 0. Statistics skip
 nulls, and `cost_reported_runs` says how many runs contributed. Total tokens = input +
-output + cache read + cache write as reported by the CLI.
+output + cache read + cache write as reported by the CLI, with input counting only uncached
+input tokens. For Claude Code the four counts are summed over every model in `modelUsage`
+(subagents and background calls included), matching `total_cost_usd`. For Codex, which
+reports cached and cache-write tokens as parts of `input_tokens`, those parts are subtracted
+from input; reasoning tokens are already inside `output_tokens` and are not added again.
 
 Wall time is measured around the agent process only (verifier time excluded). The mock
 adapter reports simulated wall time so demos run in seconds.
