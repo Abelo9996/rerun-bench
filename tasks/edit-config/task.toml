@@ -1,0 +1,9 @@
+id = "edit-config"
+title = "Make three precise edits to a TOML config"
+prompt = """
+In config/app.toml: change the server port to 8081, set the logging level to "debug", and
+add "https://example.org" to the CORS allowed origins while keeping the existing origin.
+Leave every other setting, comment and file unchanged.
+"""
+timeout = 300
+tags = ["config", "toml", "precision"]

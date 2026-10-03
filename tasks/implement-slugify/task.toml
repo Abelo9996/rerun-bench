@@ -1,0 +1,8 @@
+id = "implement-slugify"
+title = "Implement a function from its docstring spec"
+prompt = """
+Implement `slugify` in textkit/slug.py so that it follows the specification in its
+docstring exactly. Use only the Python standard library.
+"""
+timeout = 600
+tags = ["implement", "python", "spec"]

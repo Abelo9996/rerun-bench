@@ -1,0 +1,9 @@
+id = "multi-file-rename"
+title = "Rename a function across a package"
+prompt = """
+Rename the function `calc_ttl` to `compute_total` everywhere in the `inventory` package:
+its definition, every call site, and the package exports. Do not keep the old name as an
+alias. `python -m inventory.cli 3x2.50 1x4` must keep printing the same output.
+"""
+timeout = 600
+tags = ["refactor", "multi-file", "python"]

@@ -1,0 +1,10 @@
+id = "minimal-fix"
+title = "Fix one bug in legacy code without touching anything else"
+prompt = """
+`paginate` in legacy.py returns the wrong page. Pages are 1-indexed according to its
+docstring, but page 1 currently returns the second page. Fix that bug with the smallest
+change that works. Do not reformat, modernize, or clean up anything else in the repository,
+even code that looks outdated.
+"""
+timeout = 600
+tags = ["bugfix", "over-edit-trap", "minimal-diff"]

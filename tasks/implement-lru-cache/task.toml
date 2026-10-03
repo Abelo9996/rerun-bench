@@ -1,0 +1,8 @@
+id = "implement-lru-cache"
+title = "Implement a small data structure to spec"
+prompt = """
+Implement the `LRUCache` class in lru.py according to its docstrings. Use only the Python
+standard library.
+"""
+timeout = 600
+tags = ["implement", "data-structure", "python"]

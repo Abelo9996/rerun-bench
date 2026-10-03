@@ -1,0 +1,11 @@
+id = "write-tests"
+title = "Write unit tests strong enough to catch injected bugs"
+prompt = """
+Write unit tests for `parse_duration` in tests/test_duration.py using the standard
+library's unittest module. The tests must pass against the current implementation and
+should be thorough enough to catch bugs in it, covering the behavior described in its
+docstring. They are run with `python -m unittest discover -s tests -t .` from this
+directory. Do not modify duration.py.
+"""
+timeout = 600
+tags = ["tests", "mutation", "python"]

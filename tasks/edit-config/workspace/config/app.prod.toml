@@ -1,0 +1,14 @@
+# Production settings. Changes here need a change ticket.
+
+[server]
+host = "0.0.0.0"
+port = 443
+workers = 16
+
+[logging]
+level = "warning"
+format = "json"
+
+[cors]
+allowed_origins = ["https://example.com"]
+allow_credentials = true

@@ -1,0 +1,8 @@
+id = "fix-failing-test"
+title = "Fix the bug behind a failing unit test"
+prompt = """
+Running `python -m unittest` in this directory shows a failing test.
+Fix the bug in the source code so that all tests pass. Do not modify the test file.
+"""
+timeout = 600
+tags = ["bugfix", "python", "tests"]

@@ -1,0 +1,9 @@
+id = "add-cli-flag"
+title = "Add a flag to a small CLI without changing its default output"
+prompt = """
+Add a `--words` flag to wc.py. When it is given, print word counts (whitespace-separated
+tokens) instead of line counts, in exactly the same output format. Without the flag the
+output must stay exactly as it is now.
+"""
+timeout = 600
+tags = ["cli", "feature", "python"]

@@ -1,0 +1,9 @@
+id = "refactor-extract-helper"
+title = "Refactor duplicated logic without changing behavior"
+prompt = """
+pricing.py repeats the same discount-clamping logic in three functions. Extract it into
+one helper function named `clamp_percent(percent)` in pricing.py and make all three
+functions use it. Behavior must not change for any input.
+"""
+timeout = 600
+tags = ["refactor", "python", "behavior-preserving"]

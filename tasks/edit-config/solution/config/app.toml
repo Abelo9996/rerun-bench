@@ -1,0 +1,14 @@
+# Local development settings. Production values live in app.prod.toml.
+
+[server]
+host = "127.0.0.1"
+port = 8081
+workers = 4
+
+[logging]
+level = "debug"
+format = "json"
+
+[cors]
+allowed_origins = ["https://example.com", "https://example.org"]
+allow_credentials = false

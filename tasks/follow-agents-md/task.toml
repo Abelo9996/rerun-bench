@@ -1,0 +1,9 @@
+id = "follow-agents-md"
+title = "Add a function while following the repo's AGENTS.md conventions"
+prompt = """
+Add a function `is_palindrome(text)` to textutils.py. It returns True when the text reads
+the same forwards and backwards, ignoring case and any character that is not a letter or
+digit, and False otherwise.
+"""
+timeout = 600
+tags = ["instructions", "agents-md", "python"]
