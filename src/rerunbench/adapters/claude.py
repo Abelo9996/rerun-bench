@@ -2,6 +2,11 @@
 
 The JSON result object carries ``total_cost_usd``, ``usage`` (input/output/cache tokens),
 ``num_turns``, ``is_error`` and a ``modelUsage`` map keyed by model id.
+
+Isolation: by default the run loads only project and local settings (the task workspace has
+none) and ignores MCP servers outside ``--mcp-config``, so the benchmarker's personal hooks,
+plugins and MCP servers do not leak into the measurement. ``--agent-opt isolate=0`` turns
+this off; ``--agent-opt bare=1`` adds ``--bare`` (requires ANTHROPIC_API_KEY).
 """
 
 from __future__ import annotations
@@ -28,6 +33,10 @@ class ClaudeAdapter(Adapter):
             mode,
             "--no-session-persistence",
         ]
+        if self.options.get("isolate", "1") not in ("0", "false", "no"):
+            cmd += ["--setting-sources", "project,local", "--strict-mcp-config"]
+        if self.options.get("bare", "0") in ("1", "true", "yes"):
+            cmd.append("--bare")
         if self.model:
             cmd += ["--model", self.model]
         if "max_turns" in self.options:

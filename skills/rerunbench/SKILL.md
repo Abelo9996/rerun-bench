@@ -1,0 +1,65 @@
+---
+name: rerunbench
+description: Run the rerunbench consistency benchmark on a coding agent (Claude Code, Codex CLI, opencode, or the free mock agent), read its reports, and add new benchmark tasks. Use this whenever the user wants to measure how reliable or consistent a coding agent or model is across repeated runs, compare agents or CLI versions on pass^k, flip rate or cost variance, produce a rerunbench leaderboard or HTML report, or write a new rerunbench task with a verifier and reference solution, even if they only say "benchmark my agent" or "how flaky is this model".
+---
+
+# rerunbench
+
+rerunbench runs each task in a fixed suite N times per agent and reports pass rate, pass^k
+(all k runs pass), flip rate (two runs disagree) and cost spread. Pass or fail is decided only
+by each task's hidden `verify.py`.
+
+Invoke it as `rerunbench ...` if installed, otherwise
+`uvx --from git+https://github.com/Abelo9996/rerunbench rerunbench ...`.
+
+## Run the benchmark
+
+1. Start with the mock agent. It is free and confirms the setup works:
+   `rerunbench run --agent mock --tasks all --runs 5 --out results/`
+2. Real agents (`claude`, `codex`, `opencode`) spend the user's money or quota and refuse to
+   start without `--yes`. Before adding `--yes`, tell the user how many agent sessions it
+   will launch (tasks x runs) and get their explicit go-ahead. Suggest a small first run such
+   as `--tasks edit-config --runs 2`.
+   `rerunbench run --agent claude --model sonnet --runs 5 --out results/ --yes`
+3. Report on everything under a results root:
+   `rerunbench report results/ --format md` (or `html -o report.html`, or `json`).
+
+Use at least 5 runs per task; with fewer, pass^k and flip rate are too noisy to compare.
+Compare agents on the same task set and the same `--runs`.
+
+## Read the report
+
+- Prefer pass^k and flip rate over pass@k when the question is reliability. pass@k rewards
+  an agent that succeeds once in k tries.
+- Overlapping Wilson intervals mean the pass-rate difference is not established. The JSON
+  report also has `macro_pass_rate_task_bootstrap_ci95`, which accounts for task sampling.
+- CV columns are within-task spread (std / mean across reruns of one task), averaged.
+- `n/a` cost means the CLI did not report it (Codex reports tokens only unless prices are
+  passed with `--agent-opt usd_per_mtok_in=... --agent-opt usd_per_mtok_out=...`).
+- Per-run diffs are in `<result>/diffs/<task>/runNNN.diff`; failing verifier output is in
+  `runs.jsonl` under `verify_output_tail`.
+
+Formulas: `docs/METRICS.md` in the repository.
+
+## Add a task
+
+Create `tasks/<id>/` with:
+
+- `task.toml`: `id` (equal to the directory name), `title`, `prompt`, `timeout`, `tags`.
+- `workspace/`: starting files the agent sees.
+- `verify.py`: stdlib-only Python, run with cwd set to the agent's workspace; exit 0 means
+  pass. Keep it outside `workspace/` so the agent cannot read or edit it.
+- `solution/`: reference files overlaid on `workspace/`.
+
+The verifier must be deterministic and offline, because any variance it adds is
+indistinguishable from agent variance. Check behavior by running code rather than matching
+source text. Then validate:
+
+```sh
+rerunbench --tasks-dir tasks verify-tasks --tasks <id> -v   # must print "ok"
+uv run pytest                                               # in a repo checkout
+```
+
+`ok` means the untouched workspace fails and the reference solution passes. If the task
+targets a failure mode (over-editing, ignoring AGENTS.md, weak tests), also add a test that
+a plausible wrong answer fails. Full rules: `CONTRIBUTING.md`.

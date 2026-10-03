@@ -1,0 +1,28 @@
+name: New adapter
+description: Request or propose support for another coding-agent CLI.
+labels: [adapter]
+body:
+  - type: input
+    id: cli
+    attributes:
+      label: CLI name and link
+    validations:
+      required: true
+  - type: textarea
+    id: headless
+    attributes:
+      label: Headless command
+      description: The non-interactive invocation, e.g. `mycli run --json "<prompt>"`.
+    validations:
+      required: true
+  - type: textarea
+    id: output
+    attributes:
+      label: Sample machine-readable output
+      description: A captured sample showing token usage and cost fields, if the CLI reports them. Remove anything private.
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: CLI version tested

@@ -1,0 +1,39 @@
+name: New task proposal
+description: Propose a task for the benchmark suite.
+labels: [task]
+body:
+  - type: input
+    id: id
+    attributes:
+      label: Task id
+      placeholder: "fix-off-by-one-in-parser"
+    validations:
+      required: true
+  - type: textarea
+    id: prompt
+    attributes:
+      label: Prompt given to the agent
+    validations:
+      required: true
+  - type: textarea
+    id: measures
+    attributes:
+      label: What it measures
+      description: The behavior or failure mode this task separates. Why existing tasks do not cover it.
+    validations:
+      required: true
+  - type: textarea
+    id: verifier
+    attributes:
+      label: How the verifier decides pass or fail
+      description: Must be deterministic, offline, and stdlib-only.
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: Checklist
+      options:
+        - label: I can provide a reference solution.
+        - label: The untouched workspace fails the verifier.
+        - label: The task needs no network access.

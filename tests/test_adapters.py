@@ -124,6 +124,14 @@ def test_claude_command():
     assert cmd[cmd.index("--permission-mode") + 1] == "acceptEdits"
 
 
+def test_claude_isolation_flags():
+    cmd = get_adapter("claude").build_command("x", WS)
+    assert cmd[cmd.index("--setting-sources") + 1] == "project,local"
+    assert "--strict-mcp-config" in cmd and "--bare" not in cmd
+    cmd = get_adapter("claude", options={"isolate": "0", "bare": "1"}).build_command("x", WS)
+    assert "--setting-sources" not in cmd and "--bare" in cmd
+
+
 def test_claude_parse():
     u = get_adapter("claude").parse_output(CLAUDE_JSON, "")
     assert u.input_tokens == 1200 and u.output_tokens == 1800
