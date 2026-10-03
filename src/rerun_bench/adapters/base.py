@@ -62,6 +62,10 @@ class Adapter(ABC):
     def __init__(self, model: str | None = None, options: dict[str, str] | None = None):
         self.model = model
         self.options = dict(options or {})
+        # ``--agent-opt bin=/path/to/cli`` runs a specific build of the CLI, for example to
+        # compare two releases side by side without changing the one on PATH.
+        if self.options.get("bin"):
+            self.binary = self.options["bin"]
 
     # ---- pure, unit-testable parts -------------------------------------------------
     @abstractmethod
@@ -95,7 +99,7 @@ class Adapter(ABC):
         if exe is None:
             return AgentResult(None, 0.0, False, Usage(), error=f"{cmd[0]!r} not found on PATH")
         cmd = [exe, *cmd[1:]]
-        env = {**os.environ, **self.extra_env()}
+        env = self.child_env(os.environ)
         start = time.perf_counter()
         try:
             proc = subprocess.run(
@@ -136,6 +140,16 @@ class Adapter(ABC):
 
     def extra_env(self) -> dict[str, str]:
         return {}
+
+    def unset_env(self) -> frozenset[str]:
+        """Variables removed from the child's environment before ``extra_env`` is applied."""
+        return frozenset()
+
+    def child_env(self, base: dict[str, str]) -> dict[str, str]:
+        drop = self.unset_env()
+        env = {k: v for k, v in base.items() if k not in drop}
+        env.update(self.extra_env())
+        return env
 
     def _safe_parse(self, stdout: str, stderr: str) -> Usage:
         try:

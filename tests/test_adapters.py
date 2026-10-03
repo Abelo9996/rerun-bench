@@ -13,52 +13,135 @@ from rerun_bench.adapters.base import Usage
 
 WS = Path("/tmp/ws")
 
+# Shape of `claude -p --output-format json` from Claude Code 2.1.x. Values are synthetic;
+# the field names and nesting follow the real output. Top-level `usage` covers the main
+# conversation only; `modelUsage` covers every model the session called, and the adapter
+# sums it so tokens line up with `total_cost_usd`.
 CLAUDE_JSON = json.dumps(
     {
         "type": "result",
         "subtype": "success",
         "is_error": False,
+        "api_error_status": None,
         "duration_ms": 41234,
+        "duration_api_ms": 39001,
         "num_turns": 7,
         "result": "Fixed the median bug.",
-        "session_id": "abc",
+        "stop_reason": "end_turn",
+        "session_id": "00000000-0000-0000-0000-000000000000",
         "total_cost_usd": 0.0831,
         "usage": {
-            "input_tokens": 1200,
+            "input_tokens": 900,
             "cache_creation_input_tokens": 9000,
             "cache_read_input_tokens": 45000,
-            "output_tokens": 1800,
+            "output_tokens": 1760,
+            "output_tokens_details": {"thinking_tokens": 120},
+            "server_tool_use": {"web_search_requests": 0, "web_fetch_requests": 0},
+            "service_tier": "standard",
+            "cache_creation": {"ephemeral_1h_input_tokens": 9000, "ephemeral_5m_input_tokens": 0},
+            "iterations": [],
         },
         "modelUsage": {
-            "claude-haiku-4-5": {"inputTokens": 300, "outputTokens": 40},
-            "claude-sonnet-4-5": {"inputTokens": 900, "outputTokens": 1760},
+            "claude-haiku-4-5": {
+                "inputTokens": 300,
+                "outputTokens": 40,
+                "cacheReadInputTokens": 0,
+                "cacheCreationInputTokens": 500,
+                "webSearchRequests": 0,
+                "costUSD": 0.001,
+                "contextWindow": 200000,
+                "maxOutputTokens": 64000,
+            },
+            "claude-sonnet-4-5": {
+                "inputTokens": 900,
+                "outputTokens": 1760,
+                "cacheReadInputTokens": 45000,
+                "cacheCreationInputTokens": 9000,
+                "webSearchRequests": 0,
+                "costUSD": 0.0821,
+                "contextWindow": 200000,
+                "maxOutputTokens": 64000,
+                "thinkingTokens": 120,
+            },
         },
+        "permission_denials": [],
+        "terminal_reason": "completed",
+        "uuid": "00000000-0000-0000-0000-000000000001",
     }
 )
 
+# Shape of `codex exec --json` from Codex CLI 0.160. Transient `error` events (retries) can
+# precede a successful turn; `cached_input_tokens` and `cache_write_input_tokens` are subsets
+# of `input_tokens`, and `reasoning_output_tokens` is a subset of `output_tokens`.
 CODEX_JSONL = (
     "\n".join(
         json.dumps(e)
         for e in [
-            {"type": "thread.started", "thread_id": "t1"},
+            {"type": "thread.started", "thread_id": "00000000-0000-0000-0000-000000000000"},
             {"type": "turn.started"},
-            {"type": "item.completed", "item": {"id": "i0", "type": "agent_message", "text": "ok"}},
+            {"type": "error", "message": "Reconnecting... 2/5 (stream disconnected)"},
+            {
+                "type": "item.started",
+                "item": {
+                    "id": "item_0",
+                    "type": "command_execution",
+                    "command": "/bin/zsh -lc 'cat stats.py'",
+                    "aggregated_output": "",
+                    "exit_code": None,
+                    "status": "in_progress",
+                },
+            },
+            {
+                "type": "item.completed",
+                "item": {
+                    "id": "item_0",
+                    "type": "command_execution",
+                    "command": "/bin/zsh -lc 'cat stats.py'",
+                    "aggregated_output": "def median(xs): ...",
+                    "exit_code": 0,
+                    "status": "completed",
+                },
+            },
+            {
+                "type": "item.completed",
+                "item": {"id": "item_1", "type": "agent_message", "text": "ok"},
+            },
             {
                 "type": "turn.completed",
                 "usage": {
                     "input_tokens": 24000,
-                    "cached_input_tokens": 20000,
+                    "cached_input_tokens": 18000,
+                    "cache_write_input_tokens": 2000,
                     "output_tokens": 900,
+                    "reasoning_output_tokens": 300,
                 },
             },
             {"type": "turn.started"},
             {
                 "type": "turn.completed",
-                "usage": {"input_tokens": 1000, "cached_input_tokens": 0, "output_tokens": 100},
+                "usage": {
+                    "input_tokens": 1000,
+                    "cached_input_tokens": 0,
+                    "cache_write_input_tokens": 0,
+                    "output_tokens": 100,
+                    "reasoning_output_tokens": 0,
+                },
             },
         ]
     )
     + "\n"
+)
+
+# A run whose model is unavailable: retries, then `turn.failed`, and no usage.
+CODEX_FAILED_JSONL = "\n".join(
+    json.dumps(e)
+    for e in [
+        {"type": "thread.started", "thread_id": "00000000-0000-0000-0000-000000000000"},
+        {"type": "turn.started"},
+        {"type": "error", "message": "Reconnecting... 1/5 (unexpected status 404 Not Found)"},
+        {"type": "error", "message": "unexpected status 404 Not Found"},
+        {"type": "turn.failed", "error": {"message": "unexpected status 404 Not Found"}},
+    ]
 )
 
 OPENCODE_JSONL = "\n".join(
@@ -134,12 +217,52 @@ def test_claude_isolation_flags():
 
 def test_claude_parse():
     u = get_adapter("claude").parse_output(CLAUDE_JSON, "")
+    # Summed over modelUsage (both models), not just the main conversation's `usage`.
     assert u.input_tokens == 1200 and u.output_tokens == 1800
-    assert u.cache_read_tokens == 45000 and u.cache_write_tokens == 9000
-    assert u.total_tokens == 1200 + 1800 + 45000 + 9000
+    assert u.cache_read_tokens == 45000 and u.cache_write_tokens == 9500
+    assert u.total_tokens == 1200 + 1800 + 45000 + 9500
     assert u.cost_usd == pytest.approx(0.0831)
     assert u.model == "claude-sonnet-4-5"
     assert u.num_turns == 7 and u.is_error is False
+
+
+def test_claude_parse_without_model_usage_falls_back_to_usage():
+    obj = json.loads(CLAUDE_JSON)
+    del obj["modelUsage"]
+    u = get_adapter("claude").parse_output(json.dumps(obj), "")
+    assert u.input_tokens == 900 and u.output_tokens == 1760
+    assert u.cache_read_tokens == 45000 and u.cache_write_tokens == 9000
+    assert u.model is None
+
+
+def test_claude_strips_nested_session_env():
+    a = get_adapter("claude")
+    parent = {
+        "PATH": "/usr/bin",
+        "HOME": "/home/u",
+        "ANTHROPIC_API_KEY": "k",
+        "CLAUDECODE": "1",
+        "CLAUDE_CODE_ENTRYPOINT": "cli",
+        "CLAUDE_CODE_SESSION_ID": "s",
+        "CLAUDE_CODE_CHILD_SESSION": "1",
+        "CLAUDE_EFFORT": "high",
+        "CLAUDE_CODE_USE_BEDROCK": "1",
+    }
+    env = a.child_env(parent)
+    assert env["PATH"] == "/usr/bin" and env["ANTHROPIC_API_KEY"] == "k"
+    assert env["CLAUDE_CODE_USE_BEDROCK"] == "1", "user configuration must pass through"
+    for k in ("CLAUDECODE", "CLAUDE_CODE_ENTRYPOINT", "CLAUDE_CODE_SESSION_ID", "CLAUDE_EFFORT"):
+        assert k not in env
+    cmd = get_adapter("claude", options={"effort": "low"}).build_command("x", WS)
+    assert cmd[cmd.index("--effort") + 1] == "low"
+    assert "--effort" not in a.build_command("x", WS)
+
+
+def test_bin_option_overrides_binary():
+    a = get_adapter("codex", options={"bin": "/opt/codex-next/bin/codex"})
+    assert a.binary == "/opt/codex-next/bin/codex"
+    assert a.build_command("x", WS)[0] == "/opt/codex-next/bin/codex"
+    assert get_adapter("codex").binary == "codex"
 
 
 def test_claude_parse_tolerates_noise_and_garbage():
@@ -152,19 +275,24 @@ def test_claude_parse_tolerates_noise_and_garbage():
 def test_codex_command():
     cmd = get_adapter("codex", "gpt-5-codex").build_command("fix it", WS)
     assert cmd[:3] == ["codex", "exec", "--json"]
-    assert "--skip-git-repo-check" in cmd
+    assert "--skip-git-repo-check" in cmd and "--ephemeral" in cmd
+    assert "--ignore-user-config" in cmd
     assert cmd[cmd.index("--sandbox") + 1] == "workspace-write"
     assert cmd[cmd.index("--cd") + 1] == str(WS)
     assert cmd[cmd.index("--model") + 1] == "gpt-5-codex"
     assert cmd[-1] == "fix it"
+    cmd = get_adapter("codex", options={"isolate": "0", "effort": "high"}).build_command("x", WS)
+    assert "--ignore-user-config" not in cmd and "--model" not in cmd
+    assert cmd[cmd.index("-c") + 1] == "model_reasoning_effort=high"
 
 
 def test_codex_parse():
     u = get_adapter("codex", "gpt-5-codex").parse_output(CODEX_JSONL, "")
-    assert u.input_tokens == 25000 - 20000
-    assert u.cache_read_tokens == 20000
-    assert u.output_tokens == 1000
+    assert u.input_tokens == 25000 - 18000 - 2000
+    assert u.cache_read_tokens == 18000 and u.cache_write_tokens == 2000
+    assert u.output_tokens == 1000, "reasoning tokens are part of output_tokens"
     assert u.num_turns == 2
+    assert u.is_error is False, "a retried transient error is not a failed run"
     assert u.cost_usd is None, "codex reports no cost; never invent one"
     assert u.model == "gpt-5-codex"
     priced = get_adapter(
@@ -176,8 +304,31 @@ def test_codex_parse():
         },
     )
     u2 = priced.parse_output(CODEX_JSONL, "")
-    assert u2.cost_usd == pytest.approx((5000 * 1.25 + 20000 * 0.125 + 1000 * 10) / 1e6)
+    expected = (5000 * 1.25 + 18000 * 0.125 + 2000 * 1.25 + 1000 * 10) / 1e6
+    assert u2.cost_usd == pytest.approx(expected)
+    free_cache = get_adapter(
+        "codex",
+        options={"usd_per_mtok_in": "1", "usd_per_mtok_out": "1", "usd_per_mtok_cached": "0"},
+    )
+    assert free_cache.parse_output(CODEX_JSONL, "").cost_usd == pytest.approx(
+        (5000 + 2000 + 1000) / 1e6
+    ), "a cached price of 0 must not fall back to the input price"
     assert get_adapter("codex").parse_output("", "").total_tokens is None
+    assert get_adapter("codex").parse_output(CODEX_JSONL, "").model is None
+
+
+def test_codex_parse_failed_turn_and_old_schema():
+    u = get_adapter("codex").parse_output(CODEX_FAILED_JSONL, "")
+    assert u.is_error is True and u.total_tokens is None
+    old = json.dumps(
+        {
+            "type": "turn.completed",
+            "usage": {"input_tokens": 100, "cached_input_tokens": 40, "output_tokens": 5},
+        }
+    )
+    u = get_adapter("codex").parse_output(old, "")
+    assert u.input_tokens == 60 and u.cache_read_tokens == 40 and u.output_tokens == 5
+    assert u.cache_write_tokens is None, "not reported by older CLIs, so not zero"
 
 
 def test_opencode_command_and_parse():
