@@ -192,6 +192,7 @@ def test_adapter_exception_is_recorded(tmp_path, monkeypatch):
     d = run_benchmark(MockAdapter(), RunPlan(t, 2), tmp_path)
     rows = [json.loads(x) for x in (d / "runs.jsonl").read_text().splitlines()]
     assert len(rows) == 2 and all("boom" in r["agent_error"] and not r["passed"] for r in rows)
+    assert all(r["agent_stdout_tail"] == "" and r["agent_stderr_tail"] == "" for r in rows)
 
 
 def test_resume_runs_only_missing_pairs(tmp_path, capsys):

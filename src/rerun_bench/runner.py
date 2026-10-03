@@ -91,6 +91,8 @@ def execute_one(
         "agent_exit_code": result.exit_code,
         "agent_timed_out": result.timed_out,
         "agent_error": result.error,
+        "agent_stdout_tail": _scrub_paths(result.stdout_tail, work, task.root)[-2000:],
+        "agent_stderr_tail": _scrub_paths(result.stderr_tail, work, task.root)[-1000:],
         "wall_time_s": round(result.wall_time_s, 3),
         "input_tokens": u.input_tokens,
         "output_tokens": u.output_tokens,
