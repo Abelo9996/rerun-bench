@@ -83,6 +83,9 @@ def cmd_run(args) -> int:
                 flush=True,
             )
 
+    if args.run_id and (out_root / args.run_id).exists():
+        print(f"error: {out_root / args.run_id} already exists", file=sys.stderr)
+        return 2
     out_dir = run_benchmark(
         adapter,
         RunPlan(

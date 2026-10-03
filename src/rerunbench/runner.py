@@ -15,7 +15,7 @@ from pathlib import Path
 
 from . import __version__
 from . import workspace as ws
-from .adapters import Adapter
+from .adapters import Adapter, AgentResult, Usage
 from .adapters.mock import MockAdapter
 from .tasks import Task, verify
 
@@ -54,9 +54,16 @@ def execute_one(
     try:
         if isinstance(adapter, MockAdapter):
             adapter.solution_dir = task.solution
-        result = adapter.run(
-            task.prompt, work, timeout=task.timeout, seed=seed, run_key=f"{task.id}/{run_index}"
-        )
+        try:
+            result = adapter.run(
+                task.prompt,
+                work,
+                timeout=task.timeout,
+                seed=seed,
+                run_key=f"{task.id}/{run_index}",
+            )
+        except Exception as exc:  # an adapter bug must not lose the other runs
+            result = AgentResult(None, 0.0, False, Usage(), error=f"adapter error: {exc!r}")
         vres = verify(task, work)
         diff = ws.unified_diff(pristine, work)
     finally:
@@ -116,8 +123,15 @@ def run_benchmark(
     session, such as rate limiting or a provider-side change, spreads across tasks instead
     of landing on whichever task happened to run last.
     """
+    explicit = run_id is not None
     run_id = run_id or make_run_id(adapter.name, adapter.model)
     out_dir = out_root / run_id
+    if out_dir.exists() and not explicit:
+        n = 2
+        while (out_root / f"{run_id}-{n}").exists():
+            n += 1
+        run_id = f"{run_id}-{n}"
+        out_dir = out_root / run_id
     out_dir.mkdir(parents=True, exist_ok=False)
     meta = {
         "schema_version": SCHEMA_VERSION,

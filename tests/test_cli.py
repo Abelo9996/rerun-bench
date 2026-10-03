@@ -147,3 +147,48 @@ def test_errors(tmp_path, capsys):
 def test_verify_tasks_command(capsys):
     assert run_cli("verify-tasks", "--tasks", "edit-config") == 0
     assert "ok" in capsys.readouterr().out
+
+
+def test_existing_run_id_is_refused(tmp_path, capsys):
+    args = (
+        "run",
+        "--agent",
+        "mock",
+        "--tasks",
+        "edit-config",
+        "--runs",
+        "1",
+        "--out",
+        str(tmp_path),
+        "--quiet",
+        "--no-report",
+    )
+    assert run_cli(*args, "--run-id", "dup") == 0
+    assert run_cli(*args, "--run-id", "dup") == 2
+
+
+def test_auto_run_ids_do_not_collide(tmp_path):
+    from rerunbench import tasks as tasks_mod
+    from rerunbench.adapters import get_adapter
+    from rerunbench.runner import RunPlan, run_benchmark
+
+    t = tasks_mod.select(tasks_mod.discover(TASKS_DIR), "edit-config")
+    a = get_adapter("mock")
+    d1 = run_benchmark(a, RunPlan(t, 1), tmp_path)
+    d2 = run_benchmark(a, RunPlan(t, 1), tmp_path)
+    assert d1 != d2 and d1.is_dir() and d2.is_dir()
+
+
+def test_adapter_exception_is_recorded(tmp_path, monkeypatch):
+    from rerunbench import tasks as tasks_mod
+    from rerunbench.adapters.mock import MockAdapter
+    from rerunbench.runner import RunPlan, run_benchmark
+
+    def boom(*a, **k):
+        raise RuntimeError("boom")
+
+    monkeypatch.setattr(MockAdapter, "run", boom)
+    t = tasks_mod.select(tasks_mod.discover(TASKS_DIR), "edit-config")
+    d = run_benchmark(MockAdapter(), RunPlan(t, 2), tmp_path)
+    rows = [json.loads(x) for x in (d / "runs.jsonl").read_text().splitlines()]
+    assert len(rows) == 2 and all("boom" in r["agent_error"] and not r["passed"] for r in rows)
