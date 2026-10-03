@@ -36,15 +36,17 @@ Supported CLIs, each driven headlessly in a fresh temporary copy of the task wor
 | Agent | Command rerun-bench runs | Cost reported by the CLI |
 |---|---|---|
 | `claude` (Claude Code) | `claude -p <prompt> --output-format json --permission-mode bypassPermissions` | yes (`total_cost_usd`) |
-| `codex` (OpenAI Codex CLI) | `codex exec --json --sandbox workspace-write --cd <ws> <prompt>` | tokens only; pass prices with `--agent-opt` to get dollars |
+| `codex` (OpenAI Codex CLI) | `codex exec --json --ephemeral --ignore-user-config --sandbox workspace-write --cd <ws> <prompt>` | tokens only; pass prices with `--agent-opt` to get dollars |
 | `opencode` | `opencode run --format json <prompt>` | yes (per step) |
 
 ```sh
 rerun-bench run --agent claude --model sonnet --tasks all --runs 5 --out results/ --yes
-rerun-bench run --agent codex --model gpt-5-codex --runs 5 --out results/ --yes \
+rerun-bench run --agent codex --model <model> --runs 5 --out results/ --yes \
   --agent-opt usd_per_mtok_in=1.25 --agent-opt usd_per_mtok_out=10 --agent-opt usd_per_mtok_cached=0.125
 rerun-bench report results/ --format md
 ```
+
+The `usd_per_mtok_*` values are placeholders; use the published prices of the model you run.
 
 Each run records wall time, exit status, token usage and cost (when the CLI reports them),
 the CLI version, the model, and the final diff. A value the CLI does not report is stored as
@@ -56,12 +58,30 @@ prints the run count first. Start with `--tasks edit-config --runs 2`. The agent
 file-edit and shell permissions inside a temp directory; treat it like any other unattended
 agent session.
 
-For `claude`, rerun-bench by default loads only project and local settings and ignores MCP
-servers outside `--mcp-config`, so your personal hooks and MCP servers do not change the
-measurement. `--agent-opt isolate=0` turns that off.
+Personal configuration is kept out of the measurement by default. For `claude`, rerun-bench
+loads only project and local settings and ignores MCP servers outside `--mcp-config`, so your
+hooks, plugins and MCP servers do not apply. For `codex`, it passes `--ignore-user-config`, so
+the model, reasoning effort, plugins and notify hooks in your `config.toml` do not apply (auth
+still works). `--agent-opt isolate=0` turns this off for either agent. When rerun-bench itself
+runs inside a Claude Code session, that session's environment variables (`CLAUDECODE`,
+`CLAUDE_CODE_SESSION_ID` and similar) are removed before starting the measured `claude`.
+
+`codex exec --json` does not report which model it ran, so pass `--model` if you want the
+model recorded; otherwise the report shows `default`.
 
 Other useful flags: `--jobs 4` (parallel runs), `--tasks tag:refactor` or `--tasks a,b`,
-`--keep-workspaces` (inspect what the agent left behind), `--seed` (mock only).
+`--keep-workspaces` (inspect what the agent left behind), `--seed` (mock only),
+`--agent-opt bin=/path/to/cli` (run a specific build of the CLI), `--agent-opt effort=high`
+(`claude --effort` or Codex `model_reasoning_effort`).
+
+Long runs can be interrupted and continued: name the run with `--run-id` and add `--resume`
+to run only the task and run pairs that `runs.jsonl` does not have yet.
+
+```sh
+rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes
+# interrupted; later:
+rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes --resume
+```
 
 ## Example report
 
@@ -183,7 +203,6 @@ npx skills add Abelo9996/rerun-bench
 - Paired comparisons between two result sets (Fisher exact per task, task-level bootstrap
   for the suite).
 - More tasks in other languages, kept small, offline and deterministic.
-- Resume for interrupted runs.
 
 ## Related projects
 
