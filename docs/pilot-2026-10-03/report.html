@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>rerun-bench report</title><style>
+:root{--bg:#fbfbfa;--fg:#1d1d1b;--muted:#6b6b66;--line:#e2e1dc;--card:#ffffff;
+--pass:#2f7d4f;--fail:#b8433a;--accent:#2d5b9a;--chip:#f0efea}
+@media (prefers-color-scheme:dark){:root{--bg:#161615;--fg:#ecebe6;--muted:#9a9993;
+--line:#2f2e2b;--card:#1e1e1c;--pass:#5bb37f;--fail:#e0766b;--accent:#7fa8e0;--chip:#2a2a27}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--fg);
+font:14px/1.5 ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+main{max-width:1200px;margin:0 auto;padding:24px 16px 64px}
+h1{font-size:22px;margin:0 0 4px}h2{font-size:17px;margin:32px 0 8px}
+p.sub{color:var(--muted);margin:0 0 16px}
+.wrap{overflow-x:auto;border:1px solid var(--line);border-radius:8px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{padding:7px 10px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{font-weight:600;font-size:12px;color:var(--muted);cursor:pointer;user-select:none;
+position:sticky;top:0;background:var(--card)}
+th[data-dir="asc"]::after{content:" \2191"}th[data-dir="desc"]::after{content:" \2193"}
+tr:last-child td{border-bottom:none}
+.dots{display:inline-flex;gap:2px;vertical-align:middle;margin-right:6px}
+.dot{width:9px;height:9px;border-radius:2px;display:inline-block}
+.dot.p{background:var(--pass)}.dot.f{background:var(--fail)}
+.cell{display:flex;align-items:center;justify-content:flex-end;gap:6px}
+.small{color:var(--muted);font-size:12px}
+.legend{color:var(--muted);font-size:12px;margin:8px 0}
+input{font:inherit;padding:6px 8px;border:1px solid var(--line);border-radius:6px;
+background:var(--card);color:var(--fg);width:min(320px,100%)}
+dl{display:grid;grid-template-columns:max-content 1fr;gap:4px 16px;font-size:13px}
+dt{font-weight:600}dd{margin:0;color:var(--muted)}
+</style></head>
+<body><main>
+<h1>rerun-bench report</h1>
+<p class="sub">Same task, run N times. Generated 2026-10-03T08:26:33+00:00 by rerun-bench
+0.1.0. 2 result set(s), 10 task(s),
+k = 3.</p>
+<h2>Leaderboard</h2>
+<p class="legend">Click a column to sort. CV columns are the mean within-task coefficient of
+variation (std / mean across reruns of the same task).</p>
+<div class="wrap"><table class="sortable" id="leaderboard"><thead><tr><th>Agent / model</th><th>CLI version</th><th>Runs/task</th><th>Pass rate [95% CI]</th><th>pass@k</th><th>pass^k</th><th>Flip rate</th><th>Flaky tasks</th><th>Cost/run</th><th>Cost CV</th><th>Tokens CV</th><th>Wall median</th><th>Wall CV</th><th>Approach sim.</th></tr></thead>
+<tbody><tr><td>claude / claude-opus-5-5<div class='small'>claude</div></td><td>2.1.288 (Claude Code)</td><td data-v="3">3</td><td data-v="1">100% [89, 100]</td><td data-v="1">100%</td><td data-v="1">100%</td><td data-v="0">0%</td><td data-v="0">0%</td><td data-v="0.0938483">$0.0938</td><td data-v="0.0519455">0.05</td><td data-v="0.0435627">0.04</td><td data-v="12.633">12.6s</td><td data-v="0.178913">0.18</td><td data-v="0.807908">0.81</td></tr><tr><td>codex / gpt-6-luna<div class='small'>codex</div></td><td>codex-cli 0.160.0</td><td data-v="3">3</td><td data-v="0.933333">93% [79, 98]</td><td data-v="1">100%</td><td data-v="0.8">80%</td><td data-v="0.133333">13%</td><td data-v="0.2">20%</td><td data-v="">n/a</td><td data-v="">n/a</td><td data-v="0.140929">0.14</td><td data-v="16.11">16.1s</td><td data-v="0.207104">0.21</td><td data-v="0.772065">0.77</td></tr></tbody></table></div>
+<h2>Per-task consistency</h2>
+<p class="legend">Each square is one run, in run order: green passed, red failed. Hover a cell
+for CI, flip rate, cost and wall-time CV, and approach similarity.</p>
+<p><input id="taskfilter" placeholder="Filter tasks" aria-label="Filter tasks"></p>
+<div class="wrap"><table class="sortable" id="tasks"><thead><tr><th>Task</th><th>claude / claude-opus-5-5</th><th>codex / gpt-6-luna</th></tr></thead>
+<tbody><tr><td>add-cli-flag</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.13, wall CV 0.16, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.06, approach sim 0.64'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>edit-config</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.07, wall CV 0.49, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.33, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>fix-failing-test</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.01, wall CV 0.03, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.09, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>follow-agents-md</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.02, wall CV 0.09, approach sim 0.80'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.17, approach sim 0.63'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>implement-lru-cache</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.06, wall CV 0.08, approach sim 0.72'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="0.666667"><span class='cell' title='pass 2/3, 95% CI [21, 94], flip 67%, cost CV n/a, wall CV 0.08, approach sim 0.62'><span class="dots"><span class="dot f" title="run 0: fail"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>67%</span><span class='small'>flip 67%</span></span></td></tr><tr><td>implement-slugify</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.03, wall CV 0.08, approach sim 0.45'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.05, approach sim 0.70'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>minimal-fix</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.01, wall CV 0.21, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.34, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>multi-file-rename</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.02, wall CV 0.42, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.41, approach sim 1.00'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr><tr><td>refactor-extract-helper</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.05, wall CV 0.12, approach sim 0.90'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="0.666667"><span class='cell' title='pass 2/3, 95% CI [21, 94], flip 67%, cost CV n/a, wall CV 0.36, approach sim 0.92'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot f" title="run 1: fail"></span><span class="dot p" title="run 2: pass"></span></span><span>67%</span><span class='small'>flip 67%</span></span></td></tr><tr><td>write-tests</td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV 0.12, wall CV 0.11, approach sim 0.20'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td><td data-v="1"><span class='cell' title='pass 3/3, 95% CI [44, 100], flip 0%, cost CV n/a, wall CV 0.19, approach sim 0.22'><span class="dots"><span class="dot p" title="run 0: pass"></span><span class="dot p" title="run 1: pass"></span><span class="dot p" title="run 2: pass"></span></span><span>100%</span><span class='small'>flip 0%</span></span></td></tr></tbody></table></div>
+<h2>Metric definitions</h2>
+<dl>
+<dt>Pass rate</dt><dd>passes / runs, pooled over tasks, with a Wilson 95% interval.</dd>
+<dt>pass@k</dt><dd>P(at least one of k reruns passes), unbiased estimator, averaged over
+tasks.</dd>
+<dt>pass^k</dt><dd>P(all k reruns pass), unbiased estimator, averaged over tasks.</dd>
+<dt>Flip rate</dt><dd>P(two reruns of the same task disagree) = 2c(n-c)/(n(n-1)), averaged
+over tasks.</dd>
+<dt>Flaky tasks</dt><dd>Share of tasks with at least one pass and at least one fail.</dd>
+<dt>Cost / tokens / wall CV</dt><dd>Sample std / mean across reruns of one task, averaged
+over tasks.</dd>
+<dt>Approach sim.</dt><dd>Mean pairwise Jaccard similarity of changed-line sets among passing
+runs. 1.0 means every passing run made the same edit.</dd>
+</dl>
+</main><script>
+document.querySelectorAll('table.sortable').forEach(function(t){
+  t.querySelectorAll('th').forEach(function(th,i){
+    th.addEventListener('click',function(){
+      var dir=th.dataset.dir==='desc'?'asc':'desc';
+      t.querySelectorAll('th').forEach(function(o){delete o.dataset.dir});th.dataset.dir=dir;
+      var rows=Array.from(t.tBodies[0].rows);
+      rows.sort(function(a,b){
+        var x=a.cells[i].dataset.v, y=b.cells[i].dataset.v;
+        if(x===undefined||y===undefined){x=a.cells[i].textContent;y=b.cells[i].textContent;
+          return dir==='asc'?x.localeCompare(y):y.localeCompare(x)}
+        x=x===''?-Infinity:parseFloat(x);y=y===''?-Infinity:parseFloat(y);
+        return dir==='asc'?x-y:y-x});
+      rows.forEach(function(r){t.tBodies[0].appendChild(r)});
+    });
+  });
+});
+var f=document.getElementById('taskfilter');
+if(f){f.addEventListener('input',function(){var q=f.value.toLowerCase();
+  document.querySelectorAll('#tasks tbody tr').forEach(function(r){
+    r.style.display=r.cells[0].textContent.toLowerCase().indexOf(q)>=0?'':'none'})})}
+</script></body></html>

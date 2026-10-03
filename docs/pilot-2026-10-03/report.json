@@ -1,0 +1,1554 @@
+{
+  "generated_at": "2026-10-03T08:26:33+00:00",
+  "rerun_bench_version": "0.1.0",
+  "entries": [
+    {
+      "run_id": "claude",
+      "agent": "claude",
+      "model": "claude-opus-5-5",
+      "models_reported": [
+        "claude-opus-5-5"
+      ],
+      "cli_version": "2.1.288 (Claude Code)",
+      "started_at": "2026-10-03T08:16:06+00:00",
+      "metrics": {
+        "n_tasks": 10,
+        "n_runs": 30,
+        "min_runs_per_task": 3,
+        "passes": 30,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": [
+          0.8864866068260312,
+          1.0
+        ],
+        "macro_pass_rate": 1.0,
+        "macro_pass_rate_task_bootstrap_ci95": [
+          1.0,
+          1.0
+        ],
+        "k": 3,
+        "pass_at_k": 1.0,
+        "pass_hat_k": 1.0,
+        "flip_rate": 0.0,
+        "flaky_task_fraction": 0.0,
+        "total_cost_usd": 2.815449,
+        "cost_reported_runs": 30,
+        "mean_cost_usd": 0.09384830000000001,
+        "median_cost_usd": 0.08863389999999999,
+        "cost_per_success_usd": 0.09384830000000001,
+        "cost_cv_within_task": 0.05194547233777443,
+        "tokens_mean": 57713.76666666667,
+        "tokens_median": 52016.5,
+        "output_tokens_median": 963.5,
+        "tokens_cv_within_task": 0.043562703165810734,
+        "wall_time_mean_s": 13.765433333333334,
+        "wall_time_median_s": 12.633,
+        "wall_time_total_s": 412.963,
+        "wall_time_cv_within_task": 0.17891275011667346,
+        "approach_similarity": 0.8079075250990145,
+        "per_task": {
+          "add-cli-flag": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.09308913333333334,
+              "median": 0.0901942,
+              "std": 0.011740213610208864,
+              "cv": 0.12611798165710209,
+              "min": 0.0830672,
+              "max": 0.106006,
+              "iqr": 0.01146939999999999
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 57312.0,
+              "median": 51176.0,
+              "std": 11155.031869071465,
+              "cv": 0.19463693238887955,
+              "min": 50572.0,
+              "max": 70188.0,
+              "iqr": 9808.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1158.3333333333333,
+              "median": 1137.0,
+              "std": 220.77439465058745,
+              "cv": 0.19059659969834888,
+              "min": 949.0,
+              "max": 1389.0,
+              "iqr": 220.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 12.248,
+              "median": 11.706,
+              "std": 1.9940328482750735,
+              "cv": 0.16280477206687408,
+              "min": 10.581,
+              "max": 14.457,
+              "iqr": 1.9380000000000006
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "edit-config": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.07583820000000001,
+              "median": 0.07862480000000001,
+              "std": 0.005552734054499637,
+              "cv": 0.07321816781647819,
+              "min": 0.069444,
+              "max": 0.0794458,
+              "iqr": 0.0050009000000000026
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 49838.0,
+              "median": 50068.0,
+              "std": 452.22892432926045,
+              "cv": 0.009073978175875044,
+              "min": 49317.0,
+              "max": 50129.0,
+              "iqr": 406.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 668.0,
+              "median": 751.0,
+              "std": 171.30966114028712,
+              "cv": 0.25645158853336397,
+              "min": 471.0,
+              "max": 782.0,
+              "iqr": 155.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 10.075666666666667,
+              "median": 7.782,
+              "std": 4.89742098796227,
+              "cv": 0.4860642129184771,
+              "min": 6.746,
+              "max": 15.699,
+              "iqr": 4.476500000000001
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-failing-test": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.08019126666666666,
+              "median": 0.0806084,
+              "std": 0.0008804252230219958,
+              "cv": 0.010979066170405869,
+              "min": 0.07917980000000001,
+              "max": 0.08078560000000001,
+              "iqr": 0.0008029000000000092
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 66881.33333333333,
+              "median": 66953.0,
+              "std": 138.2184261715251,
+              "cv": 0.0020666218701509906,
+              "min": 66722.0,
+              "max": 66969.0,
+              "iqr": 123.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 623.0,
+              "median": 613.0,
+              "std": 24.576411454889016,
+              "cv": 0.03944849350704497,
+              "min": 605.0,
+              "max": 651.0,
+              "iqr": 23.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 8.590333333333334,
+              "median": 8.567,
+              "std": 0.2159475244899401,
+              "cv": 0.025138433645175595,
+              "min": 8.387,
+              "max": 8.817,
+              "iqr": 0.21499999999999986
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "follow-agents-md": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.08315506666666667,
+              "median": 0.0826264,
+              "std": 0.0019023168225438551,
+              "cv": 0.022876739792289928,
+              "min": 0.08157299999999999,
+              "max": 0.0852658,
+              "iqr": 0.001846399999999998
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 51084.333333333336,
+              "median": 51059.0,
+              "std": 111.1860302975753,
+              "cv": 0.0021765191604257396,
+              "min": 50988.0,
+              "max": 51206.0,
+              "iqr": 109.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 874.3333333333334,
+              "median": 845.0,
+              "std": 92.55448845590004,
+              "cv": 0.10585721134872288,
+              "min": 800.0,
+              "max": 978.0,
+              "iqr": 89.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 9.857,
+              "median": 9.567,
+              "std": 0.845176904559039,
+              "cv": 0.08574382718464432,
+              "min": 9.195,
+              "max": 10.809,
+              "iqr": 0.8069999999999986
+            },
+            "approach_similarity": 0.8000000000000002,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "implement-lru-cache": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.0979462,
+              "median": 0.09685099999999999,
+              "std": 0.0054188519374494875,
+              "cv": 0.05532477969997292,
+              "min": 0.0931586,
+              "max": 0.103829,
+              "iqr": 0.005335199999999998
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 51729.0,
+              "median": 51730.0,
+              "std": 469.50079872136536,
+              "cv": 0.009076162282691824,
+              "min": 51259.0,
+              "max": 52198.0,
+              "iqr": 469.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1427.3333333333333,
+              "median": 1343.0,
+              "std": 150.42052164958523,
+              "cv": 0.10538569942754687,
+              "min": 1338.0,
+              "max": 1601.0,
+              "iqr": 131.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 15.529000000000002,
+              "median": 16.146,
+              "std": 1.3122191128009073,
+              "cv": 0.08450119858335418,
+              "min": 14.022,
+              "max": 16.419,
+              "iqr": 1.1984999999999992
+            },
+            "approach_similarity": 0.7238095238095238,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "implement-slugify": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.08847899999999999,
+              "median": 0.09002919999999999,
+              "std": 0.002953281273431304,
+              "cv": 0.03337833015101102,
+              "min": 0.0850734,
+              "max": 0.09033440000000001,
+              "iqr": 0.002630500000000008
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 50709.0,
+              "median": 50762.0,
+              "std": 192.06509313251067,
+              "cv": 0.003787593782809968,
+              "min": 50496.0,
+              "max": 50869.0,
+              "iqr": 186.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1243.0,
+              "median": 1302.0,
+              "std": 128.1288414058287,
+              "cv": 0.10308032293308825,
+              "min": 1096.0,
+              "max": 1331.0,
+              "iqr": 117.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 13.320666666666668,
+              "median": 13.878,
+              "std": 1.083450660313304,
+              "cv": 0.08133606878884721,
+              "min": 12.072,
+              "max": 14.012,
+              "iqr": 0.9700000000000006
+            },
+            "approach_similarity": 0.4528138528138528,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "minimal-fix": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.08101646666666668,
+              "median": 0.08112000000000001,
+              "std": 0.0005782932243536413,
+              "cv": 0.007137971429104222,
+              "min": 0.0803934,
+              "max": 0.081536,
+              "iqr": 0.0005712999999999968
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 66894.33333333333,
+              "median": 66859.0,
+              "std": 131.6067374161875,
+              "cv": 0.0019673824501754635,
+              "min": 66784.0,
+              "max": 67040.0,
+              "iqr": 128.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 726.0,
+              "median": 740.0,
+              "std": 41.79712908801273,
+              "cv": 0.05757180315153269,
+              "min": 679.0,
+              "max": 759.0,
+              "iqr": 40.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 11.556666666666667,
+              "median": 10.57,
+              "std": 2.4517213000937392,
+              "cv": 0.21214779060516925,
+              "min": 9.752,
+              "max": 14.348,
+              "iqr": 2.2979999999999983
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "multi-file-rename": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.08939833333333332,
+              "median": 0.0895318,
+              "std": 0.0015997810391842194,
+              "cv": 0.01789497610899778,
+              "min": 0.087736,
+              "max": 0.0909272,
+              "iqr": 0.0015956000000000026
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 68411.66666666667,
+              "median": 68514.0,
+              "std": 252.5595639316265,
+              "cv": 0.003691761599117497,
+              "min": 68124.0,
+              "max": 68597.0,
+              "iqr": 236.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 835.0,
+              "median": 826.0,
+              "std": 33.421549934136806,
+              "cv": 0.040025808304355454,
+              "min": 807.0,
+              "max": 872.0,
+              "iqr": 32.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 13.281666666666666,
+              "median": 10.14,
+              "std": 5.517041991260655,
+              "cv": 0.41538777698034796,
+              "min": 10.053,
+              "max": 19.652,
+              "iqr": 4.7995
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "refactor-extract-helper": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.099642,
+              "median": 0.0969254,
+              "std": 0.00539760401289312,
+              "cv": 0.05416996861657855,
+              "min": 0.0961424,
+              "max": 0.10585819999999999,
+              "iqr": 0.0048578999999999845
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 51979.0,
+              "median": 51835.0,
+              "std": 361.21046496467955,
+              "cv": 0.006949161487613835,
+              "min": 51712.0,
+              "max": 52390.0,
+              "iqr": 339.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1466.3333333333333,
+              "median": 1364.0,
+              "std": 248.8178718125636,
+              "cv": 0.16968711421634253,
+              "min": 1285.0,
+              "max": 1750.0,
+              "iqr": 232.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 14.695666666666668,
+              "median": 14.195,
+              "std": 1.8048557652436752,
+              "cv": 0.12281550787604113,
+              "min": 13.194,
+              "max": 16.698,
+              "iqr": 1.751999999999999
+            },
+            "approach_similarity": 0.9047619047619048,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "write-tests": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.14972733333333332,
+              "median": 0.15671780000000002,
+              "std": 0.017721239352069405,
+              "cv": 0.11835674193580378,
+              "min": 0.129577,
+              "max": 0.16288719999999998,
+              "iqr": 0.016655100000000006
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 62299.0,
+              "median": 56365.0,
+              "std": 12596.91501916243,
+              "cv": 0.20220091846036742,
+              "min": 53765.0,
+              "max": 76767.0,
+              "iqr": 11501.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 3163.0,
+              "median": 3350.0,
+              "std": 389.7396566940552,
+              "cv": 0.12321835494595486,
+              "min": 2715.0,
+              "max": 3424.0,
+              "iqr": 354.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 28.499666666666666,
+              "median": 29.815,
+              "std": 3.225817777453235,
+              "cv": 0.11318791251780377,
+              "min": 24.824,
+              "max": 30.86,
+              "iqr": 3.017999999999997
+            },
+            "approach_similarity": 0.1976899696048632,
+            "timeouts": 0,
+            "agent_errors": 0
+          }
+        }
+      }
+    },
+    {
+      "run_id": "codex",
+      "agent": "codex",
+      "model": "gpt-6-luna",
+      "models_reported": [
+        "gpt-6-luna"
+      ],
+      "cli_version": "codex-cli 0.160.0",
+      "started_at": "2026-10-03T08:16:06+00:00",
+      "metrics": {
+        "n_tasks": 10,
+        "n_runs": 30,
+        "min_runs_per_task": 3,
+        "passes": 28,
+        "pass_rate": 0.9333333333333333,
+        "pass_rate_ci95": [
+          0.7867654163738308,
+          0.9815229762087295
+        ],
+        "macro_pass_rate": 0.9333333333333333,
+        "macro_pass_rate_task_bootstrap_ci95": [
+          0.8333333333333334,
+          1.0
+        ],
+        "k": 3,
+        "pass_at_k": 1.0,
+        "pass_hat_k": 0.8,
+        "flip_rate": 0.13333333333333333,
+        "flaky_task_fraction": 0.2,
+        "total_cost_usd": null,
+        "cost_reported_runs": 0,
+        "mean_cost_usd": null,
+        "median_cost_usd": null,
+        "cost_per_success_usd": null,
+        "cost_cv_within_task": null,
+        "tokens_mean": 65182.2,
+        "tokens_median": 56629.0,
+        "output_tokens_median": 515.5,
+        "tokens_cv_within_task": 0.14092852946632303,
+        "wall_time_mean_s": 17.339499999999997,
+        "wall_time_median_s": 16.11,
+        "wall_time_total_s": 520.185,
+        "wall_time_cv_within_task": 0.2071040237025578,
+        "approach_similarity": 0.7720647556755722,
+        "per_task": {
+          "add-cli-flag": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 56817.0,
+              "median": 56145.0,
+              "std": 14854.40463296998,
+              "cv": 0.26144295955383035,
+              "min": 42310.0,
+              "max": 71996.0,
+              "iqr": 14843.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 508.3333333333333,
+              "median": 514.0,
+              "std": 12.503332889007368,
+              "cv": 0.024596720437391542,
+              "min": 494.0,
+              "max": 517.0,
+              "iqr": 11.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 14.236666666666666,
+              "median": 14.449,
+              "std": 0.8769950588990415,
+              "cv": 0.06160115140943864,
+              "min": 13.273,
+              "max": 14.988,
+              "iqr": 0.8574999999999982
+            },
+            "approach_similarity": 0.6363636363636364,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "edit-config": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 46600.666666666664,
+              "median": 42032.0,
+              "std": 8341.994505712248,
+              "cv": 0.1790101966862902,
+              "min": 41541.0,
+              "max": 56229.0,
+              "iqr": 7344.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 396.0,
+              "median": 430.0,
+              "std": 120.64824905484538,
+              "cv": 0.3046672955930439,
+              "min": 262.0,
+              "max": 496.0,
+              "iqr": 117.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 12.397666666666666,
+              "median": 11.838,
+              "std": 4.09627591030357,
+              "cv": 0.33040700483721963,
+              "min": 8.61,
+              "max": 16.745,
+              "iqr": 4.067499999999999
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-failing-test": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 84610.66666666667,
+              "median": 84636.0,
+              "std": 98.47503913852145,
+              "cv": 0.001163860811148966,
+              "min": 84502.0,
+              "max": 84694.0,
+              "iqr": 96.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 393.3333333333333,
+              "median": 404.0,
+              "std": 24.78574859336174,
+              "cv": 0.06301461506786883,
+              "min": 365.0,
+              "max": 411.0,
+              "iqr": 23.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 14.976333333333335,
+              "median": 15.469,
+              "std": 1.414864422244525,
+              "cv": 0.0944733527728989,
+              "min": 13.381,
+              "max": 16.079,
+              "iqr": 1.3490000000000002
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "follow-agents-md": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 61261.333333333336,
+              "median": 56489.0,
+              "std": 8321.410958084773,
+              "cv": 0.13583463671622295,
+              "min": 56425.0,
+              "max": 70870.0,
+              "iqr": 7222.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 479.3333333333333,
+              "median": 467.0,
+              "std": 46.736851983561465,
+              "cv": 0.09750386366528818,
+              "min": 440.0,
+              "max": 531.0,
+              "iqr": 45.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 14.953666666666665,
+              "median": 14.626,
+              "std": 2.4708489094506225,
+              "cv": 0.16523364901254695,
+              "min": 12.663,
+              "max": 17.572,
+              "iqr": 2.4544999999999995
+            },
+            "approach_similarity": 0.6256410256410256,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "implement-lru-cache": {
+            "n": 3,
+            "passes": 2,
+            "pass_rate": 0.6666666666666666,
+            "pass_rate_ci95": [
+              0.2076596008020477,
+              0.9385080552796037
+            ],
+            "pass_at_k": {
+              "1": 0.6666666666666667,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 0.6666666666666666,
+              "2": 0.3333333333333333,
+              "3": 0.0
+            },
+            "flip_rate": 0.6666666666666666,
+            "outcomes": [
+              false,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 66855.0,
+              "median": 71802.0,
+              "std": 8815.550294791585,
+              "cv": 0.13186074780931245,
+              "min": 56677.0,
+              "max": 72086.0,
+              "iqr": 7704.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 796.3333333333334,
+              "median": 771.0,
+              "std": 67.65599258996451,
+              "cv": 0.08495938793214464,
+              "min": 745.0,
+              "max": 873.0,
+              "iqr": 64.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 20.96766666666667,
+              "median": 21.582,
+              "std": 1.6156126804817208,
+              "cv": 0.07705257366811061,
+              "min": 19.135,
+              "max": 22.186,
+              "iqr": 1.525500000000001
+            },
+            "approach_similarity": 0.6153846153846154,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "implement-slugify": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 56502.0,
+              "median": 56488.0,
+              "std": 73.01369734508724,
+              "cv": 0.0012922320863878666,
+              "min": 56437.0,
+              "max": 56581.0,
+              "iqr": 72.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 585.0,
+              "median": 599.0,
+              "std": 51.44900387762624,
+              "cv": 0.08794701517542947,
+              "min": 528.0,
+              "max": 628.0,
+              "iqr": 50.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 16.174666666666667,
+              "median": 16.141,
+              "std": 0.8430043495340533,
+              "cv": 0.052118808189806284,
+              "min": 15.349,
+              "max": 17.034,
+              "iqr": 0.8424999999999994
+            },
+            "approach_similarity": 0.696886446886447,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "minimal-fix": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 56215.0,
+              "median": 56021.0,
+              "std": 535.061678687607,
+              "cv": 0.009518130013121177,
+              "min": 55804.0,
+              "max": 56820.0,
+              "iqr": 508.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 303.6666666666667,
+              "median": 283.0,
+              "std": 49.35922743857863,
+              "cv": 0.16254410792067606,
+              "min": 268.0,
+              "max": 360.0,
+              "iqr": 46.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 15.350333333333333,
+              "median": 14.866,
+              "std": 5.142633987883381,
+              "cv": 0.3350177404106348,
+              "min": 10.467,
+              "max": 20.718,
+              "iqr": 5.125500000000002
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "multi-file-rename": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 72137.33333333333,
+              "median": 72514.0,
+              "std": 15838.359553101873,
+              "cv": 0.21955842864215303,
+              "min": 56114.0,
+              "max": 87784.0,
+              "iqr": 15835.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 677.0,
+              "median": 629.0,
+              "std": 401.1595692489461,
+              "cv": 0.5925547551683104,
+              "min": 302.0,
+              "max": 1100.0,
+              "iqr": 399.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 18.230999999999998,
+              "median": 17.081,
+              "std": 7.395367401285754,
+              "cv": 0.405647929421631,
+              "min": 11.478,
+              "max": 26.134,
+              "iqr": 7.328000000000003
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "refactor-extract-helper": {
+            "n": 3,
+            "passes": 2,
+            "pass_rate": 0.6666666666666666,
+            "pass_rate_ci95": [
+              0.2076596008020477,
+              0.9385080552796037
+            ],
+            "pass_at_k": {
+              "1": 0.6666666666666667,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 0.6666666666666666,
+              "2": 0.3333333333333333,
+              "3": 0.0
+            },
+            "flip_rate": 0.6666666666666666,
+            "outcomes": [
+              true,
+              false,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 56999.333333333336,
+              "median": 56569.0,
+              "std": 15556.964560393308,
+              "cv": 0.2729323950056721,
+              "min": 41662.0,
+              "max": 72767.0,
+              "iqr": 15552.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 526.6666666666666,
+              "median": 650.0,
+              "std": 259.04504112862946,
+              "cv": 0.4918576730290433,
+              "min": 229.0,
+              "max": 701.0,
+              "iqr": 236.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 14.668333333333331,
+              "median": 16.502,
+              "std": 5.301902708776664,
+              "cv": 0.3614522923833654,
+              "min": 8.693,
+              "max": 18.81,
+              "iqr": 5.058499999999999
+            },
+            "approach_similarity": 0.9230769230769231,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "write-tests": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 0,
+              "n_missing": 3,
+              "mean": null,
+              "median": null,
+              "std": null,
+              "cv": null,
+              "min": null,
+              "max": null,
+              "iqr": null
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 93823.66666666667,
+              "median": 104265.0,
+              "std": 18452.46071214713,
+              "cv": 0.19667170733909137,
+              "min": 72518.0,
+              "max": 104688.0,
+              "iqr": 16085.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1254.0,
+              "median": 1249.0,
+              "std": 180.5519315875629,
+              "cv": 0.14398080668864666,
+              "min": 1076.0,
+              "max": 1437.0,
+              "iqr": 180.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 31.438666666666666,
+              "median": 31.342,
+              "std": 5.911592791569236,
+              "cv": 0.18803573491992565,
+              "min": 25.576,
+              "max": 37.398,
+              "iqr": 5.911000000000005
+            },
+            "approach_similarity": 0.22329490940307484,
+            "timeouts": 0,
+            "agent_errors": 0
+          }
+        }
+      }
+    }
+  ],
+  "tasks": [
+    "add-cli-flag",
+    "edit-config",
+    "fix-failing-test",
+    "follow-agents-md",
+    "implement-lru-cache",
+    "implement-slugify",
+    "minimal-fix",
+    "multi-file-rename",
+    "refactor-extract-helper",
+    "write-tests"
+  ]
+}

@@ -83,6 +83,22 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes --resume
 ```
 
+## Pilot results
+
+A first run against real CLIs on 2026-10-03: all 10 tasks, 3 runs each, Claude Code 2.1.288
+(default model, reported as `claude-opus-5-5`) and Codex CLI 0.160.0 (`gpt-6-luna`), on
+macOS arm64. Full setup, per-task outcomes, raw run records and diffs:
+[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md).
+
+| Agent / model | Pass rate [Wilson 95% CI] | pass^3 | Flip rate | Median cost/run | Median tokens/run | Median wall time |
+|---|---|---|---|---|---|---|
+| claude / claude-opus-5-5 | 30/30, 100% [89, 100] | 100% | 0% | $0.0886 | 52,017 | 12.6 s |
+| codex / gpt-6-luna | 28/30, 93% [79, 98] | 80% | 13% | not reported | 56,629 | 16.1 s |
+
+n = 3 per task is a pilot, not a leaderboard. The pass-rate intervals overlap, so these
+runs do not establish a difference between the two agents. Claude Code's cost is its own
+list-price estimate; Codex reports tokens only.
+
 ## Example report
 
 Two mock profiles, 10 tasks, 5 runs each (`rerun-bench report results/`):

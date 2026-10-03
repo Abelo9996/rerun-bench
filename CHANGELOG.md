@@ -26,6 +26,9 @@ All notable changes to this project are documented here. The format follows
 - `--agent-opt bin=<path>` runs a specific build of an agent CLI.
 - `--agent-opt effort=<level>` for `claude` (`--effort`) and `codex`
   (`model_reasoning_effort`).
+- Run records include `agent_stdout_tail` and `agent_stderr_tail` (paths scrubbed), so a
+  run that fails without changing anything can be diagnosed from the result files.
+- Pilot results for Claude Code and Codex CLI in `docs/pilot-2026-10-03/`.
 - JSON report: `median_cost_usd`, `tokens_median`, `output_tokens_median` and
   `wall_time_total_s`.
 
