@@ -72,7 +72,9 @@ class MockAdapter(Adapter):
     def parse_output(self, stdout: str, stderr: str) -> Usage:
         return Usage()
 
-    def run(self, prompt: str, workspace: Path, timeout: int, seed: int, run_key: str) -> AgentResult:
+    def run(
+        self, prompt: str, workspace: Path, timeout: int, seed: int, run_key: str
+    ) -> AgentResult:
         task_id = run_key.split("/", 1)[0]
         digest = hashlib.sha256(f"{seed}|{self.model}|{run_key}".encode()).digest()
         rng = random.Random(int.from_bytes(digest[:8], "big"))
@@ -82,7 +84,8 @@ class MockAdapter(Adapter):
             ws.overlay(self.solution_dir, workspace)
         elif wrong_edit:
             (workspace / "MOCK_NOTES.md").write_text(
-                "The mock agent edited the wrong file on this run.\n", encoding="utf-8")
+                "The mock agent edited the wrong file on this run.\n", encoding="utf-8"
+            )
         total = _lognormal(rng, self._opt("tokens"), self._opt("token_cv"))
         out_share = 0.08 + 0.04 * rng.random()
         out_tok = int(total * out_share)
@@ -94,8 +97,15 @@ class MockAdapter(Adapter):
             exit_code=0,
             wall_time_s=round(wall, 3),
             timed_out=False,
-            usage=Usage(input_tokens=in_tok, output_tokens=out_tok, cache_read_tokens=cache_tok,
-                        cache_write_tokens=0, cost_usd=round(cost, 6), model=self.model,
-                        num_turns=1 + int(rng.random() * 6), is_error=False),
+            usage=Usage(
+                input_tokens=in_tok,
+                output_tokens=out_tok,
+                cache_read_tokens=cache_tok,
+                cache_write_tokens=0,
+                cost_usd=round(cost, 6),
+                model=self.model,
+                num_turns=1 + int(rng.random() * 6),
+                is_error=False,
+            ),
             extra={"simulated_wall_time": True},
         )

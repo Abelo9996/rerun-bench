@@ -26,8 +26,12 @@ class Usage:
 
     @property
     def total_tokens(self) -> int | None:
-        parts = [self.input_tokens, self.output_tokens, self.cache_read_tokens,
-                 self.cache_write_tokens]
+        parts = [
+            self.input_tokens,
+            self.output_tokens,
+            self.cache_read_tokens,
+            self.cache_write_tokens,
+        ]
         if all(p is None for p in parts):
             return None
         return sum(p or 0 for p in parts)
@@ -82,7 +86,9 @@ class Adapter(ABC):
         return out[0].strip() if out else None
 
     # ---- execution -------------------------------------------------------------------
-    def run(self, prompt: str, workspace: Path, timeout: int, seed: int, run_key: str) -> AgentResult:
+    def run(
+        self, prompt: str, workspace: Path, timeout: int, seed: int, run_key: str
+    ) -> AgentResult:
         """Run the agent once inside ``workspace``. ``seed``/``run_key`` are for the mock."""
         cmd = self.build_command(prompt, workspace)
         exe = shutil.which(cmd[0])
@@ -93,15 +99,31 @@ class Adapter(ABC):
         start = time.perf_counter()
         try:
             proc = subprocess.run(
-                cmd, cwd=workspace, capture_output=True, text=True, encoding="utf-8",
-                errors="replace", timeout=timeout, env=env, stdin=subprocess.DEVNULL,
+                cmd,
+                cwd=workspace,
+                capture_output=True,
+                text=True,
+                encoding="utf-8",
+                errors="replace",
+                timeout=timeout,
+                env=env,
+                stdin=subprocess.DEVNULL,
             )
         except subprocess.TimeoutExpired as exc:
             wall = time.perf_counter() - start
-            stdout = exc.stdout.decode("utf-8", "replace") if isinstance(exc.stdout, bytes) else (
-                exc.stdout or "")
-            return AgentResult(None, wall, True, self._safe_parse(stdout, ""),
-                               stdout_tail=stdout[-2000:], error="timeout")
+            stdout = (
+                exc.stdout.decode("utf-8", "replace")
+                if isinstance(exc.stdout, bytes)
+                else (exc.stdout or "")
+            )
+            return AgentResult(
+                None,
+                wall,
+                True,
+                self._safe_parse(stdout, ""),
+                stdout_tail=stdout[-2000:],
+                error="timeout",
+            )
         wall = time.perf_counter() - start
         return AgentResult(
             exit_code=proc.returncode,

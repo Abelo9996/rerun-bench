@@ -40,16 +40,23 @@ def make_run_id(agent: str, model: str | None, now: datetime | None = None) -> s
     return f"{_slug(agent)}_{_slug(model or 'default')}_{now.strftime('%Y%m%dT%H%M%SZ')}"
 
 
-def execute_one(adapter: Adapter, task: Task, run_index: int, seed: int, out_dir: Path,
-                keep_workspace: bool = False) -> dict:
+def execute_one(
+    adapter: Adapter,
+    task: Task,
+    run_index: int,
+    seed: int,
+    out_dir: Path,
+    keep_workspace: bool = False,
+) -> dict:
     work = ws.fresh_copy(task.workspace)
     pristine = ws.fresh_copy(task.workspace)
     started = datetime.now(UTC).isoformat(timespec="seconds")
     try:
         if isinstance(adapter, MockAdapter):
             adapter.solution_dir = task.solution
-        result = adapter.run(task.prompt, work, timeout=task.timeout, seed=seed,
-                             run_key=f"{task.id}/{run_index}")
+        result = adapter.run(
+            task.prompt, work, timeout=task.timeout, seed=seed, run_key=f"{task.id}/{run_index}"
+        )
         vres = verify(task, work)
         diff = ws.unified_diff(pristine, work)
     finally:
@@ -61,8 +68,10 @@ def execute_one(adapter: Adapter, task: Task, run_index: int, seed: int, out_dir
     (out_dir / diff_rel).write_text(diff, encoding="utf-8")
     added = sum(1 for ln in diff.splitlines() if ln.startswith("+") and not ln.startswith("+++"))
     removed = sum(1 for ln in diff.splitlines() if ln.startswith("-") and not ln.startswith("---"))
-    files = sorted({ln[6:] for ln in diff.splitlines() if ln.startswith("+++ b/")}
-                   | {ln[6:] for ln in diff.splitlines() if ln.startswith("--- a/")})
+    files = sorted(
+        {ln[6:] for ln in diff.splitlines() if ln.startswith("+++ b/")}
+        | {ln[6:] for ln in diff.splitlines() if ln.startswith("--- a/")}
+    )
     u = result.usage
     return {
         "task_id": task.id,
@@ -94,8 +103,13 @@ def execute_one(adapter: Adapter, task: Task, run_index: int, seed: int, out_dir
     }
 
 
-def run_benchmark(adapter: Adapter, plan: RunPlan, out_root: Path, run_id: str | None = None,
-                  progress: Callable[[dict], None] | None = None) -> Path:
+def run_benchmark(
+    adapter: Adapter,
+    plan: RunPlan,
+    out_root: Path,
+    run_id: str | None = None,
+    progress: Callable[[dict], None] | None = None,
+) -> Path:
     """Run the plan and write ``<out_root>/<run_id>/{meta.json,runs.jsonl,diffs/}``.
 
     Runs are interleaved (run 0 of every task, then run 1, ...) so that drift over the
@@ -150,15 +164,19 @@ def run_benchmark(adapter: Adapter, plan: RunPlan, out_root: Path, run_id: str |
 def load_results(path: Path) -> list[tuple[dict, list[dict]]]:
     """Find every ``meta.json`` + ``runs.jsonl`` pair under ``path`` (recursively)."""
     found = []
-    metas = [path / "meta.json"] if (path / "meta.json").is_file() else sorted(
-        path.rglob("meta.json"))
+    metas = (
+        [path / "meta.json"] if (path / "meta.json").is_file() else sorted(path.rglob("meta.json"))
+    )
     for meta_path in metas:
         runs_path = meta_path.parent / "runs.jsonl"
         if not runs_path.is_file():
             continue
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         meta["_dir"] = str(meta_path.parent)
-        runs = [json.loads(ln) for ln in runs_path.read_text(encoding="utf-8").splitlines()
-                if ln.strip()]
+        runs = [
+            json.loads(ln)
+            for ln in runs_path.read_text(encoding="utf-8").splitlines()
+            if ln.strip()
+        ]
         found.append((meta, runs))
     return found

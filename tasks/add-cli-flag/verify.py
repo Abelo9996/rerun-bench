@@ -14,8 +14,13 @@ def fail(msg):
 
 
 def run(*args, cwd):
-    p = subprocess.run([sys.executable, str(ws / "wc.py"), *args], cwd=cwd, capture_output=True,
-                       text=True, timeout=60)
+    p = subprocess.run(
+        [sys.executable, str(ws / "wc.py"), *args],
+        cwd=cwd,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
     return p.returncode, p.stdout.replace("\r\n", "\n")
 
 
@@ -27,11 +32,11 @@ with tempfile.TemporaryDirectory() as d:
     expect = {
         ("a.txt",): "       4 a.txt\n",
         ("a.txt", "b.txt", "c.txt"): "       4 a.txt\n       1 b.txt\n       0 c.txt\n"
-                                     "       5 total\n",
+        "       5 total\n",
         ("--words", "a.txt"): "       6 a.txt\n",
         ("a.txt", "--words"): "       6 a.txt\n",
         ("--words", "a.txt", "b.txt", "c.txt"): "       6 a.txt\n       1 b.txt\n"
-                                                "       0 c.txt\n       7 total\n",
+        "       0 c.txt\n       7 total\n",
     }
     for args, want in expect.items():
         code, out = run(*args, cwd=d)

@@ -18,6 +18,7 @@ Z95 = 1.959963984540054
 
 # ---- binomial pass-rate statistics ----------------------------------------------------
 
+
 def wilson_interval(successes: int, n: int, z: float = Z95) -> tuple[float, float]:
     """Wilson score interval for a binomial proportion (Wilson 1927)."""
     if n <= 0:
@@ -26,7 +27,9 @@ def wilson_interval(successes: int, n: int, z: float = Z95) -> tuple[float, floa
     denom = 1 + z * z / n
     centre = (p + z * z / (2 * n)) / denom
     half = z * math.sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / denom
-    return (max(0.0, centre - half), min(1.0, centre + half))
+    lo = 0.0 if successes == 0 else max(0.0, centre - half)
+    hi = 1.0 if successes == n else min(1.0, centre + half)
+    return (lo, hi)
 
 
 def pass_at_k(n: int, c: int, k: int) -> float:
@@ -57,6 +60,7 @@ def flip_rate(n: int, c: int) -> float | None:
 
 # ---- spread statistics -----------------------------------------------------------------
 
+
 def spread(values: list[float | int | None]) -> dict:
     """mean, median, sample std (ddof=1), CV = std/mean, min, max, IQR. Ignores ``None``."""
     xs = [float(v) for v in values if v is not None]
@@ -71,8 +75,15 @@ def spread(values: list[float | int | None]) -> dict:
         iqr = q[2] - q[0]
     else:
         iqr = None
-    return out | {"mean": mean, "median": statistics.median(xs), "std": std, "cv": cv,
-                  "min": min(xs), "max": max(xs), "iqr": iqr}
+    return out | {
+        "mean": mean,
+        "median": statistics.median(xs),
+        "std": std,
+        "cv": cv,
+        "min": min(xs),
+        "max": max(xs),
+        "iqr": iqr,
+    }
 
 
 def jaccard(a: set, b: set) -> float:
@@ -95,8 +106,9 @@ def _mean(xs: list[float | None]) -> float | None:
     return statistics.fmean(vals) if vals else None
 
 
-def bootstrap_task_ci(per_task_rates: list[float], reps: int = 2000, seed: int = 0,
-                      alpha: float = 0.05) -> tuple[float, float] | None:
+def bootstrap_task_ci(
+    per_task_rates: list[float], reps: int = 2000, seed: int = 0, alpha: float = 0.05
+) -> tuple[float, float] | None:
     """Percentile bootstrap CI for the macro pass rate, resampling *tasks* with replacement.
 
     This reflects uncertainty about the task population, which the pooled Wilson interval
@@ -114,13 +126,15 @@ def bootstrap_task_ci(per_task_rates: list[float], reps: int = 2000, seed: int =
 
 # ---- per-task and per-agent rollups ---------------------------------------------------
 
+
 def task_metrics(task_runs: list[dict], diffs: dict[int, str] | None = None) -> dict:
     runs = sorted(task_runs, key=lambda r: r["run_index"])
     n = len(runs)
     c = sum(1 for r in runs if r["passed"])
     lo, hi = wilson_interval(c, n)
-    passed_diffs = [diffs[r["run_index"]] for r in runs if r["passed"] and diffs
-                    and r["run_index"] in diffs]
+    passed_diffs = [
+        diffs[r["run_index"]] for r in runs if r["passed"] and diffs and r["run_index"] in diffs
+    ]
     return {
         "n": n,
         "passes": c,
@@ -140,8 +154,9 @@ def task_metrics(task_runs: list[dict], diffs: dict[int, str] | None = None) -> 
     }
 
 
-def agent_metrics(runs: list[dict], diffs: dict[tuple[str, int], str] | None = None,
-                  k: int | None = None) -> dict:
+def agent_metrics(
+    runs: list[dict], diffs: dict[tuple[str, int], str] | None = None, k: int | None = None
+) -> dict:
     """Roll up one result set (one agent, model and CLI version).
 
     ``k`` defaults to the smallest per-task run count so pass@k / pass^k are defined for
@@ -175,12 +190,16 @@ def agent_metrics(runs: list[dict], diffs: dict[tuple[str, int], str] | None = N
         "pass_at_k": _mean([m["pass_at_k"][k] for m in per_task.values()]) if k else None,
         "pass_hat_k": _mean([m["pass_hat_k"][k] for m in per_task.values()]) if k else None,
         "flip_rate": _mean([m["flip_rate"] for m in per_task.values()]),
-        "flaky_task_fraction": (sum(1 for m in per_task.values() if 0 < m["passes"] < m["n"])
-                                / len(per_task)) if per_task else None,
+        "flaky_task_fraction": (
+            sum(1 for m in per_task.values() if 0 < m["passes"] < m["n"]) / len(per_task)
+        )
+        if per_task
+        else None,
         "total_cost_usd": total_cost,
         "cost_reported_runs": len(known_costs),
         "mean_cost_usd": statistics.fmean(known_costs) if known_costs else None,
-        "cost_per_success_usd": (total_cost / c_total) if (total_cost is not None and c_total)
+        "cost_per_success_usd": (total_cost / c_total)
+        if (total_cost is not None and c_total)
         else None,
         "cost_cv_within_task": _mean([m["cost_usd"]["cv"] for m in per_task.values()]),
         "tokens_mean": spread([r.get("total_tokens") for r in runs])["mean"],

@@ -17,15 +17,23 @@ def fail(msg):
 if (ws / "test_stats.py").read_bytes() != (ORIGINAL / "test_stats.py").read_bytes():
     fail("test_stats.py was modified")
 
-proc = subprocess.run([sys.executable, "-m", "unittest", "-q"], cwd=ws, capture_output=True,
-                      text=True, timeout=60)
+proc = subprocess.run(
+    [sys.executable, "-m", "unittest", "-q"], cwd=ws, capture_output=True, text=True, timeout=60
+)
 if proc.returncode != 0:
     fail("visible tests fail:\n" + proc.stderr[-1500:])
 
 from stats import mean, median  # noqa: E402
 
-cases = [([5], 5), ([3, 1, 2], 2), ([4, 1, 3, 2], 2.5), ([1.0, 2.0], 1.5),
-         ([10, -10], 0), ([7, 7, 7, 7], 7), ([1, 2, 3, 4, 5, 6], 3.5)]
+cases = [
+    ([5], 5),
+    ([3, 1, 2], 2),
+    ([4, 1, 3, 2], 2.5),
+    ([1.0, 2.0], 1.5),
+    ([10, -10], 0),
+    ([7, 7, 7, 7], 7),
+    ([1, 2, 3, 4, 5, 6], 3.5),
+]
 for xs, want in cases:
     got = median(list(xs))
     if got != want:

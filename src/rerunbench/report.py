@@ -23,17 +23,24 @@ def build(results_path: Path, k: int | None = None) -> dict:
                 diffs[(r["task_id"], r["run_index"])] = p.read_text(encoding="utf-8")
         m = agent_metrics(runs, diffs, k=k)
         models = sorted({r.get("model") for r in runs if r.get("model")})
-        entries.append({
-            "run_id": meta["run_id"],
-            "agent": meta["agent"],
-            "model": meta.get("model") or (models[0] if len(models) == 1 else None),
-            "models_reported": models,
-            "cli_version": meta.get("cli_version"),
-            "started_at": meta.get("started_at"),
-            "metrics": m,
-        })
-    entries.sort(key=lambda e: (-(e["metrics"]["pass_hat_k"] or 0),
-                                -(e["metrics"]["pass_rate"] or 0), e["run_id"]))
+        entries.append(
+            {
+                "run_id": meta["run_id"],
+                "agent": meta["agent"],
+                "model": meta.get("model") or (models[0] if len(models) == 1 else None),
+                "models_reported": models,
+                "cli_version": meta.get("cli_version"),
+                "started_at": meta.get("started_at"),
+                "metrics": m,
+            }
+        )
+    entries.sort(
+        key=lambda e: (
+            -(e["metrics"]["pass_hat_k"] or 0),
+            -(e["metrics"]["pass_rate"] or 0),
+            e["run_id"],
+        )
+    )
     task_ids = sorted({t for e in entries for t in e["metrics"]["per_task"]})
     return {
         "generated_at": datetime.now(UTC).isoformat(timespec="seconds"),
@@ -44,6 +51,7 @@ def build(results_path: Path, k: int | None = None) -> dict:
 
 
 # ---- formatting helpers ----------------------------------------------------------------
+
 
 def _pct(x: float | None, digits: int = 0) -> str:
     return "n/a" if x is None else f"{100 * x:.{digits}f}%"
@@ -72,12 +80,20 @@ def _name(e: dict) -> str:
 
 
 LEADER_COLS = [
-    ("Agent / model", None), ("CLI version", None), ("Runs/task", None),
-    ("Pass rate [95% CI]", "pass_rate"), ("pass@k", "pass_at_k"), ("pass^k", "pass_hat_k"),
-    ("Flip rate", "flip_rate"), ("Flaky tasks", "flaky_task_fraction"),
-    ("Cost/run", "mean_cost_usd"), ("Cost CV", "cost_cv_within_task"),
-    ("Tokens CV", "tokens_cv_within_task"), ("Wall median", "wall_time_median_s"),
-    ("Wall CV", "wall_time_cv_within_task"), ("Approach sim.", "approach_similarity"),
+    ("Agent / model", None),
+    ("CLI version", None),
+    ("Runs/task", None),
+    ("Pass rate [95% CI]", "pass_rate"),
+    ("pass@k", "pass_at_k"),
+    ("pass^k", "pass_hat_k"),
+    ("Flip rate", "flip_rate"),
+    ("Flaky tasks", "flaky_task_fraction"),
+    ("Cost/run", "mean_cost_usd"),
+    ("Cost CV", "cost_cv_within_task"),
+    ("Tokens CV", "tokens_cv_within_task"),
+    ("Wall median", "wall_time_median_s"),
+    ("Wall CV", "wall_time_cv_within_task"),
+    ("Approach sim.", "approach_similarity"),
 ]
 
 
@@ -103,18 +119,29 @@ def _leader_cells(e: dict) -> list[tuple[str, float | None]]:
 
 # ---- markdown ---------------------------------------------------------------------------
 
+
 def to_markdown(rep: dict) -> str:
-    lines = ["# rerunbench report", "",
-             f"Generated {rep['generated_at']} by rerunbench {rep['rerunbench_version']}. "
-             "k = runs per task. CV columns are the mean within-task coefficient of variation. "
-             "Definitions: docs/METRICS.md.", "", "## Leaderboard", ""]
+    lines = [
+        "# rerunbench report",
+        "",
+        f"Generated {rep['generated_at']} by rerunbench {rep['rerunbench_version']}. "
+        "k = runs per task. CV columns are the mean within-task coefficient of variation. "
+        "Definitions: docs/METRICS.md.",
+        "",
+        "## Leaderboard",
+        "",
+    ]
     lines.append("| " + " | ".join(c for c, _ in LEADER_COLS) + " |")
     lines.append("|" + "---|" * len(LEADER_COLS))
     for e in rep["entries"]:
         lines.append("| " + " | ".join(c for c, _ in _leader_cells(e)) + " |")
-    lines += ["", "## Per-task consistency", "",
-              "Outcomes in run order (P = pass, F = fail), then pass rate, flip rate, and cost CV.",
-              ""]
+    lines += [
+        "",
+        "## Per-task consistency",
+        "",
+        "Outcomes in run order (P = pass, F = fail), then pass rate, flip rate, and cost CV.",
+        "",
+    ]
     header = ["Task"] + [_name(e) for e in rep["entries"]]
     lines.append("| " + " | ".join(header) + " |")
     lines.append("|" + "---|" * len(header))
@@ -125,8 +152,10 @@ def to_markdown(rep: dict) -> str:
             if not t:
                 row.append("not run")
                 continue
-            row.append(f"`{_outcomes(t['outcomes'])}` {_pct(t['pass_rate'])}, "
-                       f"flip {_pct(t['flip_rate'])}, cost CV {_num(t['cost_usd']['cv'])}")
+            row.append(
+                f"`{_outcomes(t['outcomes'])}` {_pct(t['pass_rate'])}, "
+                f"flip {_pct(t['flip_rate'])}, cost CV {_num(t['cost_usd']['cv'])}"
+            )
         lines.append("| " + " | ".join(row) + " |")
     return "\n".join(lines) + "\n"
 
@@ -200,9 +229,15 @@ def _td(text: str, value: float | None = None, raw: bool = False) -> str:
 
 
 def _dots(outs: list[bool]) -> str:
-    return '<span class="dots">' + "".join(
-        f'<span class="dot {"p" if o else "f"}" title="run {i}: {"pass" if o else "fail"}">'
-        "</span>" for i, o in enumerate(outs)) + "</span>"
+    return (
+        '<span class="dots">'
+        + "".join(
+            f'<span class="dot {"p" if o else "f"}" title="run {i}: {"pass" if o else "fail"}">'
+            "</span>"
+            for i, o in enumerate(outs)
+        )
+        + "</span>"
+    )
 
 
 def to_html(rep: dict) -> str:
@@ -211,8 +246,10 @@ def to_html(rep: dict) -> str:
     body = []
     for ent in rep["entries"]:
         cells = _leader_cells(ent)
-        tds = [f"<td>{e(cells[0][0])}<div class='small'>{e(ent['run_id'])}</div></td>",
-               f"<td>{e(cells[1][0])}</td>"]
+        tds = [
+            f"<td>{e(cells[0][0])}<div class='small'>{e(ent['run_id'])}</div></td>",
+            f"<td>{e(cells[1][0])}</td>",
+        ]
         tds += [_td(text, val) for text, val in cells[2:]]
         body.append("<tr>" + "".join(tds) + "</tr>")
     t_head = "<th>Task</th>" + "".join(f"<th>{e(_name(x))}</th>" for x in rep["entries"])
@@ -225,35 +262,39 @@ def to_html(rep: dict) -> str:
                 tds.append("<td class='small'>not run</td>")
                 continue
             sim = t["approach_similarity"]
-            tip = (f"pass {t['passes']}/{t['n']}, 95% CI {_ci(t['pass_rate_ci95'])}, "
-                   f"flip {_pct(t['flip_rate'])}, cost CV {_num(t['cost_usd']['cv'])}, "
-                   f"wall CV {_num(t['wall_time_s']['cv'])}, approach sim {_num(sim)}")
-            inner = (f"<span class='cell' title='{e(tip)}'>{_dots(t['outcomes'])}"
-                     f"<span>{_pct(t['pass_rate'])}</span>"
-                     f"<span class='small'>flip {_pct(t['flip_rate'])}</span></span>")
+            tip = (
+                f"pass {t['passes']}/{t['n']}, 95% CI {_ci(t['pass_rate_ci95'])}, "
+                f"flip {_pct(t['flip_rate'])}, cost CV {_num(t['cost_usd']['cv'])}, "
+                f"wall CV {_num(t['wall_time_s']['cv'])}, approach sim {_num(sim)}"
+            )
+            inner = (
+                f"<span class='cell' title='{e(tip)}'>{_dots(t['outcomes'])}"
+                f"<span>{_pct(t['pass_rate'])}</span>"
+                f"<span class='small'>flip {_pct(t['flip_rate'])}</span></span>"
+            )
             tds.append(_td(inner, t["pass_rate"], raw=True))
         t_rows.append("<tr>" + "".join(tds) + "</tr>")
-    k_note = ", ".join(sorted({str(x['metrics']['k']) for x in rep["entries"]})) or "n/a"
+    k_note = ", ".join(sorted({str(x["metrics"]["k"]) for x in rep["entries"]})) or "n/a"
     return f"""<!doctype html>
 <html lang="en"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>rerunbench report</title><style>{CSS}</style></head>
 <body><main>
 <h1>rerunbench report</h1>
-<p class="sub">Same task, run N times. Generated {e(rep['generated_at'])} by rerunbench
-{e(rep['rerunbench_version'])}. {len(rep['entries'])} result set(s), {len(rep['tasks'])} task(s),
+<p class="sub">Same task, run N times. Generated {e(rep["generated_at"])} by rerunbench
+{e(rep["rerunbench_version"])}. {len(rep["entries"])} result set(s), {len(rep["tasks"])} task(s),
 k = {e(k_note)}.</p>
 <h2>Leaderboard</h2>
 <p class="legend">Click a column to sort. CV columns are the mean within-task coefficient of
 variation (std / mean across reruns of the same task).</p>
 <div class="wrap"><table class="sortable" id="leaderboard"><thead><tr>{head}</tr></thead>
-<tbody>{''.join(body)}</tbody></table></div>
+<tbody>{"".join(body)}</tbody></table></div>
 <h2>Per-task consistency</h2>
 <p class="legend">Each square is one run, in run order: green passed, red failed. Hover a cell
 for CI, flip rate, cost and wall-time CV, and approach similarity.</p>
 <p><input id="taskfilter" placeholder="Filter tasks" aria-label="Filter tasks"></p>
 <div class="wrap"><table class="sortable" id="tasks"><thead><tr>{t_head}</tr></thead>
-<tbody>{''.join(t_rows)}</tbody></table></div>
+<tbody>{"".join(t_rows)}</tbody></table></div>
 <h2>Metric definitions</h2>
 <dl>
 <dt>Pass rate</dt><dd>passes / runs, pooled over tasks, with a Wilson 95% interval.</dd>

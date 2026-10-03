@@ -18,8 +18,9 @@ ADAPTERS: dict[str, type[Adapter]] = {
 REAL_AGENTS = frozenset({"claude", "codex", "opencode"})
 
 
-def get_adapter(name: str, model: str | None = None, options: dict[str, str] | None = None
-                ) -> Adapter:
+def get_adapter(
+    name: str, model: str | None = None, options: dict[str, str] | None = None
+) -> Adapter:
     try:
         cls = ADAPTERS[name]
     except KeyError:

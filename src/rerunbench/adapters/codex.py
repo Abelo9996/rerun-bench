@@ -19,8 +19,17 @@ class CodexAdapter(Adapter):
 
     def build_command(self, prompt: str, workspace: Path) -> list[str]:
         sandbox = self.options.get("sandbox", "workspace-write")
-        cmd = [self.binary, "exec", "--json", "--skip-git-repo-check", "--ephemeral",
-               "--sandbox", sandbox, "--cd", str(workspace)]
+        cmd = [
+            self.binary,
+            "exec",
+            "--json",
+            "--skip-git-repo-check",
+            "--ephemeral",
+            "--sandbox",
+            sandbox,
+            "--cd",
+            str(workspace),
+        ]
         if self.model:
             cmd += ["--model", self.model]
         cmd.append(prompt)

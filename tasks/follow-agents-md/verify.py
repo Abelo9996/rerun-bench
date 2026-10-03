@@ -19,9 +19,17 @@ import textutils  # noqa: E402
 fn = getattr(textutils, "is_palindrome", None)
 if fn is None:
     fail("is_palindrome not defined")
-for text, want in [("racecar", True), ("A man, a plan, a canal: Panama", True), ("", True),
-                   ("ab", False), ("No 'x' in Nixon", True), ("12321", True), ("123", False),
-                   ("Was it a car or a cat I saw?", True), ("hello", False)]:
+for text, want in [
+    ("racecar", True),
+    ("A man, a plan, a canal: Panama", True),
+    ("", True),
+    ("ab", False),
+    ("No 'x' in Nixon", True),
+    ("12321", True),
+    ("123", False),
+    ("Was it a car or a cat I saw?", True),
+    ("hello", False),
+]:
     if fn(text) is not want:
         fail(f"is_palindrome({text!r}) returned {fn(text)!r}, want {want}")
 if not (fn.__doc__ or "").strip():
@@ -41,7 +49,7 @@ if not m:
 if not re.search(r"^[-*] .*`is_palindrome`", m.group(1), re.M):
     fail("AGENTS.md: no bullet mentioning `is_palindrome` under ## Unreleased")
 orig = (ORIGINAL / "CHANGES.md").read_text(encoding="utf-8").replace("\r\n", "\n")
-released = orig[orig.index("## 0.3.0"):]
+released = orig[orig.index("## 0.3.0") :]
 if released not in changes:
     fail("CHANGES.md: a released section was edited")
 print("PASS")

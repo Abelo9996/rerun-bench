@@ -20,8 +20,10 @@ except Exception as exc:  # noqa: BLE001
 want = {
     "server": {"host": "127.0.0.1", "port": 8081, "workers": 4},
     "logging": {"level": "debug", "format": "json"},
-    "cors": {"allowed_origins": ["https://example.com", "https://example.org"],
-             "allow_credentials": False},
+    "cors": {
+        "allowed_origins": ["https://example.com", "https://example.org"],
+        "allow_credentials": False,
+    },
 }
 if cfg != want:
     fail(f"config/app.toml values differ from the request:\n got  {cfg}\n want {want}")

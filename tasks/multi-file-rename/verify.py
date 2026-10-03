@@ -36,8 +36,16 @@ with redirect_stdout(buf):
     cli.main(["3x2.50", "1x4"])
 if buf.getvalue() != "2 lines, total 11.50\ncheck: 11.50\n":
     fail(f"cli output changed: {buf.getvalue()!r}")
-proc = subprocess.run([sys.executable, "-m", "inventory.cli", "2x1.25", "4x0.5"], cwd=ws,
-                      capture_output=True, text=True, timeout=60)
-if proc.returncode != 0 or proc.stdout.replace("\r\n", "\n") != "2 lines, total 4.50\ncheck: 4.50\n":
+proc = subprocess.run(
+    [sys.executable, "-m", "inventory.cli", "2x1.25", "4x0.5"],
+    cwd=ws,
+    capture_output=True,
+    text=True,
+    timeout=60,
+)
+if (
+    proc.returncode != 0
+    or proc.stdout.replace("\r\n", "\n") != "2 lines, total 4.50\ncheck: 4.50\n"
+):
     fail(f"python -m inventory.cli failed: {proc.stdout!r} {proc.stderr[-500:]!r}")
 print("PASS")

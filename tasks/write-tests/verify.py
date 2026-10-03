@@ -17,8 +17,13 @@ def fail(msg):
 
 
 def run_tests(root):
-    p = subprocess.run([sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."],
-                       cwd=root, capture_output=True, text=True, timeout=120)
+    p = subprocess.run(
+        [sys.executable, "-m", "unittest", "discover", "-s", "tests", "-t", "."],
+        cwd=root,
+        capture_output=True,
+        text=True,
+        timeout=120,
+    )
     return p.returncode, p.stdout + p.stderr
 
 

@@ -18,8 +18,16 @@ class ClaudeAdapter(Adapter):
 
     def build_command(self, prompt: str, workspace: Path) -> list[str]:
         mode = self.options.get("permission_mode", "bypassPermissions")
-        cmd = [self.binary, "-p", prompt, "--output-format", "json",
-               "--permission-mode", mode, "--no-session-persistence"]
+        cmd = [
+            self.binary,
+            "-p",
+            prompt,
+            "--output-format",
+            "json",
+            "--permission-mode",
+            mode,
+            "--no-session-persistence",
+        ]
         if self.model:
             cmd += ["--model", self.model]
         if "max_turns" in self.options:

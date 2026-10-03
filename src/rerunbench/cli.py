@@ -57,10 +57,13 @@ def cmd_run(args) -> int:
         if not adapter.available():
             print(f"error: `{adapter.binary}` is not on PATH", file=sys.stderr)
             return 2
-        print(f"warning: this runs the real `{adapter.binary}` CLI {total} times "
-              f"({len(selected)} tasks x {args.runs} runs). It spends your model quota or API "
-              "credit, and the agent runs with file-edit and shell permissions inside a temp "
-              "copy of each task workspace.", file=sys.stderr)
+        print(
+            f"warning: this runs the real `{adapter.binary}` CLI {total} times "
+            f"({len(selected)} tasks x {args.runs} runs). It spends your model quota or API "
+            "credit, and the agent runs with file-edit and shell permissions inside a temp "
+            "copy of each task workspace.",
+            file=sys.stderr,
+        )
         if not args.yes:
             print("Re-run with --yes to confirm.", file=sys.stderr)
             return 3
@@ -74,14 +77,25 @@ def cmd_run(args) -> int:
             status = "pass" if rec["passed"] else "FAIL"
             cost = rec.get("cost_usd")
             cost_s = f"${cost:.4f}" if cost is not None else "cost n/a"
-            print(f"[{done:>{len(str(total))}}/{total}] {rec['task_id']} run {rec['run_index']}: "
-                  f"{status}  {rec['wall_time_s']:.1f}s  {cost_s}", flush=True)
+            print(
+                f"[{done:>{len(str(total))}}/{total}] {rec['task_id']} run {rec['run_index']}: "
+                f"{status}  {rec['wall_time_s']:.1f}s  {cost_s}",
+                flush=True,
+            )
 
     out_dir = run_benchmark(
         adapter,
-        RunPlan(tasks=selected, runs=args.runs, seed=args.seed, jobs=args.jobs,
-                keep_workspaces=args.keep_workspaces),
-        out_root, run_id=args.run_id, progress=progress)
+        RunPlan(
+            tasks=selected,
+            runs=args.runs,
+            seed=args.seed,
+            jobs=args.jobs,
+            keep_workspaces=args.keep_workspaces,
+        ),
+        out_root,
+        run_id=args.run_id,
+        progress=progress,
+    )
     print(f"\nwrote {out_dir}")
     if not args.no_report:
         rep = report_mod.build(out_dir)
@@ -128,8 +142,10 @@ def cmd_verify_tasks(args) -> int:
             ws.cleanup(sol)
         ok = (not r0.passed) and r1 is not None and r1.passed
         bad += not ok
-        print(f"{'ok  ' if ok else 'BAD '} {t.id}: untouched={'pass' if r0.passed else 'fail'} "
-              f"solution={'missing' if r1 is None else ('pass' if r1.passed else 'fail')}")
+        print(
+            f"{'ok  ' if ok else 'BAD '} {t.id}: untouched={'pass' if r0.passed else 'fail'} "
+            f"solution={'missing' if r1 is None else ('pass' if r1.passed else 'fail')}"
+        )
         if not ok and args.verbose:
             print((r1.output if r1 else r0.output).rstrip())
     return 1 if bad else 0
@@ -139,7 +155,8 @@ def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
         prog="rerunbench",
         description="Run the same coding tasks N times per agent and report pass rate, "
-                    "consistency across reruns, and cost spread.")
+        "consistency across reruns, and cost spread.",
+    )
     p.add_argument("--version", action="version", version=f"rerunbench {__version__}")
     p.add_argument("--tasks-dir", help="task suite directory (default: bundled suite)")
     sub = p.add_subparsers(dest="cmd", required=True)
@@ -147,9 +164,12 @@ def build_parser() -> argparse.ArgumentParser:
     s = sub.add_parser("list", help="list tasks in the suite")
     s.set_defaults(func=cmd_list)
 
-    s = sub.add_parser("run", help="run tasks N times with one agent",
-                       description="Run each selected task --runs times with one agent. Each run "
-                                   "gets a fresh temp copy of the task workspace.")
+    s = sub.add_parser(
+        "run",
+        help="run tasks N times with one agent",
+        description="Run each selected task --runs times with one agent. Each run "
+        "gets a fresh temp copy of the task workspace.",
+    )
     s.add_argument("--agent", required=True, choices=sorted(ADAPTERS))
     s.add_argument("--model", help="model passed to the agent CLI (default: the CLI's default)")
     s.add_argument("--tasks", default="all", help="'all', comma-separated ids, or tag:<name>")
@@ -158,8 +178,13 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--run-id", help="name of the result directory (default agent_model_time)")
     s.add_argument("--seed", type=int, default=0, help="seed for the mock agent (default 0)")
     s.add_argument("--jobs", type=int, default=1, help="parallel runs (default 1)")
-    s.add_argument("--agent-opt", action="append", default=[], metavar="KEY=VALUE",
-                   help="adapter option, repeatable (e.g. pass_prob=0.6 for mock)")
+    s.add_argument(
+        "--agent-opt",
+        action="append",
+        default=[],
+        metavar="KEY=VALUE",
+        help="adapter option, repeatable (e.g. pass_prob=0.6 for mock)",
+    )
     s.add_argument("--keep-workspaces", action="store_true", help="keep per-run temp dirs")
     s.add_argument("--yes", action="store_true", help="confirm a run against a real agent")
     s.add_argument("--quiet", action="store_true")
@@ -173,8 +198,9 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("--k", type=int, help="k for pass@k and pass^k (default: runs per task)")
     s.set_defaults(func=cmd_report)
 
-    s = sub.add_parser("verify-tasks",
-                       help="check that each task fails untouched and passes with its solution")
+    s = sub.add_parser(
+        "verify-tasks", help="check that each task fails untouched and passes with its solution"
+    )
     s.add_argument("--tasks", default="all")
     s.add_argument("-v", "--verbose", action="store_true")
     s.set_defaults(func=cmd_verify_tasks)

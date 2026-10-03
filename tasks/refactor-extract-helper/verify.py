@@ -29,13 +29,17 @@ for name in ("member_price", "sale_price", "bulk_price"):
     fn = funcs.get(name)
     if fn is None:
         fail(f"{name} is missing")
-    calls = [n for n in ast.walk(fn) if isinstance(n, ast.Call)
-             and isinstance(n.func, ast.Name) and n.func.id == "clamp_percent"]
+    calls = [
+        n
+        for n in ast.walk(fn)
+        if isinstance(n, ast.Call) and isinstance(n.func, ast.Name) and n.func.id == "clamp_percent"
+    ]
     if not calls:
         fail(f"{name} does not call clamp_percent")
     for node in ast.walk(fn):
         if isinstance(node, ast.Compare) and any(
-                isinstance(c, ast.Name) and c.id == "MAX_DISCOUNT" for c in node.comparators):
+            isinstance(c, ast.Name) and c.id == "MAX_DISCOUNT" for c in node.comparators
+        ):
             fail(f"{name} still contains its own clamping comparison")
 
 old = load(ORIGINAL, "pricing_original")

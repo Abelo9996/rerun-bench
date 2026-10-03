@@ -62,8 +62,10 @@ def unified_diff(before: Path, after: Path) -> str:
         a_lines = _read_lines(a_files.get(rel))
         b_lines = _read_lines(b_files.get(rel))
         if a_lines is None or b_lines is None:
-            if a_files.get(rel) is None or b_files.get(rel) is None or (
-                a_files[rel].read_bytes() != b_files[rel].read_bytes()
+            if (
+                a_files.get(rel) is None
+                or b_files.get(rel) is None
+                or (a_files[rel].read_bytes() != b_files[rel].read_bytes())
             ):
                 chunks.append(f"Binary files a/{rel} and b/{rel} differ\n")
             continue
@@ -72,7 +74,9 @@ def unified_diff(before: Path, after: Path) -> str:
         a_name = f"a/{rel}" if rel in a_files else "/dev/null"
         b_name = f"b/{rel}" if rel in b_files else "/dev/null"
         for line in difflib.unified_diff(a_lines, b_lines, a_name, b_name, n=3):
-            chunks.append(line if line.endswith("\n") else line + "\n\\ No newline at end of file\n")
+            chunks.append(
+                line if line.endswith("\n") else line + "\n\\ No newline at end of file\n"
+            )
     return "".join(chunks)
 
 
