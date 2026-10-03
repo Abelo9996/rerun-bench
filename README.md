@@ -154,7 +154,9 @@ class MyAgentAdapter(Adapter):
         return [self.binary, "run", "--json", prompt]
 
     def parse_output(self, stdout: str, stderr: str) -> Usage:
-        ...  # tokens, cost, model; leave fields None when the CLI does not report them
+        # Fill tokens, cost and model; leave a field None when the CLI does not report it.
+        data = json.loads(stdout)
+        return Usage(output_tokens=data.get("output_tokens"), cost_usd=data.get("cost"))
 ```
 
 The base class handles the subprocess, timeout, wall time and `--version`. Test both methods
