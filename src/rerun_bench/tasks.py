@@ -75,6 +75,7 @@ def default_tasks_dir() -> Path:
 
 
 def load_task(path: Path) -> Task:
+    path = Path(path).expanduser().resolve()
     toml_path = path / "task.toml"
     if not toml_path.is_file():
         raise TaskError(f"{path}: missing task.toml")
@@ -103,11 +104,20 @@ def load_task(path: Path) -> Task:
 
 
 def discover(tasks_dir: Path | None = None) -> list[Task]:
-    root = tasks_dir or default_tasks_dir()
+    # Absolute paths: the verifier runs with cwd set to the agent's workspace, so a relative
+    # ``--tasks-dir tasks`` would otherwise point every verifier at a file that is not there.
+    root = Path(tasks_dir or default_tasks_dir()).expanduser().resolve()
+    if not root.is_dir():
+        raise TaskError(f"task directory {root} does not exist")
     out = []
     for child in sorted(root.iterdir()):
         if child.is_dir() and (child / "task.toml").is_file():
             out.append(load_task(child))
+    if not out:
+        raise TaskError(
+            f"no tasks in {root}: each task is a subdirectory with a task.toml "
+            "(see the README section 'Add a task')"
+        )
     return out
 
 
@@ -133,10 +143,10 @@ def select(tasks: list[Task], spec: str) -> list[Task]:
 def verify(task: Task, workspace: Path) -> VerifyResult:
     """Run the task's verifier against ``workspace``. Deterministic, offline, stdlib-only."""
     env = {**os.environ, "PYTHONDONTWRITEBYTECODE": "1", "PYTHONHASHSEED": "0"}
-    env["RERUN_BENCH_TASK_DIR"] = str(task.root)
+    env["RERUN_BENCH_TASK_DIR"] = str(task.root.resolve())
     try:
         proc = subprocess.run(
-            [sys.executable, str(task.verifier)],
+            [sys.executable, str(task.verifier.resolve())],
             cwd=workspace,
             capture_output=True,
             text=True,

@@ -48,6 +48,7 @@ def _lognormal(rng: random.Random, mean: float, cv: float) -> float:
 class MockAdapter(Adapter):
     name = "mock"
     binary = ""
+    real = False
 
     def __init__(self, model: str | None = None, options: dict[str, str] | None = None):
         super().__init__(model or "mock-1", options)

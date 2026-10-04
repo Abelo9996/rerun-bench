@@ -19,7 +19,8 @@ A rerun-bench task measures an agent, so the task itself must contribute zero va
    order, no timing thresholds. Set any seeds explicitly.
 2. **Reference solution.** Ship `solution/` with the minimal files that make the task pass.
    The test suite overlays it on `workspace/` and requires the verifier to pass, and requires
-   the untouched workspace to fail. Run `rerun-bench verify-tasks --tasks <id> -v`.
+   the untouched workspace to fail. Run `uv run rerun-bench verify-tasks --tasks <id> -v`
+   from the repository root (it must print `ok`).
 3. **No network.** Neither the task nor the verifier may need the network. Use only the
    Python standard library in `verify.py` so it runs under `uvx` with no extra installs.
 4. **Hidden checks.** Keep `verify.py` outside `workspace/`. It may read the original
@@ -49,6 +50,11 @@ published.
   add pricing, make it opt-in through `--agent-opt`.
 - Do not let a parse failure lose the run: `Adapter._safe_parse` already wraps
   `parse_output`.
+- Every adapter except `mock` counts as a paid agent (`Adapter.real = True`), so `run` asks
+  for `--yes` and checks that the binary is on PATH before starting it.
+- A non-zero exit, or `Usage.is_error = True`, is recorded as an agent error with a one-line
+  reason from `Adapter.describe_error`. Override it if your CLI reports errors in a shape the
+  default does not recognise.
 
 ## Pull requests
 

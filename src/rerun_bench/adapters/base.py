@@ -58,6 +58,9 @@ class Adapter(ABC):
 
     name: str = ""
     binary: str = ""
+    # A real adapter starts a paid agent session: ``run`` refuses to start it without
+    # ``--yes``. Only the free, simulated mock sets this to False.
+    real: bool = True
 
     def __init__(self, model: str | None = None, options: dict[str, str] | None = None):
         self.model = model
@@ -151,6 +154,10 @@ class Adapter(ABC):
         env.update(self.extra_env())
         return env
 
+    def describe_error(self, stdout: str, stderr: str) -> str:
+        """One line saying why the agent failed, taken from its own output."""
+        return error_summary(stdout, stderr)
+
     def _safe_parse(self, stdout: str, stderr: str) -> Usage:
         try:
             return self.parse_output(stdout, stderr)
@@ -188,3 +195,44 @@ def as_float(v) -> float | None:
     if isinstance(v, int | float):
         return float(v)
     return None
+
+
+def error_summary(stdout: str, stderr: str, limit: int = 160) -> str:
+    """Best one-line explanation of a failed agent session.
+
+    Looks for the error text the common CLIs put in their JSON output (a ``result`` with
+    ``is_error``, an ``error`` event, a ``turn.failed`` event), then falls back to the last
+    non-empty line of stderr, then of stdout.
+    """
+    import json
+
+    found = None
+    objs = list(iter_json_lines(stdout))
+    text = stdout.strip()
+    if text.startswith("{") and not objs:
+        try:
+            obj = json.loads(text)
+        except json.JSONDecodeError:
+            obj = None
+        if isinstance(obj, dict):
+            objs = [obj]
+    for obj in objs:
+        msg = None
+        if obj.get("is_error") is True and isinstance(obj.get("result"), str):
+            msg = obj["result"]
+        elif obj.get("type") == "error" and isinstance(obj.get("message"), str):
+            msg = obj["message"]
+        elif obj.get("type") == "turn.failed":
+            err = obj.get("error")
+            msg = err.get("message") if isinstance(err, dict) else None
+            msg = msg if isinstance(msg, str) else "turn failed"
+        if msg:
+            found = msg
+    if found is None:
+        for stream in (stderr, stdout):
+            lines = [ln.strip() for ln in stream.splitlines() if ln.strip()]
+            if lines:
+                found = lines[-1]
+                break
+    found = " ".join((found or "no output").split())
+    return found if len(found) <= limit else found[: limit - 3] + "..."

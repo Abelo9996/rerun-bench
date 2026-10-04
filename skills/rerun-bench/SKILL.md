@@ -18,12 +18,17 @@ with `npx skills add Abelo9996/rerun-bench`.
 1. Start with the mock agent. It is free and confirms the setup works:
    `rerun-bench run --agent mock --tasks all --runs 5 --out results/`
 2. Real agents (`claude`, `codex`, `opencode`) spend the user's money or quota and refuse to
-   start without `--yes`. Before adding `--yes`, tell the user how many agent sessions it
-   will launch (tasks x runs) and get their explicit go-ahead. Suggest a small first run such
-   as `--tasks edit-config --runs 2`.
+   start without `--yes`. Run the command once without `--yes`: it prints the number of agent
+   sessions and a rough token and dollar estimate. Show that to the user and get their
+   explicit go-ahead before adding `--yes`. Suggest a small first run such as
+   `--tasks edit-config --runs 1`.
    `rerun-bench run --agent claude --model sonnet --runs 5 --out results/ --yes`
 3. Report on everything under a results root:
-   `rerun-bench report results/ --format md` (or `html -o report.html`, or `json`).
+   `rerun-bench report results/ --format md` (or `text`, `html -o report.html`, or `json`).
+4. If `run` exits with code 4, several runs in a row ended in an agent error (not logged in,
+   out of quota, rate limited). Show the user the printed error; after it is fixed, run the
+   printed `--resume` command. Exit code 130 means the run was interrupted; the printed
+   `--resume` command continues it.
 
 Use at least 5 runs per task; with fewer, pass^k and flip rate are too noisy to compare.
 Compare agents on the same task set and the same `--runs`.
@@ -32,8 +37,11 @@ Compare agents on the same task set and the same `--runs`.
 
 - Prefer pass^k and flip rate over pass@k when the question is reliability. pass@k rewards
   an agent that succeeds once in k tries.
-- Overlapping Wilson intervals mean the pass-rate difference is not established. The JSON
+- Overlapping Wilson intervals mean the pass-rate difference is not established; the report
+  says so in its Comparison section. Do not call one agent better when it does. The JSON
   report also has `macro_pass_rate_task_bootstrap_ci95`, which accounts for task sampling.
+- Check the report's notes for agent errors. Runs that failed because of login, quota or rate
+  limits measure the setup, not the agent.
 - CV columns are within-task spread (std / mean across reruns of one task), averaged.
 - `n/a` cost means the CLI did not report it (Codex reports tokens only unless prices are
   passed with `--agent-opt usd_per_mtok_in=... --agent-opt usd_per_mtok_out=...`).
@@ -57,8 +65,8 @@ indistinguishable from agent variance. Check behavior by running code rather tha
 source text. Then validate:
 
 ```sh
-rerun-bench --tasks-dir tasks verify-tasks --tasks <id> -v   # must print "ok"
-uv run pytest                                               # in a repo checkout
+uv run rerun-bench --tasks-dir tasks verify-tasks --tasks <id> -v   # must print "ok"
+uv run pytest                                                      # in a repo checkout
 ```
 
 `ok` means the untouched workspace fails and the reference solution passes. If the task

@@ -15,10 +15,14 @@ def run_cli(*args):
     return cli.main(["--tasks-dir", str(TASKS_DIR), *args])
 
 
+N_TASKS = sum(1 for p in TASKS_DIR.iterdir() if (p / "task.toml").is_file())
+
+
 def test_list(capsys):
     assert run_cli("list") == 0
     out = capsys.readouterr().out
-    assert "fix-failing-test" in out and "10 tasks" in out
+    assert "fix-failing-test" in out and f"{N_TASKS} tasks" in out
+    assert "--agent mock" in out, "list ends with a free next step"
 
 
 def test_help_runs():
@@ -73,7 +77,7 @@ def test_mock_run_and_reports(tmp_path, capsys):
     capsys.readouterr()
 
     runs = [json.loads(x) for x in (out / "a" / "runs.jsonl").read_text().splitlines()]
-    assert len(runs) == 30
+    assert len(runs) == 3 * N_TASKS
     meta = json.loads((out / "a" / "meta.json").read_text())
     assert meta["agent"] == "mock" and meta["runs_per_task"] == 3 and meta["cli_version"]
     for r in runs:
@@ -81,23 +85,30 @@ def test_mock_run_and_reports(tmp_path, capsys):
         if r["passed"]:
             assert r["lines_added"] + r["lines_removed"] > 0
     # Interleaved order: run 0 of every task precedes any run 1.
-    assert [r["run_index"] for r in runs[:10]] == [0] * 10
+    assert [r["run_index"] for r in runs[:N_TASKS]] == [0] * N_TASKS
 
     assert run_cli("report", str(out), "--format", "json", "-o", str(tmp_path / "r.json")) == 0
     rep = json.loads((tmp_path / "r.json").read_text())
     assert {e["run_id"] for e in rep["entries"]} == {"a", "b"}
     b = next(e for e in rep["entries"] if e["run_id"] == "b")
-    assert b["metrics"]["n_tasks"] == 3 and b["metrics"]["k"] == 4
+    # One k for every row, so the rows are comparable: the smallest runs per task (a has 3).
+    assert rep["k"] == 3 and b["metrics"]["n_tasks"] == 3 and b["metrics"]["k"] == 3
+    assert (
+        run_cli("report", str(out / "b"), "--format", "json", "-o", str(tmp_path / "b.json")) == 0
+    )
+    assert json.loads((tmp_path / "b.json").read_text())["entries"][0]["metrics"]["k"] == 4
 
     assert run_cli("report", str(out), "--format", "md") == 0
     md = capsys.readouterr().out
-    assert "## Leaderboard" in md and "mock / weak" in md and "edit-config" in md
+    assert "## Reliability" in md and "mock / weak" in md and "edit-config" in md
+    assert "pass^3" in md and "## Comparison" in md
 
     html_path = tmp_path / "r.html"
     assert run_cli("report", str(out), "--format", "html", "-o", str(html_path)) == 0
     html = html_path.read_text()
     assert html.startswith("<!doctype html>") and "<style>" in html and "<script>" in html
-    assert not re.search(r"(src|href)=[\"']?(https?:)?//", html), "report must be self-contained"
+    assert not re.search(r"src=[\"']?(https?:)?//", html), "report must be self-contained"
+    assert "<link" not in html
     assert "leaderboard" in html and "minimal-fix" in html
 
 

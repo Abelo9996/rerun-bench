@@ -127,6 +127,20 @@ def bootstrap_task_ci(
 # ---- per-task and per-agent rollups ---------------------------------------------------
 
 
+def is_agent_error(rec: dict) -> bool:
+    """True when the run ended in an agent error rather than a plain wrong answer.
+
+    Timeouts are not agent errors here: they are reported separately and are a legitimate
+    way for an agent to fail a task.
+    """
+    if rec.get("agent_timed_out"):
+        return False
+    if rec.get("agent_error"):
+        return True
+    code = rec.get("agent_exit_code")
+    return (code is not None and code != 0) or rec.get("is_error") is True
+
+
 def task_metrics(task_runs: list[dict], diffs: dict[int, str] | None = None) -> dict:
     runs = sorted(task_runs, key=lambda r: r["run_index"])
     n = len(runs)
@@ -150,7 +164,7 @@ def task_metrics(task_runs: list[dict], diffs: dict[int, str] | None = None) -> 
         "wall_time_s": spread([r.get("wall_time_s") for r in runs]),
         "approach_similarity": approach_similarity(passed_diffs),
         "timeouts": sum(1 for r in runs if r.get("agent_timed_out")),
-        "agent_errors": sum(1 for r in runs if r.get("agent_error")),
+        "agent_errors": sum(1 for r in runs if is_agent_error(r)),
     }
 
 
@@ -182,6 +196,8 @@ def agent_metrics(
         "n_runs": n_total,
         "min_runs_per_task": min_n,
         "passes": c_total,
+        "agent_error_runs": sum(1 for r in runs if is_agent_error(r)),
+        "timeout_runs": sum(1 for r in runs if r.get("agent_timed_out")),
         "pass_rate": c_total / n_total if n_total else None,
         "pass_rate_ci95": list(wilson_interval(c_total, n_total)),
         "macro_pass_rate": _mean(rates),

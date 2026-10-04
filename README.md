@@ -30,8 +30,10 @@ uvx rerun-bench run --agent mock --tasks all --runs 5 --out results/
 uvx rerun-bench report results/ --format html -o report.html
 ```
 
-Or install once with `uv tool install git+https://github.com/Abelo9996/rerun-bench` and drop
-the `uvx --from ...` prefix.
+The `run` command ends with a short summary and the next commands to try; `report.html` is
+one self-contained page you can open or share. Mock runs are labeled simulated: their cost,
+tokens and wall time are made up. Or install once with `uv tool install rerun-bench` (or
+`pipx install rerun-bench`) and drop the `uvx` prefix.
 
 ## Run real agents
 
@@ -39,8 +41,8 @@ Supported CLIs, each driven headlessly in a fresh temporary copy of the task wor
 
 | Agent | Command rerun-bench runs | Cost reported by the CLI |
 |---|---|---|
-| `claude` (Claude Code) | `claude -p <prompt> --output-format json --permission-mode bypassPermissions` | yes (`total_cost_usd`) |
-| `codex` (OpenAI Codex CLI) | `codex exec --json --ephemeral --ignore-user-config --sandbox workspace-write --cd <ws> <prompt>` | tokens only; pass prices with `--agent-opt` to get dollars |
+| `claude` (Claude Code) | `claude -p <prompt> --output-format json --permission-mode bypassPermissions --no-session-persistence` | yes (`total_cost_usd`) |
+| `codex` (OpenAI Codex CLI) | `codex exec --json --skip-git-repo-check --ephemeral --sandbox workspace-write --cd <ws> --ignore-user-config <prompt>` | tokens only; pass prices with `--agent-opt` to get dollars |
 | `opencode` | `opencode run --format json <prompt>` | yes (per step) |
 
 ```sh
@@ -57,10 +59,19 @@ the CLI version, the model, and the final diff. A value the CLI does not report 
 `null`, never as zero.
 
 **Cost warning.** Real runs spend your API credit or subscription quota: a full suite at
-`--runs 5` is 50 agent sessions. rerun-bench refuses to start a real agent without `--yes`, and
-prints the run count first. Start with `--tasks edit-config --runs 2`. The agent runs with
-file-edit and shell permissions inside a temp directory; treat it like any other unattended
-agent session.
+`--runs 5` is 50 agent sessions. rerun-bench refuses to start a real agent without `--yes`. It
+first prints the number of runs and a rough token and dollar estimate based on the pilot below
+(about 52,000 tokens and $0.09 per Claude Code run with its default model; your model may
+cost more or less). Start with `--tasks edit-config --runs 1`. The agent runs with file-edit
+and shell permissions inside a temp directory; treat it like any other unattended agent
+session.
+
+**Setup failures stop the run.** If 3 runs in a row end in an agent error (non-zero exit, or an
+error the CLI reports, such as not logged in, out of quota or rate limited), rerun-bench stops,
+prints the agent's error, moves those runs to `errors.jsonl` so they are not scored, and prints
+the `--resume` command to continue once the problem is fixed. `--max-consecutive-errors 0`
+turns this off. Agent errors that do not stop the run still count as fails, and every report
+says how many there were.
 
 Personal configuration is kept out of the measurement by default. For `claude`, rerun-bench
 loads only project and local settings and ignores MCP servers outside `--mcp-config`, so your
@@ -78,8 +89,9 @@ Other useful flags: `--jobs 4` (parallel runs), `--tasks tag:refactor` or `--tas
 `--agent-opt bin=/path/to/cli` (run a specific build of the CLI), `--agent-opt effort=high`
 (`claude --effort` or Codex `model_reasoning_effort`).
 
-Long runs can be interrupted and continued: name the run with `--run-id` and add `--resume`
-to run only the task and run pairs that `runs.jsonl` does not have yet.
+Long runs can be interrupted and continued. Ctrl-C stops the run, keeps every finished run,
+and prints the exact command to continue. `--resume` with the same `--run-id` runs only the
+task and run pairs that `runs.jsonl` does not have yet.
 
 ```sh
 rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes
@@ -105,21 +117,55 @@ list-price estimate; Codex reports tokens only.
 
 ## Example report
 
-Two mock profiles, 10 tasks, 5 runs each (`rerun-bench report results/`):
+Two mock profiles, 10 tasks, 5 runs each. Free to reproduce:
 
-| Agent / model | Runs/task | Pass rate [95% CI] | pass@k | pass^k | Flip rate | Flaky tasks | Cost/run | Cost CV |
-|---|---|---|---|---|---|---|---|---|
-| mock / mock-steady | 5 | 86% [74, 93] | 100% | 40% | 26% | 60% | $0.0601 | 0.19 |
-| mock / mock-flaky | 5 | 60% [46, 72] | 100% | 0% | 50% | 100% | $0.0906 | 0.46 |
+```sh
+uvx rerun-bench run --agent mock --model mock-steady --agent-opt pass_prob=0.85 \
+  --agent-opt token_cv=0.15 --runs 5 --out results/
+uvx rerun-bench run --agent mock --model mock-flaky --agent-opt pass_prob=0.6 \
+  --agent-opt token_cv=0.5 --runs 5 --out results/
+uvx rerun-bench report results/
+```
 
-| Task | mock / mock-steady | mock / mock-flaky |
-|---|---|---|
-| fix-failing-test | `PPPPP` 100%, flip 0%, cost CV 0.13 | `FFFPF` 20%, flip 40%, cost CV 0.49 |
-| minimal-fix | `PPPPF` 80%, flip 40%, cost CV 0.16 | `PPFPF` 60%, flip 60%, cost CV 0.46 |
+In a terminal, `report` prints an 80-column summary (excerpt):
+
+```
+mock / mock-steady  [mock 0.1.1]
+  Pass rate     80%  [67, 89]   40 of 50 runs passed
+  pass^5        30%  all 5 reruns of a task pass
+  pass@5       100%  at least 1 of 5 reruns passes
+  Flip rate     34%  two runs of the same task disagree
+  Flaky tasks   70%  tasks with both passes and fails
+  Cost/run     $0.0582 median, $0.0597 mean, CV 0.14 (simulated)
+
+mock / mock-flaky  [mock 0.1.1]
+  Pass rate     60%  [46, 72]   30 of 50 runs passed
+  pass^5         0%  all 5 reruns of a task pass
+  pass@5       100%  at least 1 of 5 reruns passes
+  Flip rate     50%  two runs of the same task disagree
+  Flaky tasks  100%  tasks with both passes and fails
+  Cost/run     $0.0551 median, $0.0609 mean, CV 0.35 (simulated)
+
+Comparison
+  The pass-rate 95% intervals of all rows overlap, so these runs are not enough
+  to tell the rows apart. More runs per task narrow the intervals.
+  ...
+  Rows are sorted by pass^5, then pass rate. The order is not a ranking.
+
+Per task: runs in order (P pass, F fail), pass rate
+  task                     A            B
+  add-cli-flag             PPPPP 100%   PPPFP  80%
+  fix-failing-test         FPPPP  80%   FFFPF  20%
+  ...
+```
 
 Both profiles reach pass@5 = 100%: given five tries, each solves every task at least once.
-Only pass^5 and the flip rate separate them. The HTML report (`--format html`) is one static
-file with inline CSS and JS, a sortable leaderboard, and a per-task grid of run outcomes.
+Their pass-rate intervals overlap, so the pass rate alone does not separate them; pass^5 and
+the flip rate show how differently they behave from one rerun to the next. The report never
+names a winner: when the intervals overlap it says so, and when they do not it states only
+that. `--format md` gives Markdown tables for a README or pull request, `--format json` every
+number, and `--format html` one static page with inline CSS and JS: a short "how to read
+this" key, sortable tables, and a per-task grid of run outcomes.
 
 ## Metrics
 
@@ -136,9 +182,11 @@ Full definitions, estimators and caveats: [docs/METRICS.md](docs/METRICS.md).
 | Cost / tokens / wall-time CV | Run-to-run spread within a task (std / mean), averaged over tasks. |
 | Cost per success | Total cost divided by passing runs. |
 | Approach similarity | Mean pairwise Jaccard of changed lines among passing runs. 1.0 means the same edit every time. |
+| Agent errors, timeouts | Runs that ended in a non-zero exit, a CLI-reported error, or the task timeout. Counted as fails and listed in every report. |
 
 Only the task's verifier decides pass or fail. The agent's exit code and its own claims of
-success are recorded but not scored.
+success are recorded but not scored. When several result sets are in one report, pass@k and
+pass^k use the same k for every row: the smallest runs per task among them (`--k` to lower it).
 
 ## Task suite
 
@@ -180,9 +228,12 @@ timeout = 600
 tags = ["bugfix", "python"]
 ```
 
-Then check it: `rerun-bench --tasks-dir tasks verify-tasks --tasks my-task -v` must print `ok`
-(the untouched workspace fails, the reference solution passes), and `uv run pytest` picks the
-new task up automatically. Rules for verifiers are in [CONTRIBUTING.md](CONTRIBUTING.md).
+Then check it from the repository root: `uv run rerun-bench --tasks-dir tasks verify-tasks
+--tasks my-task -v` must print `ok` (the untouched workspace fails, the reference solution
+passes), and `uv run pytest` picks the new task up automatically. To run your own task suite
+outside a checkout, pass `--tasks-dir <path>` before the subcommand:
+`uvx rerun-bench --tasks-dir my-tasks run --agent mock --runs 3`. Rules for verifiers are in
+[CONTRIBUTING.md](CONTRIBUTING.md).
 
 ## Add an adapter
 
@@ -190,6 +241,13 @@ Subclass `Adapter` in `src/rerun_bench/adapters/`, implement two pure methods, a
 in `ADAPTERS` in `src/rerun_bench/adapters/__init__.py`:
 
 ```python
+# src/rerun_bench/adapters/myagent.py
+import json
+from pathlib import Path
+
+from .base import Adapter, Usage
+
+
 class MyAgentAdapter(Adapter):
     name = "myagent"
     binary = "myagent"
@@ -203,9 +261,10 @@ class MyAgentAdapter(Adapter):
         return Usage(output_tokens=data.get("output_tokens"), cost_usd=data.get("cost"))
 ```
 
-The base class handles the subprocess, timeout, wall time and `--version`. Test both methods
-against a captured sample of the CLI's output (see `tests/test_adapters.py`); the test suite
-never calls a real agent.
+The base class handles the subprocess, timeout, wall time, `--version`, and turning a non-zero
+exit into a recorded agent error. Every adapter except `mock` is treated as a paid agent, so
+`run` asks for `--yes` before starting it. Test both methods against a captured sample of the
+CLI's output (see `tests/test_adapters.py`); the test suite never calls a real agent.
 
 ## Agent skill
 

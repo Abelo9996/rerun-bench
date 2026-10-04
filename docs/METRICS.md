@@ -12,7 +12,14 @@ For one result set (one agent, model and CLI version):
 - A run passes if and only if `verify.py` exits 0. The agent's own exit code, self-reported
   success, and output text are recorded but never used to score.
 - `k` defaults to `min_t n_t` (the runs per task), so every task has pass@k and pass^k
-  defined. Override with `rerun-bench report --k`.
+  defined. When one report covers several result sets, `k` is the smallest such value over
+  all of them, so every row uses the same `k`. Lower it with `rerun-bench report --k`.
+- Agent errors: a run whose agent exited non-zero, crashed, or reported an error itself (for
+  example `is_error` from Claude Code or `turn.failed` from Codex) is an agent error. It is
+  scored by the verifier like any other run, so it normally counts as a fail, and reports list
+  how many there were. Timeouts are counted separately. When `run` stops early because several
+  runs in a row ended in an agent error (a login, quota or rate-limit problem), those runs are
+  moved to `errors.jsonl` and are not scored.
 
 ## Sampling design
 
@@ -92,8 +99,17 @@ Limitations: line-level Jaccard is sensitive to formatting (the same logical cha
 with different line breaks counts as a different approach) and ignores line order. It is a
 signal for variability, not a measure of code quality.
 
+## Comparing result sets
+
+When a report has two or more result sets, it checks whether their pooled pass-rate Wilson
+intervals overlap. Overlap is reported as "not enough to tell the rows apart"; no overlap is
+reported only as that fact. This is a deliberately cautious rule: runs of the same task are
+not independent, so a test that treats every run as an independent trial would overstate the
+evidence. Rows are sorted by pass^k, then pass rate, and the reports say the order is not a
+ranking.
+
 ## What is not measured (yet)
 
-- Statistical tests between two result sets (planned: Fisher exact test per task, and a
-  paired task-level bootstrap for the macro difference).
+- Formal statistical tests between two result sets (planned: Fisher exact test per task, and
+  a paired task-level bootstrap for the macro difference).
 - Variance decomposition across CLI versions and days.

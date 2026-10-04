@@ -22,7 +22,7 @@ uvx rerun-bench run --agent mock --tasks all --runs 5 --out results/
 uvx rerun-bench report results/ --format html -o report.html
 ```
 
-也可以用 `uv tool install git+https://github.com/Abelo9996/rerun-bench` 安装一次，之后就不用再加 `uvx --from ...` 前缀了。
+`run` 命令结束时会打印一段简短的汇总，以及接下来可以执行的命令；`report.html` 是一个可以直接打开或分享的独立页面。mock 的运行会标注为模拟（simulated）：其成本、token 和耗时都是虚构的。也可以用 `uv tool install rerun-bench`（或 `pipx install rerun-bench`）安装一次，之后就不用再加 `uvx` 前缀了。
 
 ## 运行真实的智能体
 
@@ -30,8 +30,8 @@ uvx rerun-bench report results/ --format html -o report.html
 
 | 智能体 | rerun-bench 执行的命令 | CLI 是否上报成本 |
 |---|---|---|
-| `claude`（Claude Code） | `claude -p <prompt> --output-format json --permission-mode bypassPermissions` | 是（`total_cost_usd`） |
-| `codex`（OpenAI Codex CLI） | `codex exec --json --ephemeral --ignore-user-config --sandbox workspace-write --cd <ws> <prompt>` | 只上报 token；通过 `--agent-opt` 传入价格即可换算成美元 |
+| `claude`（Claude Code） | `claude -p <prompt> --output-format json --permission-mode bypassPermissions --no-session-persistence` | 是（`total_cost_usd`） |
+| `codex`（OpenAI Codex CLI） | `codex exec --json --skip-git-repo-check --ephemeral --sandbox workspace-write --cd <ws> --ignore-user-config <prompt>` | 只上报 token；通过 `--agent-opt` 传入价格即可换算成美元 |
 | `opencode` | `opencode run --format json <prompt>` | 是（按步骤上报） |
 
 ```sh
@@ -45,7 +45,7 @@ rerun-bench report results/ --format md
 
 每次运行都会记录耗时（wall time）、退出状态、token 用量和成本（在 CLI 有上报的情况下）、CLI 版本、模型，以及最终的 diff。CLI 没有上报的值会存为 `null`，绝不会存为 0。
 
-**成本提醒。** 真实运行会消耗你的 API 额度或订阅配额：整套任务以 `--runs 5` 运行就是 50 个智能体会话。没有 `--yes` 时，rerun-bench 会拒绝启动真实的智能体，并且会先打印运行次数。建议从 `--tasks edit-config --runs 2` 开始。智能体会在一个临时目录中以文件编辑和 shell 权限运行；请像对待任何无人值守的智能体会话一样对待它。
+**成本提醒。** 真实运行会消耗你的 API 额度或订阅配额：整套任务以 `--runs 5` 运行就是 50 个智能体会话。没有 `--yes` 时，rerun-bench 会拒绝启动真实的智能体，并且会先打印运行次数，以及基于下方试点结果的大致 token 和美元估算（Claude Code 默认模型每次运行约 52,000 个 token、约 $0.09；你的模型可能更贵或更便宜）。建议从 `--tasks edit-config --runs 1` 开始。智能体会在一个临时目录中以文件编辑和 shell 权限运行；请像对待任何无人值守的智能体会话一样对待它。
 
 默认情况下，个人配置不会影响测量结果。对于 `claude`，rerun-bench 只加载项目设置和本地设置，并忽略 `--mcp-config` 之外的 MCP 服务器，因此你自己的 hooks、插件和 MCP 服务器都不会生效。对于 `codex`，它会传入 `--ignore-user-config`，因此你 `config.toml` 里的模型、推理强度、插件和 notify hooks 都不会生效（登录认证仍然可用）。对任一智能体，都可以用 `--agent-opt isolate=0` 关闭这一行为。如果 rerun-bench 本身是在某个 Claude Code 会话里运行的，那么在启动被测的 `claude` 之前，会先移除该会话的环境变量（`CLAUDECODE`、`CLAUDE_CODE_SESSION_ID` 等）。
 
@@ -53,7 +53,9 @@ rerun-bench report results/ --format md
 
 其他常用参数：`--jobs 4`（并行运行）、`--tasks tag:refactor` 或 `--tasks a,b`、`--keep-workspaces`（查看智能体留下了什么）、`--seed`（仅限 mock）、`--agent-opt bin=/path/to/cli`（运行某个特定构建的 CLI）、`--agent-opt effort=high`（对应 `claude --effort` 或 Codex 的 `model_reasoning_effort`）。
 
-耗时较长的运行可以中断后继续：用 `--run-id` 给这次运行命名，再加上 `--resume`，就只会运行 `runs.jsonl` 中还没有的那些（任务，运行）组合。
+**配置问题会让运行停止。** 如果连续 3 次运行都以智能体错误结束（非零退出码，或 CLI 自己报告的错误，例如未登录、额度用尽或被限流），rerun-bench 会停止，打印智能体的错误信息，把这几次运行移到 `errors.jsonl`（不计分），并打印问题修复后继续运行的 `--resume` 命令。`--max-consecutive-errors 0` 可以关闭这一行为。没有导致停止的智能体错误仍然计为失败，每份报告都会写明有多少次。
+
+耗时较长的运行可以中断后继续。按 Ctrl-C 会停止运行，保留所有已完成的运行，并打印继续运行的完整命令。用同一个 `--run-id` 加上 `--resume`，就只会运行 `runs.jsonl` 中还没有的那些（任务，运行）组合。
 
 ```sh
 rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes
@@ -74,19 +76,38 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 
 ## 报告示例
 
-两个 mock 配置，10 个任务，每个跑 5 次（`rerun-bench report results/`）：
+两个 mock 配置，10 个任务，每个跑 5 次。可以免费复现：
 
-| 智能体 / 模型 | 每任务运行次数 | 通过率 [95% CI] | pass@k | pass^k | 翻转率 | 不稳定任务 | 每次运行成本 | 成本 CV |
-|---|---|---|---|---|---|---|---|---|
-| mock / mock-steady | 5 | 86% [74, 93] | 100% | 40% | 26% | 60% | $0.0601 | 0.19 |
-| mock / mock-flaky | 5 | 60% [46, 72] | 100% | 0% | 50% | 100% | $0.0906 | 0.46 |
+```sh
+uvx rerun-bench run --agent mock --model mock-steady --agent-opt pass_prob=0.85 \
+  --agent-opt token_cv=0.15 --runs 5 --out results/
+uvx rerun-bench run --agent mock --model mock-flaky --agent-opt pass_prob=0.6 \
+  --agent-opt token_cv=0.5 --runs 5 --out results/
+uvx rerun-bench report results/
+```
 
-| 任务 | mock / mock-steady | mock / mock-flaky |
-|---|---|---|
-| fix-failing-test | `PPPPP` 100%, flip 0%, cost CV 0.13 | `FFFPF` 20%, flip 40%, cost CV 0.49 |
-| minimal-fix | `PPPPF` 80%, flip 40%, cost CV 0.16 | `PPFPF` 60%, flip 60%, cost CV 0.46 |
+在终端中，`report` 会打印一份 80 列宽的汇总（节选）：
 
-两个配置的 pass@5 都是 100%：给五次机会，每个配置都能把每个任务至少解出一次。真正能把它们区分开的，只有 pass^5 和翻转率。HTML 报告（`--format html`）是一个单独的静态文件，内联了 CSS 和 JS，包含一个可排序的排行榜，以及按任务展示每次运行结果的网格。
+```
+mock / mock-steady  [mock 0.1.1]
+  Pass rate     80%  [67, 89]   40 of 50 runs passed
+  pass^5        30%  all 5 reruns of a task pass
+  pass@5       100%  at least 1 of 5 reruns passes
+  Flip rate     34%  two runs of the same task disagree
+
+mock / mock-flaky  [mock 0.1.1]
+  Pass rate     60%  [46, 72]   30 of 50 runs passed
+  pass^5         0%  all 5 reruns of a task pass
+  pass@5       100%  at least 1 of 5 reruns passes
+  Flip rate     50%  two runs of the same task disagree
+
+Comparison
+  The pass-rate 95% intervals of all rows overlap, so these runs are not enough
+  to tell the rows apart. More runs per task narrow the intervals.
+  ...
+```
+
+两个配置的 pass@5 都是 100%：给五次机会，每个配置都能把每个任务至少解出一次。它们的通过率区间重叠，所以仅凭通过率无法区分二者；pass^5 和翻转率反映的是它们在多次重跑之间表现得有多不一样。报告从不宣布“赢家”：区间重叠时会直接说明，不重叠时也只陈述这一事实。`--format md` 输出适合放进 README 或 PR 的 Markdown 表格，`--format json` 输出全部数值，`--format html` 输出一个内联 CSS 和 JS 的静态页面：开头是简短的“如何阅读”说明，然后是可排序的表格，以及按任务展示每次运行结果的网格。
 
 ## 指标
 
@@ -103,8 +124,9 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 | 成本 / token / 耗时 CV | 同一任务内各次运行之间的波动（标准差 / 均值），再对所有任务取平均。 |
 | 每次成功的成本 | 总成本除以通过的运行次数。 |
 | 解法相似度 | 通过的运行之间，改动行的两两 Jaccard 相似度的平均值。1.0 表示每次的改动都完全相同。 |
+| 智能体错误、超时 | 以非零退出码、CLI 报告的错误或任务超时结束的运行。计为失败，并在每份报告中列出。 |
 
-通过与否只由任务的验证器决定。智能体的退出码以及它自称成功的说法会被记录下来，但不计入评分。
+通过与否只由任务的验证器决定。智能体的退出码以及它自称成功的说法会被记录下来，但不计入评分。一份报告包含多个结果集时，pass@k 和 pass^k 对每一行使用相同的 k：取各结果集中每任务运行次数的最小值（可用 `--k` 调低）。
 
 ## 任务集
 
@@ -145,13 +167,20 @@ timeout = 600
 tags = ["bugfix", "python"]
 ```
 
-然后检查一下：`rerun-bench --tasks-dir tasks verify-tasks --tasks my-task -v` 必须输出 `ok`（未经修改的工作区不通过，参考答案通过），并且 `uv run pytest` 会自动把新任务纳入测试。验证器的编写规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。
+然后在仓库根目录下检查：`uv run rerun-bench --tasks-dir tasks verify-tasks --tasks my-task -v` 必须输出 `ok`（未经修改的工作区不通过，参考答案通过），并且 `uv run pytest` 会自动把新任务纳入测试。如果要在仓库之外运行你自己的任务集，把 `--tasks-dir <路径>` 放在子命令之前：`uvx rerun-bench --tasks-dir my-tasks run --agent mock --runs 3`。验证器的编写规则见 [CONTRIBUTING.md](CONTRIBUTING.md)。
 
 ## 添加适配器
 
 在 `src/rerun_bench/adapters/` 中继承 `Adapter`，实现两个纯方法，然后在 `src/rerun_bench/adapters/__init__.py` 的 `ADAPTERS` 中注册：
 
 ```python
+# src/rerun_bench/adapters/myagent.py
+import json
+from pathlib import Path
+
+from .base import Adapter, Usage
+
+
 class MyAgentAdapter(Adapter):
     name = "myagent"
     binary = "myagent"
@@ -165,7 +194,7 @@ class MyAgentAdapter(Adapter):
         return Usage(output_tokens=data.get("output_tokens"), cost_usd=data.get("cost"))
 ```
 
-子进程、超时、耗时统计和 `--version` 都由基类处理。请用一份采集到的 CLI 输出样本来测试这两个方法（参见 `tests/test_adapters.py`）；测试套件从不调用真实的智能体。
+子进程、超时、耗时统计、`--version`，以及把非零退出码记录为智能体错误，都由基类处理。除 `mock` 之外的每个适配器都被视为付费智能体，所以 `run` 在启动前会要求 `--yes`。请用一份采集到的 CLI 输出样本来测试这两个方法（参见 `tests/test_adapters.py`）；测试套件从不调用真实的智能体。
 
 ## Agent Skill
 

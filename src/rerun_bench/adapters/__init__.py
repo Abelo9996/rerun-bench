@@ -15,7 +15,8 @@ ADAPTERS: dict[str, type[Adapter]] = {
     "mock": MockAdapter,
 }
 
-REAL_AGENTS = frozenset({"claude", "codex", "opencode"})
+# Every adapter except the simulated mock spends money and needs --yes.
+REAL_AGENTS = frozenset(name for name, cls in ADAPTERS.items() if cls.real)
 
 
 def get_adapter(

@@ -188,7 +188,9 @@ OPENCODE_JSONL = "\n".join(
 
 
 def test_registry():
-    assert set(ADAPTERS) == {"claude", "codex", "opencode", "mock"}
+    # A superset, so adding an adapter as the README describes keeps this test green.
+    assert set(ADAPTERS) >= {"claude", "codex", "opencode", "mock"}
+    assert all(cls.name == key for key, cls in ADAPTERS.items())
     with pytest.raises(ValueError):
         get_adapter("nope")
 
