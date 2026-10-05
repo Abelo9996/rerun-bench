@@ -35,6 +35,8 @@ one self-contained page you can open or share. Mock runs are labeled simulated: 
 tokens and wall time are made up. Or install once with `uv tool install rerun-bench` (or
 `pipx install rerun-bench`) and drop the `uvx` prefix.
 
+Homebrew (macOS and Linux): `brew install abelo9996/tap/rerun-bench`, then run `rerun-bench list` without `uvx`.
+
 ## Run real agents
 
 Supported CLIs, each driven headlessly in a fresh temporary copy of the task workspace:

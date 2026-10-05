@@ -24,6 +24,8 @@ uvx rerun-bench report results/ --format html -o report.html
 
 `run` 命令结束时会打印一段简短的汇总，以及接下来可以执行的命令；`report.html` 是一个可以直接打开或分享的独立页面。mock 的运行会标注为模拟（simulated）：其成本、token 和耗时都是虚构的。也可以用 `uv tool install rerun-bench`（或 `pipx install rerun-bench`）安装一次，之后就不用再加 `uvx` 前缀了。
 
+Homebrew（macOS 和 Linux）：`brew install abelo9996/tap/rerun-bench`，之后直接运行 `rerun-bench list`，无需 `uvx`。
+
 ## 运行真实的智能体
 
 支持以下 CLI，每次都在任务工作区的一份全新临时副本中以无头（headless）模式驱动：
