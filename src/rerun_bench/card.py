@@ -178,6 +178,22 @@ def card_model(rep: dict) -> dict:
     }
 
 
+def from_report_json(data: dict) -> dict:
+    """A report saved with ``report --format json`` (any version), ready for ``card_model``.
+
+    Older reports lack the comparison, the simulated flag and the top-level k; they are
+    filled in from the entries.
+    """
+    from .report import compare
+
+    entries = [dict(e) for e in data.get("entries") or []]
+    for e in entries:
+        e.setdefault("simulated", e.get("agent") == "mock")
+    ks = {e["metrics"].get("k") for e in entries}
+    k = data.get("k") or (ks.pop() if len(ks) == 1 else None)
+    return {**data, "entries": entries, "k": k, "comparison": compare(entries)}
+
+
 # ---- text measurement ------------------------------------------------------------------
 
 _W: dict[str, int] = {}

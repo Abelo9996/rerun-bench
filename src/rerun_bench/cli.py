@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import argparse
+import json
 import os
 import shlex
 import subprocess
@@ -302,7 +303,14 @@ def cmd_card(args) -> int:
         else:
             print(f"error: -o must end in .svg, got {str(out)!r}", file=sys.stderr)
         return 2
-    rep = report_mod.build(path, k=args.k)
+    if path.is_file() and path.suffix.lower() == ".json":
+        try:
+            rep = card_mod.from_report_json(json.loads(path.read_text(encoding="utf-8")))
+        except (ValueError, KeyError, TypeError, AttributeError) as exc:
+            print(f"error: {path} is not a rerun-bench JSON report ({exc})", file=sys.stderr)
+            return 2
+    else:
+        rep = report_mod.build(path, k=args.k)
     if not rep["entries"]:
         print(
             f"error: no runs found under {path}. A result set is a directory with meta.json "
@@ -438,7 +446,10 @@ def build_parser() -> argparse.ArgumentParser:
         "with the pass rate and its 95%% interval, pass^k, flip rate and median cost of every "
         "result set under a directory.",
     )
-    s.add_argument("results", help="a result directory or a root containing several")
+    s.add_argument(
+        "results",
+        help="a result directory, a root containing several, or a report saved with --format json",
+    )
     s.add_argument(
         "-o", "--output", default="rerun-bench-card.svg", help="output file (default %(default)s)"
     )

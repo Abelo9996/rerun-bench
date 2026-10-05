@@ -15,11 +15,20 @@ All notable changes to this project are documented here. The format follows
   never names a winner (overlapping intervals: "these runs do not establish a difference";
   separate intervals: only that they do not overlap). Rows are in name order. Mock results are
   marked simulated. No dependencies; system fonts; light and dark. PNG is not built in, and
-  the command prints how to convert.
+  the command prints how to convert. It also takes a report saved with `--format json`.
 - The 2026-10-03 pilot has its card in `docs/pilot-2026-10-03/card.svg` (and `card.png`),
   shown in the README.
+- The repository is a GitHub Action (`uses: Abelo9996/rerun-bench@v0`). It installs uv, runs
+  the benchmark with `uvx rerun-bench` (default agent `mock`, so it is free out of the box),
+  uploads the result set and the report (`report-format`, HTML by default) as artifacts, writes
+  the text summary to the job summary, and sets outputs for later steps: `pass-rate`,
+  `pass-rate-low`, `pass-rate-high`, `flip-rate`, `pass-hat-k`, `k`, `runs`, `passes`,
+  `agent-errors`, `run-dir` and `report-path`. See "Use in CI" in the README, including which
+  credentials each real agent needs, and `examples/rerun-bench.yml`. The action only needs the
+  `run` and `report` commands, so it works with 0.1.1 and later; its `version` input defaults
+  to 0.1.1, the release on PyPI today.
 
-## 0.1.1 - Unreleased
+## 0.1.1 - 2026-10-04
 
 ### Fixed
 

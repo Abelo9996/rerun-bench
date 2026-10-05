@@ -65,6 +65,58 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes --resume
 ```
 
+## 在 CI 中使用
+
+这个仓库同时也是一个 GitHub Action。它会运行基准测试，把结果集和报告作为构件（artifact）上传，把文本汇总写入作业摘要（job summary），并把主要数字作为输出（outputs）提供给后续步骤。默认的智能体是 `mock`，因此无需任何配置即可运行，也不会产生任何花费。
+
+```yaml
+# .github/workflows/rerun-bench.yml
+name: rerun-bench
+on: [pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    steps:
+      - id: bench
+        uses: Abelo9996/rerun-bench@v0
+        with:
+          runs: 5
+      - env:
+          PASS_RATE: ${{ steps.bench.outputs.pass-rate }}
+          LOW: ${{ steps.bench.outputs.pass-rate-low }}
+          HIGH: ${{ steps.bench.outputs.pass-rate-high }}
+        run: echo "pass rate $PASS_RATE, 95% interval $LOW to $HIGH"
+```
+
+更完整的示例（包含一个只在手动触发时才运行真实智能体的作业）见 [examples/rerun-bench.yml](examples/rerun-bench.yml)。
+
+| 输入 | 默认值 | 含义 |
+|---|---|---|
+| `agent` | `mock` | `mock`、`claude`、`codex` 或 `opencode`。|
+| `tasks` | `all` | `all`、逗号分隔的任务 id，或 `tag:<name>`。|
+| `runs` | `5` | 每个任务的运行次数。|
+| `tasks-dir` | | 你仓库中的任务集目录（需要先检出代码）。留空表示使用内置任务集。|
+| `version` | `0.1.1` | 通过 `uvx` 运行的 PyPI 上的 rerun-bench 版本。也可以填一个代码检出目录的路径。|
+| `extra-args` | | 传给 `rerun-bench run` 的其他参数，按空白字符拆分，例如 `--model sonnet --jobs 2`。|
+| `report-format` | `html` | 报告构件的格式：`html`、`md`、`json` 或 `text`。|
+| `results-dir` | `rerun-bench-results` | 结果集的写入位置。|
+| `artifact-name` | `rerun-bench` | 构件名为 `<name>-results` 和 `<name>-report`。如果同一次工作流运行中多次使用这个 Action（例如在 matrix 中），请设置不同的值。|
+
+输出均为小数（0.8 表示 80%）：`pass-rate`、`pass-rate-low` 和 `pass-rate-high`（95% Wilson 区间）、`flip-rate`（每个任务只运行 1 次时为空）以及 `pass-hat-k`；另有 `k`、`runs`、`passes`、`agent-errors`、`run-dir` 和 `report-path`。后续步骤可以据此设置门槛，例如当 `pass-rate-low` 低于某个阈值时让作业失败。
+
+**在 CI 中运行真实智能体会花钱。** 每次运行都是一个完整的智能体会话，费用计入你提供的密钥或订阅；默认设置（10 个任务、每个 5 次）就是 50 个会话，按下方试点结果中 Claude Code 默认模型计算约为 $4.40。这个 Action 会传入 `--yes`，因此不会再提示确认。请在前面的步骤中安装智能体的 CLI，并通过 Action 步骤上的 `env` 传入凭据：
+
+| `agent` | 安装步骤 | 凭据（Action 步骤上的 `env`）|
+|---|---|---|
+| `mock` | 无 | 无 |
+| `claude` | `npm install -g @anthropic-ai/claude-code` | `ANTHROPIC_API_KEY`（Claude Console 的密钥，按 token 计费），或通过 `claude setup-token` 生成的 `CLAUDE_CODE_OAUTH_TOKEN`（使用你的 Claude 订阅）。使用 `--agent-opt bare=1` 时只能用 `ANTHROPIC_API_KEY`。|
+| `codex` | `npm install -g @openai/codex` | `CODEX_API_KEY`（OpenAI API 密钥，`codex exec` 会读取它）。|
+| `opencode` | `npm install -g opencode-ai` | `--model provider/model` 中对应服务商的 API 密钥变量，例如 `ANTHROPIC_API_KEY` 或 `OPENAI_API_KEY`。|
+
+智能体在作业中拥有 shell 权限，因此可以读取其环境中的任何变量。请使用设有消费上限的密钥，只在 Action 步骤上设置它（不要设在整个作业上），并且不要在不受信任的人可以触发的事件上运行真实智能体。从 fork 发起的工作流不会获得仓库的 secrets。
+
 ## 试点结果
 
 2026-10-03 针对真实 CLI 的首次运行：全部 10 个任务，每个跑 3 次，Claude Code 2.1.288（默认模型，上报为 `claude-opus-5-5`）和 Codex CLI 0.160.0（`gpt-6-luna`），运行环境为 macOS arm64。完整配置、各任务结果、原始运行记录和 diff 见：[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md)。
@@ -85,6 +137,7 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 ```sh
 uvx rerun-bench card results/                       # writes rerun-bench-card.svg
 uvx rerun-bench card results/ -o my-card.svg --k 3
+uvx rerun-bench card report.json                    # from a report saved with --format json
 ```
 
 卡片展示每组结果的通过率，以及在同一条 0 到 100% 坐标轴上用横条加误差线画出的 95% 区间，还有 pass^k、翻转率、每次运行成本中位数、任务数和运行次数，以及日期。标题是一句关于比较结果的平实陈述，规则和报告相同：区间重叠时，它会说这些运行不能说明存在差异；区间不重叠时，它只陈述这一事实。各行按名称排序，不是排名。mock 结果会标注为 simulated（模拟）。卡片使用系统字体，并在查看器支持时跟随浅色或深色模式。

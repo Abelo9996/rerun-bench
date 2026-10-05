@@ -101,6 +101,70 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id claude-pilot --yes --resume
 ```
 
+## Use in CI
+
+The repository is also a GitHub Action. It runs the benchmark, uploads the result set and the
+report as artifacts, writes the text summary to the job summary, and exposes the headline
+numbers as outputs. The default agent is `mock`, so it works with no setup and spends nothing.
+
+```yaml
+# .github/workflows/rerun-bench.yml
+name: rerun-bench
+on: [pull_request, workflow_dispatch]
+permissions:
+  contents: read
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    steps:
+      - id: bench
+        uses: Abelo9996/rerun-bench@v0
+        with:
+          runs: 5
+      - env:
+          PASS_RATE: ${{ steps.bench.outputs.pass-rate }}
+          LOW: ${{ steps.bench.outputs.pass-rate-low }}
+          HIGH: ${{ steps.bench.outputs.pass-rate-high }}
+        run: echo "pass rate $PASS_RATE, 95% interval $LOW to $HIGH"
+```
+
+A fuller file with a real-agent job that only runs when started by hand is in
+[examples/rerun-bench.yml](examples/rerun-bench.yml).
+
+| Input | Default | Meaning |
+|---|---|---|
+| `agent` | `mock` | `mock`, `claude`, `codex` or `opencode`. |
+| `tasks` | `all` | `all`, comma-separated ids, or `tag:<name>`. |
+| `runs` | `5` | Runs per task. |
+| `tasks-dir` | | A task suite in your repository (check it out first). Empty means the bundled suite. |
+| `version` | `0.1.1` | rerun-bench version from PyPI, run with `uvx`. A path to a checkout also works. |
+| `extra-args` | | More `rerun-bench run` flags, split on whitespace, e.g. `--model sonnet --jobs 2`. |
+| `report-format` | `html` | Format of the report artifact: `html`, `md`, `json` or `text`. |
+| `results-dir` | `rerun-bench-results` | Where the result set is written. |
+| `artifact-name` | `rerun-bench` | Artifacts are `<name>-results` and `<name>-report`. Set a unique value when the action runs more than once in a workflow run (for example in a matrix). |
+
+Outputs, as fractions (0.8 means 80%): `pass-rate`, `pass-rate-low` and `pass-rate-high` (the
+95% Wilson interval), `flip-rate` (empty with 1 run per task) and `pass-hat-k`; plus `k`,
+`runs`, `passes`, `agent-errors`, `run-dir` and `report-path`. A later step can gate on them, for
+example fail when `pass-rate-low` is under a threshold.
+
+**Real agents in CI cost money.** Every run is a full agent session billed to the key or plan
+you provide; the defaults (10 tasks, 5 runs) are 50 sessions, about $4.40 with Claude Code's
+default model in the pilot below. The action passes `--yes`, so there is no prompt. Install
+the agent's CLI in an earlier step and pass its credentials as `env` on the action step:
+
+| `agent` | Install step | Credentials (`env` on the action step) |
+|---|---|---|
+| `mock` | none | none |
+| `claude` | `npm install -g @anthropic-ai/claude-code` | `ANTHROPIC_API_KEY` (Claude Console key, billed per token), or `CLAUDE_CODE_OAUTH_TOKEN` from `claude setup-token` (your Claude plan). With `--agent-opt bare=1` only `ANTHROPIC_API_KEY` works. |
+| `codex` | `npm install -g @openai/codex` | `CODEX_API_KEY` (an OpenAI API key; `codex exec` reads it). |
+| `opencode` | `npm install -g opencode-ai` | The API key variable of the provider in `--model provider/model`, for example `ANTHROPIC_API_KEY` or `OPENAI_API_KEY`. |
+
+The agent runs with shell access in the job, so it can read any variable in its environment.
+Use a key with a spending limit, set it only on the action step (not for the whole job), and do
+not run real agents on events that untrusted people can trigger. Secrets are not passed to
+workflows started from forks.
+
 ## Pilot results
 
 A first run against real CLIs on 2026-10-03: all 10 tasks, 3 runs each, Claude Code 2.1.288
@@ -127,6 +191,7 @@ link previews use, like the one above:
 ```sh
 uvx rerun-bench card results/                       # writes rerun-bench-card.svg
 uvx rerun-bench card results/ -o my-card.svg --k 3
+uvx rerun-bench card report.json                    # from a report saved with --format json
 ```
 
 It shows each result set's pass rate with its 95% interval drawn as a bar with whiskers on a

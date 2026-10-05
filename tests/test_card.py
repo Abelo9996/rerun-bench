@@ -1,5 +1,6 @@
 """The shareable SVG result card: wording, validity, the simulated label, and the CLI."""
 
+import json
 import xml.etree.ElementTree as ET
 
 import pytest
@@ -152,14 +153,29 @@ def test_interval_whiskers_are_drawn_on_the_axis():
 
 
 def test_pilot_card_is_up_to_date():
-    rep = report.build(PILOT / "results")
     committed = (PILOT / "card.svg").read_text(encoding="utf-8")
+    # The pilot's raw results are not in the repository; its JSON report is.
+    rep = card.from_report_json(json.loads((PILOT / "report.json").read_text(encoding="utf-8")))
     assert card.to_svg(rep) == committed, (
-        "regenerate with: uv run rerun-bench card docs/pilot-2026-10-03/results "
+        "regenerate with: uv run rerun-bench card docs/pilot-2026-10-03/report.json "
         "-o docs/pilot-2026-10-03/card.svg"
     )
+    if (PILOT / "results").is_dir():  # a local checkout that has them gives the same card
+        assert card.to_svg(report.build(PILOT / "results")) == committed
     t = texts(parse(committed))
     assert "Claude Code" in t and "Codex CLI" in t and "SIMULATED" not in t
+    assert "pass^3" in t
+
+
+def test_card_from_a_saved_json_report(tmp_path, capsys):
+    target = tmp_path / "c.svg"
+    assert run_cli("card", str(PILOT / "report.json"), "-o", str(target)) == 0
+    assert target.read_text(encoding="utf-8") == (PILOT / "card.svg").read_text(encoding="utf-8")
+    bad = tmp_path / "bad.json"
+    bad.write_text("[1, 2]", encoding="utf-8")
+    capsys.readouterr()
+    assert run_cli("card", str(bad), "-o", str(target)) == 2
+    assert "not a rerun-bench JSON report" in capsys.readouterr().err
 
 
 def run_cli(*args):
@@ -188,7 +204,7 @@ def test_card_command_on_mock_runs(tmp_path, capsys):
     [("card.png", "PNG output is not built in"), ("card.txt", "-o must end in .svg")],
 )
 def test_card_command_rejects_other_formats(tmp_path, capsys, name, message):
-    assert run_cli("card", str(PILOT / "results"), "-o", str(tmp_path / name)) == 2
+    assert run_cli("card", str(PILOT / "report.json"), "-o", str(tmp_path / name)) == 2
     assert message in capsys.readouterr().err
     assert not (tmp_path / name).exists()
 
@@ -198,4 +214,4 @@ def test_card_command_errors(tmp_path, capsys):
     assert "does not exist" in capsys.readouterr().err
     assert run_cli("card", str(tmp_path), "-o", str(tmp_path / "c.svg")) == 2
     assert "no runs found" in capsys.readouterr().err
-    assert run_cli("card", str(PILOT / "results"), "--k", "0") == 2
+    assert run_cli("card", str(PILOT / "report.json"), "--k", "0") == 2
