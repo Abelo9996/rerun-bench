@@ -8,6 +8,12 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- Claude Code plugin (`/plugin install rerun-bench@open-agent-lab` after
+  `/plugin marketplace add Abelo9996/open-agent-lab`) with the skill and the commands
+  `/rerun-bench:run-mock` and `/rerun-bench:report`, and a Codex plugin manifest with the skill
+  and an icon. Both run the CLI through `uvx`; the Python package is unchanged.
+- `SECURITY.md` with how to report a vulnerability and what rerun-bench sends where (nothing of
+  its own).
 - `rerun-bench card results/ [-o rerun-bench-card.svg] [--k K]` writes a 1200x630 SVG result
   card (the size X, Bluesky and link previews use): each result set's pass rate with its 95%
   Wilson interval drawn as a bar with whiskers on a shared axis, pass^k, flip rate, median

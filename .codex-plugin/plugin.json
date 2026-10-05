@@ -1,0 +1,36 @@
+{
+  "name": "rerun-bench",
+  "version": "0.2.0",
+  "description": "Run the same coding tasks N times per agent and measure how consistent and how expensive it is: pass rate, pass^k, flip rate and cost spread.",
+  "author": { "name": "Abel Yagubyan", "url": "https://github.com/Abelo9996" },
+  "homepage": "https://github.com/Abelo9996/rerun-bench#readme",
+  "repository": "https://github.com/Abelo9996/rerun-bench",
+  "license": "MIT",
+  "keywords": ["benchmark", "reliability", "consistency", "pass-k", "codex"],
+  "skills": "./skills/",
+  "interface": {
+    "displayName": "rerun-bench",
+    "shortDescription": "Measure agent consistency",
+    "longDescription": "rerun-bench runs each task in a fixed suite N times per agent (Codex, Claude Code, opencode, or a free mock agent) and reports pass rate with a 95% interval, pass^k (all k runs pass), flip rate (two runs disagree) and cost spread. Pass or fail is decided only by each task's hidden verifier. The plugin adds a skill that runs the benchmark with uvx, reads its reports without overclaiming, and helps write new tasks. Real agent runs spend your quota and ask for confirmation first; start with the mock agent. Requires uv and Python 3.11+.",
+    "developerName": "Abel Yagubyan",
+    "category": "Developer Tools",
+    "capabilities": [
+      "Runs a fixed task suite several times per agent",
+      "Reports pass rate, pass^k, flip rate and cost spread",
+      "Helps write new benchmark tasks with a verifier"
+    ],
+    "websiteURL": "https://github.com/Abelo9996/rerun-bench",
+    "supportURL": "https://github.com/Abelo9996/rerun-bench/issues",
+    "privacyPolicyURL": "https://github.com/Abelo9996/rerun-bench/blob/main/SECURITY.md#privacy",
+    "termsOfServiceURL": "https://github.com/Abelo9996/rerun-bench/blob/main/LICENSE",
+    "defaultPrompt": [
+      "Run rerun-bench with the mock agent and summarize the report",
+      "How consistent is Codex on the rerun-bench tasks?",
+      "Write a new rerun-bench task with a verifier"
+    ],
+    "brandColor": "#6D28D9",
+    "composerIcon": "./assets/icon.svg",
+    "logo": "./assets/icon.svg",
+    "screenshots": ["./assets/screenshot.png"]
+  }
+}

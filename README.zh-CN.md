@@ -26,6 +26,26 @@ uvx rerun-bench report results/ --format html -o report.html
 
 Homebrew（macOS 和 Linux）：`brew install abelo9996/tap/rerun-bench`，之后直接运行 `rerun-bench list`，无需 `uvx`。
 
+## 作为 Claude Code 插件安装
+
+在 Claude Code 里运行：
+
+```text
+/plugin marketplace add Abelo9996/open-agent-lab
+/plugin install rerun-bench@open-agent-lab
+```
+
+然后运行 `/reload-plugins` 或开一个新会话。插件会加入 rerun-bench skill 和两个命令：`/rerun-bench:run-mock [runs] [dir]` 用免费的 mock 智能体跑一遍任务集并给出汇总；`/rerun-bench:report [dir]` 汇总结果，或用 `--format html -o report.html` 写出报告。两者都通过 `uvx rerun-bench` 运行 CLI，所以只需要 [uv](https://docs.astral.sh/uv/)。这两个命令都不会启动付费的智能体运行。在终端里也可以：`claude plugin marketplace add Abelo9996/open-agent-lab`，然后 `claude plugin install rerun-bench@open-agent-lab`。
+
+## 作为 Codex 插件安装
+
+```sh
+codex plugin marketplace add Abelo9996/open-agent-lab
+codex plugin add rerun-bench@open-agent-lab
+```
+
+这会给 Codex 加入 rerun-bench skill，让它在你说“测一下这个智能体有多稳定”时运行任务集（先用 mock，只有在你确认成本之后才跑真实智能体）并解读报告。
+
 ## 运行真实的智能体
 
 支持以下 CLI，每次都在任务工作区的一份全新临时副本中以无头（headless）模式驱动：

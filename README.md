@@ -37,6 +37,33 @@ tokens and wall time are made up. Or install once with `uv tool install rerun-be
 
 Homebrew (macOS and Linux): `brew install abelo9996/tap/rerun-bench`, then run `rerun-bench list` without `uvx`.
 
+## Install as a Claude Code plugin
+
+Inside Claude Code:
+
+```text
+/plugin marketplace add Abelo9996/open-agent-lab
+/plugin install rerun-bench@open-agent-lab
+```
+
+Then run `/reload-plugins` or start a new session. The plugin adds the rerun-bench skill and two
+commands: `/rerun-bench:run-mock [runs] [dir]` runs the suite with the free mock agent and
+summarizes it, and `/rerun-bench:report [dir]` summarizes results or writes a report with
+`--format html -o report.html`. Both run the CLI through `uvx rerun-bench`, so you need
+[uv](https://docs.astral.sh/uv/) and nothing else. Neither command starts a paid agent run. From
+a shell: `claude plugin marketplace add Abelo9996/open-agent-lab`, then
+`claude plugin install rerun-bench@open-agent-lab`.
+
+## Install as a Codex plugin
+
+```sh
+codex plugin marketplace add Abelo9996/open-agent-lab
+codex plugin add rerun-bench@open-agent-lab
+```
+
+This adds the rerun-bench skill to Codex, so "benchmark how consistent this agent is" runs the
+suite (mock first, real agents only after you confirm the cost) and reads the report.
+
 ## Run real agents
 
 Supported CLIs, each driven headlessly in a fresh temporary copy of the task workspace:
