@@ -164,7 +164,7 @@ A fuller file with a real-agent job that only runs when started by hand is in
 | `tasks` | `all` | `all`, comma-separated ids, or `tag:<name>`. |
 | `runs` | `5` | Runs per task. |
 | `tasks-dir` | | A task suite in your repository (check it out first). Empty means the bundled suite. |
-| `version` | `0.1.1` | rerun-bench version from PyPI, run with `uvx`. A path to a checkout also works. |
+| `version` | `0.2.0` | rerun-bench version from PyPI, run with `uvx`. A path to a checkout also works. |
 | `extra-args` | | More `rerun-bench run` flags, split on whitespace, e.g. `--model sonnet --jobs 2`. |
 | `report-format` | `html` | Format of the report artifact: `html`, `md`, `json` or `text`. |
 | `results-dir` | `rerun-bench-results` | Where the result set is written. |
@@ -248,7 +248,7 @@ uvx rerun-bench report results/
 In a terminal, `report` prints an 80-column summary (excerpt):
 
 ```
-mock / mock-steady  [mock 0.1.1]
+mock / mock-steady  [mock 0.2.0]
   Pass rate     80%  [67, 89]   40 of 50 runs passed
   pass^5        30%  all 5 reruns of a task pass
   pass@5       100%  at least 1 of 5 reruns passes
@@ -256,7 +256,7 @@ mock / mock-steady  [mock 0.1.1]
   Flaky tasks   70%  tasks with both passes and fails
   Cost/run     $0.0582 median, $0.0597 mean, CV 0.14 (simulated)
 
-mock / mock-flaky  [mock 0.1.1]
+mock / mock-flaky  [mock 0.2.0]
   Pass rate     60%  [46, 72]   30 of 50 runs passed
   pass^5         0%  all 5 reruns of a task pass
   pass@5       100%  at least 1 of 5 reruns passes

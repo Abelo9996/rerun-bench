@@ -118,7 +118,7 @@ jobs:
 | `tasks` | `all` | `all`、逗号分隔的任务 id，或 `tag:<name>`。|
 | `runs` | `5` | 每个任务的运行次数。|
 | `tasks-dir` | | 你仓库中的任务集目录（需要先检出代码）。留空表示使用内置任务集。|
-| `version` | `0.1.1` | 通过 `uvx` 运行的 PyPI 上的 rerun-bench 版本。也可以填一个代码检出目录的路径。|
+| `version` | `0.2.0` | 通过 `uvx` 运行的 PyPI 上的 rerun-bench 版本。也可以填一个代码检出目录的路径。|
 | `extra-args` | | 传给 `rerun-bench run` 的其他参数，按空白字符拆分，例如 `--model sonnet --jobs 2`。|
 | `report-format` | `html` | 报告构件的格式：`html`、`md`、`json` 或 `text`。|
 | `results-dir` | `rerun-bench-results` | 结果集的写入位置。|
@@ -179,13 +179,13 @@ uvx rerun-bench report results/
 在终端中，`report` 会打印一份 80 列宽的汇总（节选）：
 
 ```
-mock / mock-steady  [mock 0.1.1]
+mock / mock-steady  [mock 0.2.0]
   Pass rate     80%  [67, 89]   40 of 50 runs passed
   pass^5        30%  all 5 reruns of a task pass
   pass@5       100%  at least 1 of 5 reruns passes
   Flip rate     34%  two runs of the same task disagree
 
-mock / mock-flaky  [mock 0.1.1]
+mock / mock-flaky  [mock 0.2.0]
   Pass rate     60%  [46, 72]   30 of 50 runs passed
   pass^5         0%  all 5 reruns of a task pass
   pass@5       100%  at least 1 of 5 reruns passes

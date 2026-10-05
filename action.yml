@@ -24,9 +24,9 @@ inputs:
     required: false
     default: ""
   version:
-    description: rerun-bench version from PyPI (for example 0.1.1). A path to a checkout (such as .) also works.
+    description: rerun-bench version from PyPI (for example 0.2.0). A path to a checkout (such as .) also works.
     required: false
-    default: 0.1.1
+    default: 0.2.0
   extra-args:
     description: Extra arguments for `rerun-bench run`, split on whitespace (for example --model sonnet --jobs 2 --agent-opt pass_prob=0.6).
     required: false
