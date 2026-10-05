@@ -1,0 +1,158 @@
+name: rerun-bench
+description: Run the same coding tasks N times with an agent and report pass rate, its 95% interval, flip rate and cost spread.
+author: Abel Yagubyan
+
+branding:
+  icon: repeat
+  color: purple
+
+inputs:
+  agent:
+    description: Agent adapter. mock (free, simulated, the default), claude, codex or opencode. Real agents need their CLI installed and credentials in env, and they spend money.
+    required: false
+    default: mock
+  tasks:
+    description: all, comma-separated task ids, or tag:<name>.
+    required: false
+    default: all
+  runs:
+    description: Runs per task.
+    required: false
+    default: "5"
+  tasks-dir:
+    description: A task suite directory in your repository (check it out first). Empty means the suite bundled with rerun-bench.
+    required: false
+    default: ""
+  version:
+    description: rerun-bench version from PyPI (for example 0.1.1). A path to a checkout (such as .) also works.
+    required: false
+    default: 0.1.1
+  extra-args:
+    description: Extra arguments for `rerun-bench run`, split on whitespace (for example --model sonnet --jobs 2 --agent-opt pass_prob=0.6).
+    required: false
+    default: ""
+  report-format:
+    description: Format of the report artifact. html (one self-contained page), md, json or text.
+    required: false
+    default: html
+  results-dir:
+    description: Directory the result set is written under.
+    required: false
+    default: rerun-bench-results
+  artifact-name:
+    description: Prefix for the two artifacts (<name>-results and <name>-report). Set a unique value when the action runs more than once in a workflow run.
+    required: false
+    default: rerun-bench
+
+outputs:
+  pass-rate:
+    description: Share of runs that passed, as a fraction (0.8 means 80%).
+    value: ${{ steps.report.outputs.pass-rate }}
+  pass-rate-low:
+    description: Lower bound of the 95% Wilson interval for the pass rate, as a fraction.
+    value: ${{ steps.report.outputs.pass-rate-low }}
+  pass-rate-high:
+    description: Upper bound of the 95% Wilson interval for the pass rate, as a fraction.
+    value: ${{ steps.report.outputs.pass-rate-high }}
+  flip-rate:
+    description: Chance that two runs of the same task disagree, as a fraction. Empty with 1 run per task.
+    value: ${{ steps.report.outputs.flip-rate }}
+  pass-hat-k:
+    description: Chance that k reruns of the same task all pass (pass^k), as a fraction.
+    value: ${{ steps.report.outputs.pass-hat-k }}
+  k:
+    description: The k used for pass^k (runs per task).
+    value: ${{ steps.report.outputs.k }}
+  runs:
+    description: Number of runs recorded.
+    value: ${{ steps.report.outputs.runs }}
+  passes:
+    description: Number of runs that passed.
+    value: ${{ steps.report.outputs.passes }}
+  agent-errors:
+    description: Runs that ended in an agent error (login, quota, crash). They count as fails.
+    value: ${{ steps.report.outputs.agent-errors }}
+  run-dir:
+    description: The result set directory (meta.json, runs.jsonl, diffs).
+    value: ${{ steps.run.outputs.run-dir }}
+  report-path:
+    description: Path to the report file in report-format.
+    value: ${{ steps.report.outputs.report-path }}
+
+runs:
+  using: composite
+  steps:
+    - name: Set up uv
+      uses: astral-sh/setup-uv@c18668ad3cf93ea998bef934396af7bb5c839dc7 # v10.2.0
+      with:
+        enable-cache: false
+
+    - name: Run the benchmark
+      id: run
+      shell: bash
+      env:
+        RB_AGENT: ${{ inputs.agent }}
+        RB_TASKS: ${{ inputs.tasks }}
+        RB_RUNS: ${{ inputs.runs }}
+        RB_VERSION: ${{ inputs.version }}
+        RB_EXTRA: ${{ inputs.extra-args }}
+        RB_OUT: ${{ inputs.results-dir }}
+        RB_TASKS_DIR: ${{ inputs.tasks-dir }}
+      run: |
+        set -euo pipefail
+        case "$RB_VERSION" in
+          .|..|*/*|*\\*) from="$RB_VERSION" ;;
+          *) from="rerun-bench==$RB_VERSION" ;;
+        esac
+        echo "from=$from" >> "$GITHUB_OUTPUT"
+        run_id="$RB_AGENT-$(date -u +%Y%m%dT%H%M%SZ)-${GITHUB_RUN_ID:-local}-${GITHUB_RUN_ATTEMPT:-1}"
+        echo "run-dir=$RB_OUT/$run_id" >> "$GITHUB_OUTPUT"
+        echo "run-id=$run_id" >> "$GITHUB_OUTPUT"
+        suite=()
+        if [ -n "$RB_TASKS_DIR" ]; then suite=(--tasks-dir "$RB_TASKS_DIR"); fi
+        # Using the action with a real agent is the confirmation, so --yes is passed.
+        # RB_EXTRA is split on whitespace on purpose.
+        # shellcheck disable=SC2086
+        uvx --from "$from" rerun-bench ${suite[@]+"${suite[@]}"} run --agent "$RB_AGENT" \
+          --tasks "$RB_TASKS" --runs "$RB_RUNS" --out "$RB_OUT" --run-id "$run_id" \
+          --yes --no-report $RB_EXTRA
+
+    - name: Write the report and summary
+      id: report
+      if: always() && steps.run.outputs.run-dir != ''
+      shell: bash
+      env:
+        RB_FROM: ${{ steps.run.outputs.from }}
+        RB_RUN_DIR: ${{ steps.run.outputs.run-dir }}
+        RB_FORMAT: ${{ inputs.report-format }}
+      run: |
+        set -euo pipefail
+        if [ ! -s "$RB_RUN_DIR/runs.jsonl" ]; then
+          echo "::warning title=rerun-bench::no runs were recorded in $RB_RUN_DIR"
+          exit 0
+        fi
+        case "$RB_FORMAT" in md) ext=md ;; json) ext=json ;; text) ext=txt ;; *) ext=html ;; esac
+        report="$RB_RUN_DIR.report.$ext"
+        json="$RUNNER_TEMP/$(basename "$RB_RUN_DIR").report.json"
+        text="$RUNNER_TEMP/$(basename "$RB_RUN_DIR").summary.txt"
+        uvx --from "$RB_FROM" rerun-bench report "$RB_RUN_DIR" --format "$RB_FORMAT" -o "$report"
+        uvx --from "$RB_FROM" rerun-bench report "$RB_RUN_DIR" --format json -o "$json"
+        uvx --from "$RB_FROM" rerun-bench report "$RB_RUN_DIR" --format text > "$text"
+        cat "$text"
+        uv run --no-project python "$GITHUB_ACTION_PATH/action/outputs.py" "$json" "$text" "$RB_RUN_DIR" "$report"
+
+    - name: Upload the results directory
+      if: always() && steps.run.outputs.run-dir != ''
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}-results
+        path: ${{ steps.run.outputs.run-dir }}
+        if-no-files-found: warn
+
+    - name: Upload the report
+      if: always() && steps.report.outputs.report-path != ''
+      uses: actions/upload-artifact@v7
+      with:
+        name: ${{ inputs.artifact-name }}-report
+        path: ${{ steps.report.outputs.report-path }}
+        if-no-files-found: warn

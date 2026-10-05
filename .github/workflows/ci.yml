@@ -43,3 +43,70 @@ jobs:
       - name: Installed entry point
         shell: bash
         run: uvx --from . rerun-bench --help
+
+  action:
+    name: action / ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Action with the mock agent, this checkout
+        id: bench
+        uses: ./
+        with:
+          version: .
+          runs: "3"
+          extra-args: --agent-opt pass_prob=0.7 --seed 7
+          artifact-name: rerun-bench-${{ matrix.os }}
+
+      - name: Check the outputs
+        shell: bash
+        env:
+          PASS_RATE: ${{ steps.bench.outputs.pass-rate }}
+          LOW: ${{ steps.bench.outputs.pass-rate-low }}
+          HIGH: ${{ steps.bench.outputs.pass-rate-high }}
+          FLIP_RATE: ${{ steps.bench.outputs.flip-rate }}
+          PASS_HAT_K: ${{ steps.bench.outputs.pass-hat-k }}
+          K: ${{ steps.bench.outputs.k }}
+          RUNS: ${{ steps.bench.outputs.runs }}
+          PASSES: ${{ steps.bench.outputs.passes }}
+          RUN_DIR: ${{ steps.bench.outputs.run-dir }}
+          REPORT: ${{ steps.bench.outputs.report-path }}
+        run: |
+          set -x
+          test "$RUNS" = 30
+          test "$K" = 3
+          awk -v p="$PASS_RATE" -v lo="$LOW" -v hi="$HIGH" -v f="$FLIP_RATE" -v n="$RUNS" -v c="$PASSES" 'BEGIN {
+            ok = (0 <= lo && lo <= p && p <= hi && hi <= 1 && 0 <= f && f <= 1)
+            ok = ok && (p - c / n < 0.0001 && c / n - p < 0.0001)
+            exit !ok
+          }'
+          test -n "$PASS_HAT_K"
+          test -s "$RUN_DIR/runs.jsonl"
+          test -s "$RUN_DIR/meta.json"
+          grep -q "<html" "$REPORT"
+
+      - name: Action with the published release and its defaults
+        if: matrix.os == 'ubuntu-latest'
+        id: published
+        uses: ./
+        with:
+          tasks: edit-config,minimal-fix
+          runs: "2"
+          report-format: md
+          artifact-name: rerun-bench-published
+
+      - name: Check the published release's outputs
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        env:
+          RUNS: ${{ steps.published.outputs.runs }}
+          REPORT: ${{ steps.published.outputs.report-path }}
+        run: |
+          set -x
+          test "$RUNS" = 4
+          grep -q "^# rerun-bench report" "$REPORT"

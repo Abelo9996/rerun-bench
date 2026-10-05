@@ -1,0 +1,52 @@
+# Copy to .github/workflows/rerun-bench.yml in your repository.
+#
+# The mock job is free and runs on every pull request: it checks that the
+# benchmark, the report and the outputs work, with simulated results.
+# The claude job runs a real agent, which spends money, so it only runs when
+# started by hand from the Actions tab (workflow_dispatch).
+name: rerun-bench
+
+on:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mock:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Benchmark with the mock agent
+        id: bench
+        uses: Abelo9996/rerun-bench@v0
+        with:
+          runs: 5
+      - name: Use the outputs
+        env:
+          PASS_RATE: ${{ steps.bench.outputs.pass-rate }}
+          LOW: ${{ steps.bench.outputs.pass-rate-low }}
+          HIGH: ${{ steps.bench.outputs.pass-rate-high }}
+          FLIP_RATE: ${{ steps.bench.outputs.flip-rate }}
+        run: echo "pass rate $PASS_RATE (95% interval $LOW to $HIGH), flip rate $FLIP_RATE"
+
+  claude:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+      - name: Benchmark Claude Code (spends API credit)
+        id: bench
+        uses: Abelo9996/rerun-bench@v0
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        with:
+          agent: claude
+          tasks: edit-config,minimal-fix
+          runs: 3
+          artifact-name: rerun-bench-claude
+      - name: Fail if the lower bound of the pass rate is under 50%
+        env:
+          LOW: ${{ steps.bench.outputs.pass-rate-low }}
+        run: awk -v low="$LOW" 'BEGIN { exit !(low >= 0.5) }'
