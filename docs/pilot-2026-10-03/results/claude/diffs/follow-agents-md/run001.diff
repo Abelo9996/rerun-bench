@@ -1,0 +1,27 @@
+--- a/CHANGES.md
++++ b/CHANGES.md
+@@ -1,6 +1,8 @@
+ # Changes
+ 
+ ## Unreleased
++
++- Added `is_palindrome`.
+ 
+ ## 0.3.0
+ 
+--- a/textutils.py
++++ b/textutils.py
+@@ -1,6 +1,12 @@
+ """Small text helpers."""
+ 
+-__all__ = ["shout", "word_count"]
++__all__ = ["is_palindrome", "shout", "word_count"]
++
++
++def is_palindrome(text):
++    """Return True if ``text`` reads the same both ways, ignoring case and non-alphanumerics."""
++    chars = [c.casefold() for c in text if c.isalnum()]
++    return chars == chars[::-1]
+ 
+ 
+ def shout(text):

@@ -1,0 +1,9 @@
+--- a/stats.py
++++ b/stats.py
+@@ -18,4 +18,6 @@
+         raise ValueError("median of empty sequence")
+     s = sorted(xs)
+     mid = len(s) // 2
++    if len(s) % 2 == 0:
++        return (s[mid - 1] + s[mid]) / 2
+     return s[mid]

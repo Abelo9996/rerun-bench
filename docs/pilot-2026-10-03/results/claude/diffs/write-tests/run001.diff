@@ -1,0 +1,125 @@
+--- /dev/null
++++ b/tests/test_duration.py
+@@ -0,0 +1,122 @@
++import unittest
++
++from duration import parse_duration
++
++
++class ParseDurationValidTests(unittest.TestCase):
++    def assertParses(self, text, expected):
++        with self.subTest(text=text):
++            result = parse_duration(text)
++            self.assertEqual(result, expected)
++            self.assertIsInstance(result, int)
++
++    def test_docstring_examples(self):
++        self.assertParses("1h30m", 5400)
++        self.assertParses("45s", 45)
++        self.assertParses("2h5s", 7205)
++
++    def test_single_units(self):
++        self.assertParses("1h", 3600)
++        self.assertParses("1m", 60)
++        self.assertParses("1s", 1)
++        self.assertParses("3h", 10800)
++        self.assertParses("7m", 420)
++
++    def test_all_units(self):
++        self.assertParses("1h1m1s", 3661)
++        self.assertParses("2h30m15s", 9015)
++
++    def test_unit_pairs(self):
++        self.assertParses("1h30m", 5400)
++        self.assertParses("1h30s", 3630)
++        self.assertParses("5m30s", 330)
++
++    def test_zero_values(self):
++        self.assertParses("0s", 0)
++        self.assertParses("0m", 0)
++        self.assertParses("0h", 0)
++        self.assertParses("0h0m0s", 0)
++        self.assertParses("0h5m", 300)
++
++    def test_values_not_normalised(self):
++        # Values beyond a unit's natural range are allowed and simply summed.
++        self.assertParses("90m", 5400)
++        self.assertParses("3600s", 3600)
++        self.assertParses("1h75m", 8100)
++        self.assertParses("100h", 360000)
++
++    def test_multi_digit_and_leading_zeros(self):
++        self.assertParses("12h34m56s", 12 * 3600 + 34 * 60 + 56)
++        self.assertParses("01h05m", 3900)
++        self.assertParses("007s", 7)
++
++    def test_large_value(self):
++        self.assertParses("123456789s", 123456789)
++        self.assertParses("1000000h", 3600000000)
++
++    def test_surrounding_whitespace_ignored(self):
++        self.assertParses(" 1h30m ", 5400)
++        self.assertParses("\t45s\n", 45)
++        self.assertParses("  \r\n 2h5s \t ", 7205)
++
++
++class ParseDurationInvalidTests(unittest.TestCase):
++    def assertInvalid(self, text):
++        with self.subTest(text=text):
++            with self.assertRaises(ValueError):
++                parse_duration(text)
++
++    def test_empty(self):
++        self.assertInvalid("")
++
++    def test_whitespace_only(self):
++        for text in (" ", "   ", "\t", "\n", " \t\n "):
++            self.assertInvalid(text)
++
++    def test_number_without_unit(self):
++        for text in ("0", "5", "90", "1h30", "1h30m15"):
++            self.assertInvalid(text)
++
++    def test_unit_without_number(self):
++        for text in ("h", "m", "s", "hms", "1hm", "h30m", "1h30ms"):
++            self.assertInvalid(text)
++
++    def test_units_out_of_order(self):
++        for text in ("30m1h", "5s1h", "5s30m", "1s1m1h", "1m1h", "1h5s30m"):
++            self.assertInvalid(text)
++
++    def test_repeated_units(self):
++        for text in ("1h1h", "1m2m", "1s2s", "1h30m1h"):
++            self.assertInvalid(text)
++
++    def test_unknown_units(self):
++        for text in ("1d", "5ms", "1x", "10sec", "1hr", "2min"):
++            self.assertInvalid(text)
++
++    def test_uppercase_units(self):
++        for text in ("1H", "30M", "45S", "1H30M"):
++            self.assertInvalid(text)
++
++    def test_negative_and_signed_numbers(self):
++        for text in ("-1h", "-5s", "1h-30m", "+1h", "+5s"):
++            self.assertInvalid(text)
++
++    def test_non_integer_numbers(self):
++        for text in ("1.5h", "0.5s", "1,5m", "1e3s"):
++            self.assertInvalid(text)
++
++    def test_internal_whitespace(self):
++        for text in ("1h 30m", "1 h", "1h30m 5s", "1h\t5s", "5 s"):
++            self.assertInvalid(text)
++
++    def test_extra_characters(self):
++        for text in ("abc", "1h!", "x1h", "1h30mx", "1h,30m", "1h:30m", "1h30m.", "30m s"):
++            self.assertInvalid(text)
++
++    def test_error_is_value_error_with_message(self):
++        with self.assertRaisesRegex(ValueError, "invalid duration"):
++            parse_duration("bogus")
++
++
++if __name__ == "__main__":
++    unittest.main()

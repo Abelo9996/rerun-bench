@@ -1,0 +1,11 @@
+--- a/legacy.py
++++ b/legacy.py
+@@ -15,7 +15,7 @@
+ 
+     Pages past the end return an empty list.
+     """
+-    start = page * perPage
++    start = (page - 1) * perPage
+     end = start + perPage
+     return items[start:end]
+ 

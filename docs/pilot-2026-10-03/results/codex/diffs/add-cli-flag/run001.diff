@@ -1,0 +1,24 @@
+--- a/wc.py
++++ b/wc.py
+@@ -8,14 +8,20 @@
+     return len(text.splitlines())
+ 
+ 
++def count_words(text):
++    return len(text.split())
++
++
+ def main(argv=None):
+     parser = argparse.ArgumentParser(description="Count lines in files.")
++    parser.add_argument("--words", action="store_true", help="count whitespace-separated words")
+     parser.add_argument("files", nargs="+")
+     args = parser.parse_args(argv)
++    counter = count_words if args.words else count_lines
+     total = 0
+     for name in args.files:
+         with open(name, encoding="utf-8") as fh:
+-            n = count_lines(fh.read())
++            n = counter(fh.read())
+         total += n
+         print(f"{n:>8} {name}")
+     if len(args.files) > 1:

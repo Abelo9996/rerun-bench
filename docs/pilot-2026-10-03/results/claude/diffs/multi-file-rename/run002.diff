@@ -1,0 +1,51 @@
+--- a/inventory/__init__.py
++++ b/inventory/__init__.py
+@@ -1,5 +1,5 @@
+ """Tiny inventory package."""
+ 
+-from .pricing import calc_ttl, parse_line
++from .pricing import compute_total, parse_line
+ 
+-__all__ = ["calc_ttl", "parse_line"]
++__all__ = ["compute_total", "parse_line"]
+--- a/inventory/cli.py
++++ b/inventory/cli.py
+@@ -10,7 +10,7 @@
+     specs = sys.argv[1:] if argv is None else argv
+     order = Order(specs)
+     print(order.summary())
+-    print(f"check: {pricing.calc_ttl(order.lines):.2f}")
++    print(f"check: {pricing.compute_total(order.lines):.2f}")
+     return 0
+ 
+ 
+--- a/inventory/orders.py
++++ b/inventory/orders.py
+@@ -1,6 +1,6 @@
+ """Order objects."""
+ 
+-from .pricing import calc_ttl, parse_line
++from .pricing import compute_total, parse_line
+ 
+ 
+ class Order:
+@@ -8,7 +8,7 @@
+         self.lines = [parse_line(s) for s in specs]
+ 
+     def total(self):
+-        return calc_ttl(self.lines)
++        return compute_total(self.lines)
+ 
+     def summary(self):
+-        return f"{len(self.lines)} lines, total {calc_ttl(self.lines):.2f}"
++        return f"{len(self.lines)} lines, total {compute_total(self.lines):.2f}"
+--- a/inventory/pricing.py
++++ b/inventory/pricing.py
+@@ -7,6 +7,6 @@
+     return int(qty), float(price)
+ 
+ 
+-def calc_ttl(lines):
++def compute_total(lines):
+     """Total price for a list of (qty, unit_price) tuples, rounded to cents."""
+     return round(sum(q * p for q, p in lines), 2)

@@ -1,0 +1,134 @@
+--- /dev/null
++++ b/tests/test_duration.py
+@@ -0,0 +1,131 @@
++import unittest
++
++from duration import parse_duration
++
++
++class ParseDurationValidTest(unittest.TestCase):
++    def test_docstring_examples(self):
++        self.assertEqual(parse_duration("1h30m"), 5400)
++        self.assertEqual(parse_duration("45s"), 45)
++        self.assertEqual(parse_duration("2h5s"), 7205)
++
++    def test_single_units(self):
++        self.assertEqual(parse_duration("1h"), 3600)
++        self.assertEqual(parse_duration("1m"), 60)
++        self.assertEqual(parse_duration("1s"), 1)
++        self.assertEqual(parse_duration("3h"), 10800)
++        self.assertEqual(parse_duration("7m"), 420)
++
++    def test_all_units(self):
++        self.assertEqual(parse_duration("1h2m3s"), 3723)
++        self.assertEqual(parse_duration("10h20m30s"), 37230)
++
++    def test_two_unit_combinations(self):
++        self.assertEqual(parse_duration("1h1m"), 3660)
++        self.assertEqual(parse_duration("1h1s"), 3601)
++        self.assertEqual(parse_duration("1m1s"), 61)
++        self.assertEqual(parse_duration("2m30s"), 150)
++
++    def test_zero_values(self):
++        self.assertEqual(parse_duration("0s"), 0)
++        self.assertEqual(parse_duration("0h"), 0)
++        self.assertEqual(parse_duration("0m"), 0)
++        self.assertEqual(parse_duration("0h0m0s"), 0)
++        self.assertEqual(parse_duration("0h5m0s"), 300)
++
++    def test_multi_digit_and_unnormalized_values(self):
++        self.assertEqual(parse_duration("90m"), 5400)
++        self.assertEqual(parse_duration("120s"), 120)
++        self.assertEqual(parse_duration("100h"), 360000)
++        self.assertEqual(parse_duration("1h75m90s"), 3600 + 4500 + 90)
++
++    def test_leading_zeros(self):
++        self.assertEqual(parse_duration("01h05m"), 3900)
++        self.assertEqual(parse_duration("007s"), 7)
++
++    def test_large_value(self):
++        self.assertEqual(parse_duration("1000000h"), 3600000000)
++
++    def test_returns_int(self):
++        self.assertIs(type(parse_duration("1h30m")), int)
++        self.assertIs(type(parse_duration("0s")), int)
++
++    def test_surrounding_whitespace_ignored(self):
++        self.assertEqual(parse_duration("  1h30m  "), 5400)
++        self.assertEqual(parse_duration("\t45s\n"), 45)
++        self.assertEqual(parse_duration(" 2h5s"), 7205)
++        self.assertEqual(parse_duration("2h5s "), 7205)
++        self.assertEqual(parse_duration("\r\n 3m \t"), 180)
++
++
++class ParseDurationInvalidTest(unittest.TestCase):
++    def assertInvalid(self, text):
++        with self.assertRaises(ValueError, msg=f"expected ValueError for {text!r}"):
++            parse_duration(text)
++
++    def test_empty(self):
++        self.assertInvalid("")
++
++    def test_whitespace_only(self):
++        for text in [" ", "   ", "\t", "\n", " \t\n "]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_bare_number_without_unit(self):
++        for text in ["5", "0", "123", "1h30", "1h2m3"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_unit_without_number(self):
++        for text in ["h", "m", "s", "hms", "1hm", "h30m", "1h30ms"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_units_out_of_order(self):
++        for text in ["30m1h", "5s2h", "5s3m", "1s1m1h", "1m1h"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_repeated_units(self):
++        for text in ["1h1h", "1m2m", "3s4s", "1h2m3m", "1h2m3s4s"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_unknown_units(self):
++        for text in ["5d", "5ms", "5x", "1h5d", "10sec", "2min", "1hr"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_uppercase_units(self):
++        for text in ["1H", "30M", "45S", "1H30M"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_signs(self):
++        for text in ["-5s", "+5s", "1h-30m", "-1h"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_non_integer_numbers(self):
++        for text in ["1.5h", "0.5s", ".5m", "1,5h", "1e3s"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_internal_whitespace(self):
++        for text in ["1h 30m", "1 h", "1h30m 5s", "4 5s", "1h\t2m"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_extra_characters(self):
++        for text in ["abc", "1h30m!", "x1h", "1h,30m", "1h:30m", "1h30mx", "PT1H"]:
++            with self.subTest(text=text):
++                self.assertInvalid(text)
++
++    def test_error_message_mentions_input(self):
++        with self.assertRaises(ValueError) as cm:
++            parse_duration("bogus")
++        self.assertIn("bogus", str(cm.exception))
++
++
++if __name__ == "__main__":
++    unittest.main()

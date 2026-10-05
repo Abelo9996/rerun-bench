@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "run_id": "codex",
+  "rerun_bench_version": "0.1.0",
+  "agent": "codex",
+  "model": "gpt-6-luna",
+  "agent_options": {},
+  "cli_version": "codex-cli 0.160.0",
+  "runs_per_task": 3,
+  "seed": 0,
+  "tasks": [
+    "add-cli-flag",
+    "edit-config",
+    "fix-failing-test",
+    "follow-agents-md",
+    "implement-lru-cache",
+    "implement-slugify",
+    "minimal-fix",
+    "multi-file-rename",
+    "refactor-extract-helper",
+    "write-tests"
+  ],
+  "started_at": "2026-10-03T08:16:06+00:00",
+  "platform": "Darwin arm64 py3.13.15",
+  "finished_at": "2026-10-03T08:24:49+00:00",
+  "elapsed_s": 522.262
+}

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "run_id": "claude",
+  "rerun_bench_version": "0.1.0",
+  "agent": "claude",
+  "model": null,
+  "agent_options": {},
+  "cli_version": "2.1.288 (Claude Code)",
+  "runs_per_task": 3,
+  "seed": 0,
+  "tasks": [
+    "add-cli-flag",
+    "edit-config",
+    "fix-failing-test",
+    "follow-agents-md",
+    "implement-lru-cache",
+    "implement-slugify",
+    "minimal-fix",
+    "multi-file-rename",
+    "refactor-extract-helper",
+    "write-tests"
+  ],
+  "started_at": "2026-10-03T08:16:06+00:00",
+  "platform": "Darwin arm64 py3.13.15",
+  "finished_at": "2026-10-03T08:23:01+00:00",
+  "elapsed_s": 415.09
+}

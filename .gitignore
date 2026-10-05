@@ -9,3 +9,4 @@ build/
 results/
 .coverage
 .DS_Store
+!docs/pilot-*/results/

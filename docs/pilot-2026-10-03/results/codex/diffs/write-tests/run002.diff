@@ -1,0 +1,70 @@
+--- /dev/null
++++ b/tests/test_duration.py
+@@ -0,0 +1,67 @@
++"""Tests for human-written duration parsing."""
++
++import unittest
++
++from duration import parse_duration
++
++
++class ParseDurationTests(unittest.TestCase):
++    def test_valid_durations(self):
++        cases = (
++            ("1h30m", 5400),
++            ("45s", 45),
++            ("2h5s", 7205),
++            ("3h", 10800),
++            ("12m", 720),
++            ("8s", 8),
++            ("1h2m3s", 3723),
++            ("0h0m0s", 0),
++            ("90m", 5400),
++            ("75s", 75),
++        )
++        for text, expected in cases:
++            with self.subTest(text=text):
++                self.assertEqual(parse_duration(text), expected)
++
++    def test_surrounding_whitespace_is_ignored(self):
++        cases = (
++            ("  1h30m  ", 5400),
++            ("\t45s\n", 45),
++            ("\u00a02m\u00a0", 120),
++        )
++        for text, expected in cases:
++            with self.subTest(text=text):
++                self.assertEqual(parse_duration(text), expected)
++
++    def test_empty_or_whitespace_only_input_raises_value_error(self):
++        for text in ("", " ", "\t\n"):
++            with self.subTest(text=text):
++                with self.assertRaises(ValueError):
++                    parse_duration(text)
++
++    def test_invalid_format_raises_value_error(self):
++        invalid = (
++            "1d",          # unsupported unit
++            "1h2s3m",      # units out of order
++            "1m2h",        # units out of order
++            "1hh",         # repeated unit
++            "1h1h",        # repeated unit
++            "1m1m",        # repeated unit
++            "1s1s",        # repeated unit
++            "h",           # unit without a number
++            "1.5h",        # non-integer quantity
++            "-1s",         # negative quantity
++            "+1s",         # signed quantity
++            "1 h",         # internal whitespace
++            "1h 30m",      # internal whitespace
++            "1h30m trailing",
++            "1h30m!",      # trailing junk
++        )
++        for text in invalid:
++            with self.subTest(text=text):
++                with self.assertRaises(ValueError):
++                    parse_duration(text)
++
++
++if __name__ == "__main__":
++    unittest.main()

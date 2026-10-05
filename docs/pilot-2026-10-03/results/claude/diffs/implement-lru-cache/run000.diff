@@ -1,0 +1,51 @@
+--- a/lru.py
++++ b/lru.py
+@@ -1,4 +1,8 @@
+ """A least-recently-used cache."""
++
++from collections import OrderedDict
++
++_MISSING = object()
+ 
+ 
+ class LRUCache:
+@@ -10,11 +14,18 @@
+ 
+     def __init__(self, capacity):
+         """Create an empty cache. Raise ValueError unless ``capacity`` is an int >= 1."""
+-        raise NotImplementedError
++        if isinstance(capacity, bool) or not isinstance(capacity, int) or capacity < 1:
++            raise ValueError("capacity must be an int >= 1")
++        self._capacity = capacity
++        self._data = OrderedDict()
+ 
+     def get(self, key, default=None):
+         """Return the value for ``key`` and mark it most recently used, else ``default``."""
+-        raise NotImplementedError
++        value = self._data.get(key, _MISSING)
++        if value is _MISSING:
++            return default
++        self._data.move_to_end(key)
++        return value
+ 
+     def put(self, key, value):
+         """Insert or update ``key`` and mark it most recently used.
+@@ -22,10 +33,15 @@
+         If the cache then holds more than ``capacity`` keys, evict the least recently
+         used key and return it. Otherwise return None.
+         """
+-        raise NotImplementedError
++        self._data[key] = value
++        self._data.move_to_end(key)
++        if len(self._data) > self._capacity:
++            evicted, _ = self._data.popitem(last=False)
++            return evicted
++        return None
+ 
+     def __len__(self):
+-        raise NotImplementedError
++        return len(self._data)
+ 
+     def __contains__(self, key):
+-        raise NotImplementedError
++        return key in self._data

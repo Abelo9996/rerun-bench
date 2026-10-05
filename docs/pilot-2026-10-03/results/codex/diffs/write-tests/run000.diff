@@ -1,0 +1,58 @@
+--- /dev/null
++++ b/tests/test_duration.py
+@@ -0,0 +1,55 @@
++import unittest
++
++from duration import parse_duration
++
++
++class ParseDurationTests(unittest.TestCase):
++    def test_hours_minutes_seconds(self):
++        self.assertEqual(parse_duration("1h30m"), 5400)
++        self.assertEqual(parse_duration("2h5s"), 7205)
++        self.assertEqual(parse_duration("1h2m3s"), 3723)
++
++    def test_each_unit(self):
++        self.assertEqual(parse_duration("2h"), 7200)
++        self.assertEqual(parse_duration("3m"), 180)
++        self.assertEqual(parse_duration("45s"), 45)
++
++    def test_zero_values_and_component_boundaries(self):
++        self.assertEqual(parse_duration("0h0m0s"), 0)
++        self.assertEqual(parse_duration("0s"), 0)
++        self.assertEqual(parse_duration("1h60m"), 7200)
++        self.assertEqual(parse_duration("1m60s"), 120)
++
++    def test_surrounding_whitespace_is_ignored(self):
++        self.assertEqual(parse_duration("  \t1h2m3s\n"), 3723)
++        self.assertEqual(parse_duration(" 45s "), 45)
++
++    def test_empty_or_whitespace_only_input_raises_value_error(self):
++        for text in ("", " ", "\t\n"):
++            with self.subTest(text=text):
++                with self.assertRaises(ValueError):
++                    parse_duration(text)
++
++    def test_malformed_input_raises_value_error(self):
++        invalid = (
++            "abc",
++            "1d",
++            "1h2h",
++            "1m2h",
++            "1s2m",
++            "1h2m3s4s",
++            "-1s",
++            "+1s",
++            "1.5s",
++            "1 h",
++            "1h 2m",
++            "h",
++        )
++        for text in invalid:
++            with self.subTest(text=text):
++                with self.assertRaises(ValueError):
++                    parse_duration(text)
++
++
++if __name__ == "__main__":
++    unittest.main()

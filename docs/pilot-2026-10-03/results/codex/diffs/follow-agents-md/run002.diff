@@ -1,0 +1,30 @@
+--- a/CHANGES.md
++++ b/CHANGES.md
+@@ -1,6 +1,8 @@
+ # Changes
+ 
+ ## Unreleased
++
++- Added `is_palindrome` to check text while ignoring case and non-alphanumeric characters.
+ 
+ ## 0.3.0
+ 
+--- a/textutils.py
++++ b/textutils.py
+@@ -1,6 +1,15 @@
+ """Small text helpers."""
+ 
+-__all__ = ["shout", "word_count"]
++__all__ = ["is_palindrome", "shout", "word_count"]
++
++
++def is_palindrome(text):
++    """Return whether ``text`` reads the same forwards and backwards.
++
++    Case and characters other than letters and digits are ignored.
++    """
++    normalized = [character.casefold() for character in text if character.isalnum()]
++    return normalized == normalized[::-1]
+ 
+ 
+ def shout(text):

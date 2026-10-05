@@ -1,0 +1,26 @@
+--- a/textkit/slug.py
++++ b/textkit/slug.py
+@@ -1,4 +1,7 @@
+ """URL slug generation."""
++
++import re
++import unicodedata
+ 
+ 
+ def slugify(text: str, max_length: int = 50) -> str:
+@@ -18,4 +21,14 @@
+ 
+     ``max_length`` must be at least 1; otherwise raise ValueError.
+     """
+-    raise NotImplementedError
++    if max_length < 1:
++        raise ValueError("max_length must be at least 1")
++
++    text = unicodedata.normalize("NFKD", text)
++    text = text.encode("ascii", "ignore").decode("ascii")
++    text = text.lower()
++    text = re.sub(r"[^a-z0-9]+", "-", text)
++    text = text.strip("-")
++    if len(text) > max_length:
++        text = text[:max_length].rstrip("-")
++    return text or "n-a"
