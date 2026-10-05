@@ -74,6 +74,21 @@ rerun-bench run --agent claude --tasks all --runs 3 --out results/ --run-id clau
 
 每个任务 n = 3 只是一次试点，不是排行榜。两者通过率的置信区间相互重叠，因此这些运行并不能说明两个智能体之间存在差异。Claude Code 的成本是它自己按标价估算的；Codex 只上报 token。
 
+![2026-10-03 试点的 rerun-bench 结果卡片：Claude Code 和 Codex CLI 的 95% 区间相互重叠，因此这些运行不能说明通过率存在差异。Claude Code 100% [89, 100]，pass^3 100%，翻转率 0%，每次运行成本中位数 $0.0886；Codex CLI 93% [79, 98]，pass^3 80%，翻转率 13%，成本未上报。10 个任务，每个 3 次。](docs/pilot-2026-10-03/card.svg)
+
+## 分享卡片
+
+`rerun-bench card` 会把一个结果目录生成为一张 1200x630 的 SVG（X、Bluesky 和链接预览使用的尺寸），就像上面这张：
+
+```sh
+uvx rerun-bench card results/                       # writes rerun-bench-card.svg
+uvx rerun-bench card results/ -o my-card.svg --k 3
+```
+
+卡片展示每组结果的通过率，以及在同一条 0 到 100% 坐标轴上用横条加误差线画出的 95% 区间，还有 pass^k、翻转率、每次运行成本中位数、任务数和运行次数，以及日期。标题是一句关于比较结果的平实陈述，规则和报告相同：区间重叠时，它会说这些运行不能说明存在差异；区间不重叠时，它只陈述这一事实。各行按名称排序，不是排名。mock 结果会标注为 simulated（模拟）。卡片使用系统字体，并在查看器支持时跟随浅色或深色模式。
+
+输出只有 SVG，这样 rerun-bench 依然没有任何依赖。X 和 Bluesky 需要 PNG：用 `rsvg-convert -o card.png rerun-bench-card.svg` 转换（librsvg：`brew install librsvg` 或 `apt install librsvg2-bin`），或者在浏览器里打开 SVG 截图。
+
 ## 报告示例
 
 两个 mock 配置，10 个任务，每个跑 5 次。可以免费复现：

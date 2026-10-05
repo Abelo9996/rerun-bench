@@ -115,6 +115,30 @@ n = 3 per task is a pilot, not a leaderboard. The pass-rate intervals overlap, s
 runs do not establish a difference between the two agents. Claude Code's cost is its own
 list-price estimate; Codex reports tokens only.
 
+![rerun-bench result card for the 2026-10-03 pilot: the 95% intervals of Claude Code and Codex CLI overlap, so these runs do not establish a difference in pass rate. Claude Code 100% [89, 100], pass^3 100%, flip rate 0%, median cost $0.0886 per run; Codex CLI 93% [79, 98], pass^3 80%, flip rate 13%, cost not reported. 10 tasks, 3 runs each.](docs/pilot-2026-10-03/card.svg)
+
+## Share card
+
+`rerun-bench card` turns a results directory into a 1200x630 SVG, the size X, Bluesky and
+link previews use, like the one above:
+
+```sh
+uvx rerun-bench card results/                       # writes rerun-bench-card.svg
+uvx rerun-bench card results/ -o my-card.svg --k 3
+```
+
+It shows each result set's pass rate with its 95% interval drawn as a bar with whiskers on a
+shared 0 to 100% axis, pass^k, flip rate, median cost per run, the number of tasks and runs,
+and the date. The headline is one plain sentence about the comparison, with the same rule as
+the report: when the intervals overlap it says the runs do not establish a difference, and
+when they do not overlap it says only that. Rows are in name order, not ranked. Mock results
+are marked simulated. The card uses system fonts and follows light or dark mode where the
+viewer supports it.
+
+The output is SVG only, so rerun-bench stays dependency free. X and Bluesky need a PNG:
+`rsvg-convert -o card.png rerun-bench-card.svg` (librsvg: `brew install librsvg` or
+`apt install librsvg2-bin`), or open the SVG in a browser and take a screenshot.
+
 ## Example report
 
 Two mock profiles, 10 tasks, 5 runs each. Free to reproduce:

@@ -25,6 +25,10 @@ with `npx skills add Abelo9996/rerun-bench`.
    `rerun-bench run --agent claude --model sonnet --runs 5 --out results/ --yes`
 3. Report on everything under a results root:
    `rerun-bench report results/ --format md` (or `text`, `html -o report.html`, or `json`).
+   For a 1200x630 image to post (X, Bluesky, a pull request):
+   `rerun-bench card results/ -o rerun-bench-card.svg`. It is SVG only; for X or Bluesky the
+   user converts it to PNG (`rsvg-convert`, or a browser screenshot). The card's sentence
+   never names a winner; do not add one when you share it.
 4. If `run` exits with code 4, several runs in a row ended in an agent error (not logged in,
    out of quota, rate limited). Show the user the printed error; after it is fixed, run the
    printed `--resume` command. Exit code 130 means the run was interrupted; the printed

@@ -4,6 +4,21 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
+## 0.2.0 - Unreleased
+
+### Added
+
+- `rerun-bench card results/ [-o rerun-bench-card.svg] [--k K]` writes a 1200x630 SVG result
+  card (the size X, Bluesky and link previews use): each result set's pass rate with its 95%
+  Wilson interval drawn as a bar with whiskers on a shared axis, pass^k, flip rate, median
+  cost per run, tasks and runs, the date, and one plain sentence about the comparison that
+  never names a winner (overlapping intervals: "these runs do not establish a difference";
+  separate intervals: only that they do not overlap). Rows are in name order. Mock results are
+  marked simulated. No dependencies; system fonts; light and dark. PNG is not built in, and
+  the command prints how to convert.
+- The 2026-10-03 pilot has its card in `docs/pilot-2026-10-03/card.svg` (and `card.png`),
+  shown in the README.
+
 ## 0.1.1 - Unreleased
 
 ### Fixed

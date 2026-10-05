@@ -1,4 +1,4 @@
-"""Command-line interface: ``rerun-bench list | run | report | verify-tasks``."""
+"""Command-line interface: ``rerun-bench list | run | report | card | verify-tasks``."""
 
 from __future__ import annotations
 
@@ -10,6 +10,7 @@ import sys
 from pathlib import Path
 
 from . import __version__
+from . import card as card_mod
 from . import report as report_mod
 from . import tasks as tasks_mod
 from . import workspace as ws
@@ -281,6 +282,50 @@ def cmd_report(args) -> int:
     return 0
 
 
+def cmd_card(args) -> int:
+    path = Path(args.results)
+    if not path.exists():
+        print(f"error: {path} does not exist", file=sys.stderr)
+        return 2
+    if args.k is not None and args.k < 1:
+        print("error: --k must be >= 1", file=sys.stderr)
+        return 2
+    out = Path(args.output)
+    if out.suffix.lower() != ".svg":
+        if out.suffix.lower() == ".png":
+            print(
+                "error: PNG output is not built in (it would need an image library). Write the "
+                f"SVG with -o {out.with_suffix('.svg')}, then convert it, for example:\n"
+                f"  rsvg-convert -o {out} {out.with_suffix('.svg')}",
+                file=sys.stderr,
+            )
+        else:
+            print(f"error: -o must end in .svg, got {str(out)!r}", file=sys.stderr)
+        return 2
+    rep = report_mod.build(path, k=args.k)
+    if not rep["entries"]:
+        print(
+            f"error: no runs found under {path}. A result set is a directory with meta.json "
+            "and a non-empty runs.jsonl, written by `rerun-bench run --out <dir>`.",
+            file=sys.stderr,
+        )
+        return 2
+    model = card_mod.card_model(rep)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    out.write_text(card_mod.render_svg(model), encoding="utf-8")
+    print(f"wrote {out} (1200x630 SVG): {model['sentence']}.")
+    if model["more"]:
+        print(
+            f"The card shows {card_mod.MAX_ROWS} result sets; {model['more']} more are not shown."
+        )
+    print(
+        "X and Bluesky need a PNG. Convert with rsvg-convert (brew install librsvg, or apt "
+        f"install librsvg2-bin):\n  rsvg-convert -o {out.with_suffix('.png')} {out}\n"
+        "or open the SVG in a browser and take a screenshot of the card."
+    )
+    return 0
+
+
 def cmd_verify_tasks(args) -> int:
     """Check every task: untouched workspace must fail, reference solution must pass."""
     selected = tasks_mod.select(_tasks(args), args.tasks)
@@ -385,6 +430,20 @@ def build_parser() -> argparse.ArgumentParser:
     s.add_argument("-o", "--output", help="write to a file instead of stdout")
     s.add_argument("--k", type=int, help="k for pass@k and pass^k (default: runs per task)")
     s.set_defaults(func=cmd_report)
+
+    s = sub.add_parser(
+        "card",
+        help="write a 1200x630 SVG result card to post",
+        description="Write a 1200x630 SVG card (the size X, Bluesky and link previews use) "
+        "with the pass rate and its 95%% interval, pass^k, flip rate and median cost of every "
+        "result set under a directory.",
+    )
+    s.add_argument("results", help="a result directory or a root containing several")
+    s.add_argument(
+        "-o", "--output", default="rerun-bench-card.svg", help="output file (default %(default)s)"
+    )
+    s.add_argument("--k", type=int, help="k for pass^k (default: runs per task)")
+    s.set_defaults(func=cmd_card)
 
     s = sub.add_parser(
         "verify-tasks", help="check that each task fails untouched and passes with its solution"

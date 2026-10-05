@@ -91,6 +91,9 @@ and has to check its changes another way. No run failed because of it.
   `diffs/<task>/runNNN.diff` for every run.
 - `report.md`, `report.json`, `report.html`: generated with
   `rerun-bench report docs/pilot-2026-10-03/results --format <md|json|html>`.
+- `card.svg`: the 1200x630 result card, generated with
+  `rerun-bench card docs/pilot-2026-10-03/results -o docs/pilot-2026-10-03/card.svg`.
+  `card.png` is the same card converted with `rsvg-convert`, ready to post.
 
 Reproduce (spends quota on both accounts):
 
