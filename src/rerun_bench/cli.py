@@ -10,7 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-from . import __version__
+from . import __version__, star
 from . import card as card_mod
 from . import report as report_mod
 from . import tasks as tasks_mod
@@ -237,6 +237,8 @@ def cmd_run(args) -> int:
     print(f"\nwrote {out_dir}")
     if not args.no_report:
         _print_summary(out_dir, args)
+        if not args.quiet:
+            star.maybe_show()
     return 0
 
 
@@ -280,6 +282,8 @@ def cmd_report(args) -> int:
         print(f"wrote {args.output}")
     else:
         sys.stdout.write(text)
+    if fmt != "json":
+        star.maybe_show()
     return 0
 
 

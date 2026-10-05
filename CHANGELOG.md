@@ -4,7 +4,25 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## 0.2.0 - Unreleased
+## 0.2.1 - Unreleased
+
+### Added
+
+- After the first successful report a person sees in a terminal (`rerun-bench report`, or the
+  summary at the end of `rerun-bench run`), one line on stderr asks for a GitHub star if
+  rerun-bench was useful. It is shown once per machine: a marker file in the user state
+  directory (`~/Library/Application Support/rerun-bench` on macOS, `$XDG_STATE_HOME/rerun-bench`
+  or `~/.local/state/rerun-bench` on Linux, `%LOCALAPPDATA%\rerun-bench` on Windows) records
+  that it was shown, and if the marker cannot be written the line is not shown. It never
+  appears in CI (`CI`, `GITHUB_ACTIONS`, `GITLAB_CI` and other CI variables), when stdout or
+  stderr is not a terminal, with `--format json`, with `run --quiet` or `--no-report`, or when
+  `RERUN_BENCH_NO_STAR_PROMPT=1` is set. Nothing is sent over the network.
+
+### Changed
+
+- The README opens with the pilot's result, its share card and the one-line install.
+
+## 0.2.0 - 2026-10-05
 
 ### Added
 

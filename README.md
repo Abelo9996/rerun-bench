@@ -6,6 +6,25 @@ English | [简体中文](README.zh-CN.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
+**Does a coding agent pass the same task every time you rerun it?** In a 60-run pilot on
+2026-10-03 (10 tasks, 3 runs each), Codex CLI 0.160.0 with gpt-6-luna passed all 3 runs on 8
+of 10 tasks, and Claude Code 2.1.288 with claude-opus-5-5 passed all 3 on 10 of 10: pass^3 of
+80% vs 100%, and a flip rate (the chance that two runs of the same task disagree) of 13% vs 0%.
+With only 3 runs per task the pass-rate intervals overlap, so the pilot does not establish a
+difference between the two. Setup, raw run records and diffs:
+[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md).
+
+[![Result card for the 2026-10-03 pilot. The 95% intervals of Claude Code and Codex CLI overlap, so these runs do not establish a difference in pass rate. Claude Code with claude-opus-5-5: pass rate 100% [89, 100], pass^3 100%, flip rate 0%, median cost $0.0886 per run. Codex CLI with gpt-6-luna: pass rate 93% [79, 98], pass^3 80%, flip rate 13%, cost not reported. 10 tasks, 3 runs each, 60 runs in all.](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/pilot-2026-10-03/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/pilot-2026-10-03)
+
+```sh
+uvx rerun-bench run --agent mock --runs 5     # free demo: simulated agent, no API key, about 30 s
+uvx rerun-bench run --agent claude --runs 3   # real agent (or codex, opencode): shows the cost first, add --yes to start
+```
+
+Also available as a [Claude Code plugin](#install-as-a-claude-code-plugin), a
+[Codex plugin](#install-as-a-codex-plugin), a [GitHub Action](#use-in-ci)
+(`uses: Abelo9996/rerun-bench@v0`), and with Homebrew (`brew install abelo9996/tap/rerun-bench`).
+
 ![rerun-bench running the free mock agent 5 times on each of 10 tasks, then printing each task's pass and fail sequence, pass rate, flip rate and cost spread](docs/demo.gif)
 
 Run the same coding task N times per agent and find out how often it succeeds, how often it
@@ -36,6 +55,11 @@ tokens and wall time are made up. Or install once with `uv tool install rerun-be
 `pipx install rerun-bench`) and drop the `uvx` prefix.
 
 Homebrew (macOS and Linux): `brew install abelo9996/tap/rerun-bench`, then run `rerun-bench list` without `uvx`.
+
+After the first report you see in a terminal, rerun-bench prints one line asking for a GitHub
+star, once per machine, and records that in your user state directory. It never prints it in
+CI, when output is piped, or for `--format json`, and it sends nothing over the network. Turn
+it off with `RERUN_BENCH_NO_STAR_PROMPT=1`.
 
 ## Install as a Claude Code plugin
 

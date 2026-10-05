@@ -6,6 +6,17 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
+**同一个任务重跑几次，编程智能体每次都能通过吗？** 在 2026-10-03 的一次 60 次运行的试点中（10 个任务，每个跑 3 次），Codex CLI 0.160.0 搭配 gpt-6-luna 在 10 个任务中有 8 个三次全部通过，Claude Code 2.1.288 搭配 claude-opus-5-5 则是 10 个中 10 个：pass^3 分别为 80% 和 100%，翻转率（同一任务的两次运行结果不一致的概率）分别为 13% 和 0%。每个任务只有 3 次运行，两者通过率的区间相互重叠，因此这次试点并不能说明两者之间存在差异。配置、原始运行记录和 diff 见：[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md)。
+
+[![2026-10-03 试点的结果卡片。Claude Code 和 Codex CLI 的 95% 区间相互重叠，因此这些运行不能说明通过率存在差异。Claude Code 搭配 claude-opus-5-5：通过率 100% [89, 100]，pass^3 100%，翻转率 0%，每次运行成本中位数 $0.0886。Codex CLI 搭配 gpt-6-luna：通过率 93% [79, 98]，pass^3 80%，翻转率 13%，成本未上报。10 个任务，每个 3 次，共 60 次运行。](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/pilot-2026-10-03/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/pilot-2026-10-03)
+
+```sh
+uvx rerun-bench run --agent mock --runs 5     # 免费演示：模拟智能体，无需 API key，大约 30 秒
+uvx rerun-bench run --agent claude --runs 3   # 真实智能体（也可以是 codex、opencode）：先显示成本，加上 --yes 才开始
+```
+
+也可以作为 [Claude Code 插件](#作为-claude-code-插件安装)、[Codex 插件](#作为-codex-插件安装)、[GitHub Action](#在-ci-中使用)（`uses: Abelo9996/rerun-bench@v0`）使用，或通过 Homebrew 安装（`brew install abelo9996/tap/rerun-bench`）。
+
 ![rerun-bench running the free mock agent 5 times on each of 10 tasks, then printing each task's pass and fail sequence, pass rate, flip rate and cost spread](docs/demo.gif)
 
 让每个智能体把同一个编程任务跑 N 次，看看它成功的频率有多高、在通过和失败之间来回翻转的频率有多高，以及每次运行的账单相差多少。
@@ -25,6 +36,8 @@ uvx rerun-bench report results/ --format html -o report.html
 `run` 命令结束时会打印一段简短的汇总，以及接下来可以执行的命令；`report.html` 是一个可以直接打开或分享的独立页面。mock 的运行会标注为模拟（simulated）：其成本、token 和耗时都是虚构的。也可以用 `uv tool install rerun-bench`（或 `pipx install rerun-bench`）安装一次，之后就不用再加 `uvx` 前缀了。
 
 Homebrew（macOS 和 Linux）：`brew install abelo9996/tap/rerun-bench`，之后直接运行 `rerun-bench list`，无需 `uvx`。
+
+你第一次在终端里看到报告之后，rerun-bench 会打印一行字，请你在 GitHub 上点个 star。每台机器只显示一次，并在你的用户状态目录里记下已经显示过。在 CI 中、输出被管道重定向时、或使用 `--format json` 时都不会显示，也不会发送任何网络请求。设置 `RERUN_BENCH_NO_STAR_PROMPT=1` 即可关闭。
 
 ## 作为 Claude Code 插件安装
 

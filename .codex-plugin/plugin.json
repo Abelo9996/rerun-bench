@@ -1,6 +1,6 @@
 {
   "name": "rerun-bench",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Run the same coding tasks N times per agent and measure how consistent and how expensive it is: pass rate, pass^k, flip rate and cost spread.",
   "author": { "name": "Abel Yagubyan", "url": "https://github.com/Abelo9996" },
   "homepage": "https://github.com/Abelo9996/rerun-bench#readme",
