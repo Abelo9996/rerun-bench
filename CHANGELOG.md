@@ -8,6 +8,9 @@ All notable changes to this project are documented here. The format follows
 
 ### Added
 
+- `docs/run-2026-10-06`: 10 tasks x 10 runs for Claude Code (pinned to `claude-opus-5-5`, and
+  the CLI default, now `claude-opus-4-8`) and Codex CLI (`gpt-6-luna`), 300 runs with every run
+  record and diff. The README opens with this result.
 - After the first successful report a person sees in a terminal (`rerun-bench report`, or the
   summary at the end of `rerun-bench run`), one line on stderr asks for a GitHub star if
   rerun-bench was useful. It is shown once per machine: a marker file in the user state

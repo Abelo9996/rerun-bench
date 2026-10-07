@@ -6,15 +6,15 @@ English | [简体中文](README.zh-CN.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-**Does a coding agent pass the same task every time you rerun it?** In a 60-run pilot on
-2026-10-03 (10 tasks, 3 runs each), Codex CLI 0.160.0 with gpt-6-luna passed all 3 runs on 8
-of 10 tasks, and Claude Code 2.1.288 with claude-opus-5-5 passed all 3 on 10 of 10: pass^3 of
-80% vs 100%, and a flip rate (the chance that two runs of the same task disagree) of 13% vs 0%.
-With only 3 runs per task the pass-rate intervals overlap, so the pilot does not establish a
-difference between the two. Setup, raw run records and diffs:
-[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md).
+**Does a coding agent pass the same task every time you rerun it?** In 200 runs on 2026-10-06
+(10 tasks, 10 runs each), Claude Code 2.1.292 with claude-opus-5-5 passed 100 of 100 and Codex
+CLI 0.160.0 with gpt-6-luna passed 96 of 100. All 4 Codex failures were the same: it read the
+file, changed nothing and exited cleanly, and in 3 of them its final message said it had made
+the change. The pass-rate intervals still overlap ([96, 100] vs [90, 98]), so the runs do not
+establish a difference in overall pass rate; they do show what a single run would have hidden.
+Setup, raw run records and diffs: [docs/run-2026-10-06](docs/run-2026-10-06/README.md).
 
-[![Result card for the 2026-10-03 pilot. The 95% intervals of Claude Code and Codex CLI overlap, so these runs do not establish a difference in pass rate. Claude Code with claude-opus-5-5: pass rate 100% [89, 100], pass^3 100%, flip rate 0%, median cost $0.0886 per run. Codex CLI with gpt-6-luna: pass rate 93% [79, 98], pass^3 80%, flip rate 13%, cost not reported. 10 tasks, 3 runs each, 60 runs in all.](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/pilot-2026-10-03/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/pilot-2026-10-03)
+[![Result card for the 2026-10-06 run. The 95% intervals of Claude Code and Codex CLI overlap, so these runs do not establish a difference in pass rate. Claude Code with claude-opus-5-5: pass rate 100% [96, 100], pass^10 100%, flip rate 0%, median cost $0.0899 per run. Codex CLI with gpt-6-luna: pass rate 96% [90, 98], pass^10 70%, flip rate 8%, cost not reported. 10 tasks, 10 runs each, 200 runs in all.](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/run-2026-10-06/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/run-2026-10-06)
 
 ```sh
 uvx rerun-bench run --agent mock --runs 5     # free demo: simulated agent, no API key, about 30 s
@@ -216,7 +216,26 @@ Use a key with a spending limit, set it only on the action step (not for the who
 not run real agents on events that untrusted people can trigger. Secrets are not passed to
 workflows started from forks.
 
-## Pilot results
+## Results
+
+### 2026-10-06: 10 runs per task
+
+All 10 tasks, 10 runs each, on the same Mac as the pilot: Claude Code 2.1.292 pinned to
+`claude-opus-5-5`, Codex CLI 0.160.0 (`gpt-6-luna`), and Claude Code with no model flag, which
+on this account now reports `claude-opus-4-8`. Full setup, the failures, raw run records and
+diffs: [docs/run-2026-10-06](docs/run-2026-10-06/README.md).
+
+| Agent / model | Pass rate [Wilson 95% CI] | pass^10 | Flip rate | Median cost/run | Median tokens/run | Median wall time |
+|---|---|---|---|---|---|---|
+| claude / claude-opus-5-5 | 100/100, 100% [96, 100] | 100% | 0% | $0.0899 | 53,368 | 12.7 s |
+| codex / gpt-6-luna | 96/100, 96% [90, 98] | 70% | 8% | not reported | 56,552 | 16.8 s |
+| claude / default (claude-opus-4-8) | 100/100, 100% [96, 100] | 100% | 0% | $0.1312 | 84,534 | 15.6 s |
+
+The pass-rate intervals overlap, so these runs do not establish a difference in overall pass
+rate. All 4 Codex failures were clean exits after 7 to 10 seconds with no file changed; in 3 of
+them the final message said the change had been made.
+
+### 2026-10-03: pilot
 
 A first run against real CLIs on 2026-10-03: all 10 tasks, 3 runs each, Claude Code 2.1.288
 (default model, reported as `claude-opus-5-5`) and Codex CLI 0.160.0 (`gpt-6-luna`), on

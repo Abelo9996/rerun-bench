@@ -6,9 +6,9 @@
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-**同一个任务重跑几次，编程智能体每次都能通过吗？** 在 2026-10-03 的一次 60 次运行的试点中（10 个任务，每个跑 3 次），Codex CLI 0.160.0 搭配 gpt-6-luna 在 10 个任务中有 8 个三次全部通过，Claude Code 2.1.288 搭配 claude-opus-5-5 则是 10 个中 10 个：pass^3 分别为 80% 和 100%，翻转率（同一任务的两次运行结果不一致的概率）分别为 13% 和 0%。每个任务只有 3 次运行，两者通过率的区间相互重叠，因此这次试点并不能说明两者之间存在差异。配置、原始运行记录和 diff 见：[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md)。
+**同一个任务重跑几次，编程智能体每次都能通过吗？** 在 2026-10-06 的 200 次运行中（10 个任务，每个跑 10 次），Claude Code 2.1.292 搭配 claude-opus-5-5 通过了 100 次中的 100 次，Codex CLI 0.160.0 搭配 gpt-6-luna 通过了 100 次中的 96 次。Codex 的 4 次失败都一样：读取文件后没有做任何修改就正常退出，其中 3 次在最后的消息里声称已经完成了修改。两者通过率的区间仍然重叠（[96, 100] 与 [90, 98]），因此这些运行不能说明整体通过率存在差异，但它们展示了只跑一次会掩盖的东西。配置、原始运行记录和 diff 见：[docs/run-2026-10-06](docs/run-2026-10-06/README.md)。
 
-[![2026-10-03 试点的结果卡片。Claude Code 和 Codex CLI 的 95% 区间相互重叠，因此这些运行不能说明通过率存在差异。Claude Code 搭配 claude-opus-5-5：通过率 100% [89, 100]，pass^3 100%，翻转率 0%，每次运行成本中位数 $0.0886。Codex CLI 搭配 gpt-6-luna：通过率 93% [79, 98]，pass^3 80%，翻转率 13%，成本未上报。10 个任务，每个 3 次，共 60 次运行。](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/pilot-2026-10-03/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/pilot-2026-10-03)
+[![2026-10-06 运行的结果卡片。Claude Code 和 Codex CLI 的 95% 区间相互重叠，因此这些运行不能说明通过率存在差异。Claude Code 搭配 claude-opus-5-5：通过率 100% [96, 100]，pass^10 100%，翻转率 0%，每次运行成本中位数 $0.0899。Codex CLI 搭配 gpt-6-luna：通过率 96% [90, 98]，pass^10 70%，翻转率 8%，成本未上报。10 个任务，每个 10 次，共 200 次运行。](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/run-2026-10-06/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/run-2026-10-06)
 
 ```sh
 uvx rerun-bench run --agent mock --runs 5     # 免费演示：模拟智能体，无需 API key，大约 30 秒
@@ -150,7 +150,21 @@ jobs:
 
 智能体在作业中拥有 shell 权限，因此可以读取其环境中的任何变量。请使用设有消费上限的密钥，只在 Action 步骤上设置它（不要设在整个作业上），并且不要在不受信任的人可以触发的事件上运行真实智能体。从 fork 发起的工作流不会获得仓库的 secrets。
 
-## 试点结果
+## 结果
+
+### 2026-10-06：每个任务 10 次
+
+全部 10 个任务，每个跑 10 次，与试点同一台 Mac：Claude Code 2.1.292 固定为 `claude-opus-5-5`，Codex CLI 0.160.0（`gpt-6-luna`），以及不指定模型的 Claude Code（在这个账号上现在上报为 `claude-opus-4-8`）。完整配置、失败分析、原始运行记录和 diff 见：[docs/run-2026-10-06](docs/run-2026-10-06/README.md)。
+
+| 智能体 / 模型 | 通过率 [Wilson 95% CI] | pass^10 | 翻转率 | 每次运行成本中位数 | 每次运行 token 中位数 | 耗时中位数 |
+|---|---|---|---|---|---|---|
+| claude / claude-opus-5-5 | 100/100, 100% [96, 100] | 100% | 0% | $0.0899 | 53,368 | 12.7 s |
+| codex / gpt-6-luna | 96/100, 96% [90, 98] | 70% | 8% | 未上报 | 56,552 | 16.8 s |
+| claude / 默认（claude-opus-4-8） | 100/100, 100% [96, 100] | 100% | 0% | $0.1312 | 84,534 | 15.6 s |
+
+两者通过率的区间重叠，因此这些运行不能说明整体通过率存在差异。Codex 的 4 次失败都是在 7 到 10 秒后正常退出且没有修改任何文件；其中 3 次最后的消息声称已经完成修改。
+
+### 2026-10-03：试点
 
 2026-10-03 针对真实 CLI 的首次运行：全部 10 个任务，每个跑 3 次，Claude Code 2.1.288（默认模型，上报为 `claude-opus-5-5`）和 Codex CLI 0.160.0（`gpt-6-luna`），运行环境为 macOS arm64。完整配置、各任务结果、原始运行记录和 diff 见：[docs/pilot-2026-10-03](docs/pilot-2026-10-03/README.md)。
 
