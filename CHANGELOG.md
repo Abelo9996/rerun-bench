@@ -4,9 +4,29 @@ All notable changes to this project are documented here. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and the project uses
 [Semantic Versioning](https://semver.org/).
 
-## 0.2.1 - Unreleased
+## 0.3.0 - Unreleased
 
 ### Added
+
+- `rerun-bench mine <repo>`: build tasks from a repository's own past bug-fix commits and,
+  unless `--no-run`, replay them against your agent in one call. It scans the git history for
+  commits that changed source and added or changed a test, verifies each one replays (the test
+  fails on the parent commit and passes on the commit, both checked by running it in a
+  throwaway `git worktree`), and builds the top few (`-n`, default 3) into tasks: the workspace
+  is the parent tree, the prompt is the commit message rewritten as a task, and the hidden
+  check runs that test. `<repo>` is a local path, a git URL, or `owner/repo` on GitHub; clones
+  go to a scratch directory and are removed unless `--keep-clone`. The test runner is detected
+  (pytest for Python, `node --test` or `npm test` for JavaScript, `go test`, `cargo test`) with
+  a plain refusal when it cannot be. `--hide-tests` keeps the test out of the workspace the
+  agent sees. Built tasks are written under `--tasks-out` (default `./rerun-bench-tasks`).
+- `rerun-bench from-test <repo> <test-file> [--commit sha]`: the single-task version, for "my
+  agent keeps flaking on this test". It builds one task from the commit that last changed the
+  test (or `--commit`) and replays it.
+- The report for `mine` and `from-test` leads with the flip: per task `passed N/M`, and for
+  each flaky task one passing and one failing run side by side (the diff the agent made, the
+  failing test output, wall time and tokens), then the aggregate pass^k, flip rate and cost.
+  `--card` writes a shareable 1200x630 SVG whose headline is the fixed/flaky/never breakdown.
+
 
 - `docs/run-2026-10-06`: 10 tasks x 10 runs for Claude Code (pinned to `claude-opus-5-5`, and
   the CLI default, now `claude-opus-4-8`) and Codex CLI (`gpt-6-luna`), 300 runs with every run

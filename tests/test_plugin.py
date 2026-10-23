@@ -20,7 +20,7 @@ def test_plugin_manifest_matches_pyproject():
 
 def test_commands_run_only_when_asked_and_never_start_a_paid_run():
     files = sorted(p.name for p in (ROOT / "commands").glob("*.md"))
-    assert files == ["report.md", "run-mock.md"]
+    assert files == ["mine.md", "report.md", "run-mock.md"]
     for name in files:
         text = (ROOT / "commands" / name).read_text(encoding="utf-8").replace("\r\n", "\n")
         front = re.match(r"---\n(.*?)\n---\n", text, re.S)

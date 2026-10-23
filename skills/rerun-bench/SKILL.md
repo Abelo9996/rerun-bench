@@ -1,19 +1,41 @@
 ---
 name: rerun-bench
-description: Run the rerun-bench consistency benchmark on a coding agent (Claude Code, Codex CLI, opencode, or the free mock agent), read its reports, and add new benchmark tasks. Use this whenever the user wants to measure how reliable or consistent a coding agent or model is across repeated runs, compare agents or CLI versions on pass^k, flip rate or cost variance, produce a rerun-bench leaderboard or HTML report, or write a new rerun-bench task with a verifier and reference solution, even if they only say "benchmark my agent" or "how flaky is this model".
+description: Measure how consistent a coding agent is across repeated runs, either on a repo's own past bug-fix commits (rerun-bench mine) or on the bundled task suite. Run it on Claude Code, Codex CLI, opencode, or the free mock agent, read its reports, and add new tasks. Use this whenever the user wants to measure how reliable or flaky a coding agent or model is, replay their own past fixes against their agent, compare agents or CLI versions on pass^k, flip rate or cost variance, produce a rerun-bench report or card, or write a new task, even if they only say "benchmark my agent", "how flaky is this model" or "does my agent reproduce my own bug fixes".
 ---
 
 # rerun-bench
 
-rerun-bench runs each task in a fixed suite N times per agent and reports pass rate, pass^k
-(all k runs pass), flip rate (two runs disagree) and cost spread. Pass or fail is decided only
-by each task's hidden `verify.py`.
+rerun-bench runs each task N times per agent and reports pass rate, pass^k (all k runs pass),
+flip rate (two runs disagree) and cost spread. Pass or fail is decided only by each task's
+hidden `verify.py`. Tasks come from one of two places: a repo's own past bug-fix commits
+(`mine`), or the bundled suite (`run`).
 
 Invoke it as `rerun-bench ...` if installed, otherwise
 `uvx rerun-bench ...`. Install this skill
 with `npx skills add Abelo9996/rerun-bench`.
 
-## Run the benchmark
+## From the user's own repo (the one-call path)
+
+`rerun-bench mine <repo>` scans a git repository for past commits that fixed a bug and added
+or changed a test, replays the top few as tasks against the user's agent, and leads with the
+flip: which of the user's own past fixes the agent reproduces reliably and which it flakes on.
+`<repo>` is a local path, a git URL, or `owner/repo` on GitHub.
+
+1. Build the tasks only first, so the user sees what was mined before anything is spent:
+   `rerun-bench mine . --no-run`. It prints what it mined and what it skipped and why
+   (no test, test did not fail on the parent, missing deps). Nothing is replayable unless a
+   commit changed source and a test that failed before the change and passes after.
+2. Then a real run (default agent `claude`), gated by `--yes` like `run`:
+   `rerun-bench mine . --runs 5 --agent claude --yes --card mine-card.svg`.
+   Run once without `--yes` first to show the cost estimate and get a go-ahead.
+3. For one test the user keeps seeing flake on:
+   `rerun-bench from-test <repo> path/to/test_file.py --runs 5 --agent claude`.
+
+The report leads with per-task `passed N/M`, then shows each flaky task's passing and failing
+run side by side (diff, failing test output, wall time, tokens), then the aggregate. If no fix
+flips, it says so; do not invent a flip.
+
+## Run the bundled suite
 
 1. Start with the mock agent. It is free and confirms the setup works:
    `rerun-bench run --agent mock --tasks all --runs 5 --out results/`
