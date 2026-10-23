@@ -152,7 +152,8 @@ for rel in CFG["test_files"]:
 
 cmd = list(CFG["test_cmd"])
 if cmd and cmd[0] == "python":
-    cmd = [sys.executable] + cmd[1:]
+    interp = CFG.get("python")
+    cmd = [interp if interp and Path(interp).exists() else sys.executable] + cmd[1:]
 
 env = dict(os.environ)
 paths = [str(WS)]
@@ -162,6 +163,16 @@ if env.get("PYTHONPATH"):
     paths.append(env["PYTHONPATH"])
 env["PYTHONPATH"] = os.pathsep.join(paths)
 env["PYTHONDONTWRITEBYTECODE"] = "1"
+
+node_modules = CFG.get("node_modules")
+if node_modules and Path(node_modules).exists():
+    link = WS / "node_modules"
+    if not link.exists() and not link.is_symlink():
+        try:
+            link.symlink_to(node_modules)
+        except OSError:
+            pass
+    env["NODE_PATH"] = node_modules
 
 try:
     proc = subprocess.run(
@@ -183,6 +194,7 @@ def build_task(
     cand: Candidate,
     tasks_dir: Path,
     hide_tests: bool = False,
+    prepared=None,
 ) -> Path:
     """Materialize ``cand`` as ``tasks_dir/<id>/`` and return the task directory."""
     if not cand.verified:
@@ -225,7 +237,7 @@ def build_task(
     if not wrote_solution:
         solution.rmdir()
 
-    cmd = cand.runner.command(cand.test_files[0])
+    cmd = cand.runner.command(cand.test_files[0], cand.selectors)
     cmd_human = _human_cmd(cmd)
     check = {
         "runner": cand.runner.name,
@@ -235,10 +247,14 @@ def build_task(
         "test_cmd": cmd,
         "hide_tests": hide_tests,
         "timeout": VERIFY_TIMEOUT,
-        "setup": cand.runner.setup,
+        "setup": (prepared.install_cmd if prepared and prepared.install_cmd else cand.runner.setup),
         "commit": cand.sha,
         "parent": cand.parent,
     }
+    if prepared and prepared.python:
+        check["python"] = prepared.python
+    if prepared and prepared.node_modules:
+        check["node_modules"] = prepared.node_modules
     (root / "check.json").write_text(json.dumps(check, indent=2) + "\n", encoding="utf-8")
     (root / "verify.py").write_text(VERIFY_TEMPLATE, encoding="utf-8")
     _write_toml(root / "task.toml", cand, tid, _prompt(cand, hide_tests, cmd_human), hide_tests)

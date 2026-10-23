@@ -390,7 +390,7 @@ def cmd_from_test(args) -> int:
     tasks_dir = Path(args.tasks_out).expanduser().resolve()
     scratch = Path(tempfile.mkdtemp(prefix="rerun-bench-fromtest-"))
     try:
-        cand = mine_cmd.from_test_candidate(
+        cand, prepared = mine_cmd.from_test_candidate(
             repo, args.test_id, args.commit, scratch, args.test_timeout
         )
         if not cand.verified:
@@ -400,7 +400,9 @@ def cmd_from_test(args) -> int:
             )
             return 2
         tasks_dir.mkdir(parents=True, exist_ok=True)
-        root = taskgen.build_task(repo, cand, tasks_dir, hide_tests=args.hide_tests)
+        root = taskgen.build_task(
+            repo, cand, tasks_dir, hide_tests=args.hide_tests, prepared=prepared
+        )
         print(f"built {root.name} from {cand.short}: {cand.subject[:60]}", file=sys.stderr)
         if args.no_run:
             print(

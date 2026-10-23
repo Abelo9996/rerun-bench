@@ -22,6 +22,43 @@ from pathlib import Path
 
 from .runners import Runner, detect_runner, is_source_file, is_test_file
 
+# Narrow a run to the tests a commit actually touched, so an unrelated pre-existing failure in
+# the same (often monolithic) test file does not make the task look unreplayable.
+_DEF_RE = {
+    "python": re.compile(r"\bdef\s+(test[A-Za-z0-9_]*)"),
+    "go": re.compile(r"\bfunc\s+(Test[A-Za-z0-9_]*)"),
+}
+_JS_CALL = re.compile(r"\b(?:it|test)\(\s*[\"'`]([^\"'`]+)")
+
+
+def changed_test_names(diff_text: str, language: str) -> tuple[str, ...]:
+    """Names of the tests a test-file diff adds or changes, for a ``-k``/``-run`` selector.
+
+    Python and Go attribute each changed line to its enclosing ``def``/``func``; JavaScript
+    reads the string name of each ``test(...)``/``it(...)`` on a changed line. Empty means run
+    the whole file.
+    """
+    names: set[str] = set()
+    enclosing: str | None = None
+    def_re = _DEF_RE.get(language)
+    for line in diff_text.splitlines():
+        if line.startswith(("@@", "+++", "---", "diff ")):
+            enclosing = None
+            continue
+        tag, body = line[:1], line[1:]
+        if tag in " +" and def_re:
+            m = def_re.search(body)
+            if m:
+                enclosing = m.group(1)
+        if tag in "+-":
+            if enclosing:
+                names.add(enclosing)
+            if language == "javascript":
+                for m in _JS_CALL.finditer(body):
+                    names.add(m.group(1))
+    return tuple(sorted(names))
+
+
 # Commit subjects that advertise a bug fix, used only to rank, never to exclude.
 FIX_WORDS = re.compile(
     r"\b(fix(e[ds])?|bug|regression|crash|broken|incorrect|wrong|error|fail(s|ed|ing)?|"
@@ -53,6 +90,7 @@ class Candidate:
     runner: Runner
     insertions: int
     deletions: int
+    selectors: tuple[str, ...] = ()
     verified: bool = False
     test_seconds: float | None = None
     skip_reason: str | None = None
@@ -207,8 +245,12 @@ def find_candidates(repo: Path, limit: int) -> list[Candidate]:
             continue
         ins = sum(stats[p][0] for p in (*source_files, *test_files))
         dels = sum(stats[p][1] for p in (*source_files, *test_files))
+        file_diff = _git(repo, "diff", parent, sha, "--", test_files[0], check=False)
+        selectors = changed_test_names(file_diff, runner.language)
         out.append(
-            Candidate(sha, parent, subject, body, source_files, test_files, runner, ins, dels)
+            Candidate(
+                sha, parent, subject, body, source_files, test_files, runner, ins, dels, selectors
+            )
         )
     return out
 
@@ -256,12 +298,31 @@ def add_worktree(repo: Path, sha: str, dest: Path) -> Worktree:
     return Worktree(dest, repo, _added=True)
 
 
-def _run_test(worktree: Path, runner: Runner, test_file: str, timeout: int) -> tuple[bool, str]:
-    """Run ``test_file`` in ``worktree``. Returns ``(passed, output_tail)``."""
-    cmd = runner.command(test_file)
+def _run_test(
+    worktree: Path,
+    runner: Runner,
+    test_file: str,
+    timeout: int,
+    prepared=None,
+    selectors: tuple[str, ...] = (),
+) -> tuple[bool, str]:
+    """Run ``test_file`` in ``worktree``. Returns ``(passed, output_tail)``.
+
+    ``prepared`` is an optional :class:`~rerun_bench.envs.PreparedEnv`: for Python it supplies
+    the interpreter that can import the repo's installed test dependencies, and for JavaScript
+    it supplies a populated ``node_modules`` linked into the worktree.
+    """
+    from . import envs
+
+    cmd = runner.command(test_file, selectors)
+    interpreter = (prepared.python if prepared and prepared.python else None) or sys.executable
     if cmd and cmd[0] == "python":
-        cmd = [sys.executable, *cmd[1:]]
+        cmd = [interpreter, *cmd[1:]]
+    if prepared and prepared.node_modules:
+        envs.link_node_modules(prepared.node_modules, worktree)
     env = _test_env(worktree)
+    if prepared and prepared.node_modules:
+        env["NODE_PATH"] = prepared.node_modules
     try:
         proc = subprocess.run(
             cmd,
@@ -295,7 +356,7 @@ def _test_env(worktree: Path) -> dict[str, str]:
 
 
 def verify_candidate(
-    repo: Path, cand: Candidate, scratch: Path, test_timeout: int = 120
+    repo: Path, cand: Candidate, scratch: Path, test_timeout: int = 120, prepared=None
 ) -> Candidate:
     """Run the candidate's test on the parent (must fail) and the commit (must pass).
 
@@ -312,7 +373,9 @@ def verify_candidate(
     try:
         wt_commit = add_worktree(repo, cand.sha, scratch / f"wt-{cand.short}-commit")
         t0 = time.perf_counter()
-        passed_c, out_c = _run_test(wt_commit.path, cand.runner, test_file, test_timeout)
+        passed_c, out_c = _run_test(
+            wt_commit.path, cand.runner, test_file, test_timeout, prepared, cand.selectors
+        )
         cand.test_seconds = round(time.perf_counter() - t0, 2)
         cand.commit_output = out_c
         if not passed_c:
@@ -322,7 +385,9 @@ def verify_candidate(
             return cand
         wt_parent = add_worktree(repo, cand.parent, scratch / f"wt-{cand.short}-parent")
         _overlay_tests(repo, cand, wt_parent.path)
-        passed_p, out_p = _run_test(wt_parent.path, cand.runner, test_file, test_timeout)
+        passed_p, out_p = _run_test(
+            wt_parent.path, cand.runner, test_file, test_timeout, prepared, cand.selectors
+        )
         cand.parent_output = out_p
         if passed_p:
             cand.skip_reason = "test already passed on the parent (does not isolate the fix)"

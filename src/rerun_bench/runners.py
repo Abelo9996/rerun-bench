@@ -25,22 +25,36 @@ class Runner:
     language: str  # python | javascript | go | rust
     setup: list[str] | None  # best-effort dependency install, or None when none is needed
 
-    def command(self, test_file: str) -> list[str]:
-        """Command that runs just ``test_file`` (a repo-relative posix path)."""
+    def command(self, test_file: str, selectors: tuple[str, ...] = ()) -> list[str]:
+        """Command that runs just ``test_file`` (a repo-relative posix path).
+
+        ``selectors`` names the specific tests the fix commit touched. When given, the command
+        runs only those, so an unrelated pre-existing failure elsewhere in a monolithic test
+        file does not make the task look unreplayable.
+        """
         if self.name == "pytest":
-            return ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", test_file]
+            cmd = ["python", "-m", "pytest", "-q", "-p", "no:cacheprovider", test_file]
+            if selectors:
+                cmd += ["-k", " or ".join(selectors)]
+            return cmd
         if self.name == "unittest":
             module = test_file[:-3].replace("/", ".")
             return ["python", "-m", "unittest", "-q", module]
         if self.name == "node-test":
-            return ["node", "--test", test_file]
+            cmd = ["node", "--test"]
+            for name in selectors:
+                cmd += ["--test-name-pattern", name]
+            return [*cmd, test_file]
         if self.name == "npm":
             return ["npm", "test", "--", test_file]
         if self.name == "go":
             pkg = "./" + str(PurePosixPath(test_file).parent)
-            return ["go", "test", pkg]
+            cmd = ["go", "test", pkg]
+            if selectors:
+                cmd += ["-run", "|".join(selectors)]
+            return cmd
         if self.name == "cargo":
-            return ["cargo", "test"]
+            return ["cargo", "test", *selectors]
         raise ValueError(f"unknown runner {self.name!r}")
 
 
@@ -56,6 +70,7 @@ TEST_PATTERNS: dict[str, tuple[re.Pattern[str], ...]] = {
         re.compile(r"(^|/)[^/]+\.(test|spec)\.(js|mjs|cjs|jsx|ts|tsx)$"),
         re.compile(r"(^|/)__tests__/.+\.(js|mjs|cjs|jsx|ts|tsx)$"),
         re.compile(r"(^|/)tests?/.+\.(js|mjs|cjs|jsx|ts|tsx)$"),
+        re.compile(r"(^|/)test\.(js|mjs|cjs|jsx|ts|tsx)$"),
     ),
     "go": (re.compile(r"(^|/)[^/]+_test\.go$"),),
     "rust": (re.compile(r"(^|/)tests/.+\.rs$"),),

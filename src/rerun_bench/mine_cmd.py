@@ -13,7 +13,7 @@ import tempfile
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from . import mining, taskgen
+from . import envs, mining, taskgen
 from .mining import Candidate, MineError
 
 
@@ -26,6 +26,7 @@ class MineOutcome:
     no_runner: list[Candidate] = field(default_factory=list)
     scratch: Path | None = None
     cloned: bool = False
+    env_notes: list[str] = field(default_factory=list)
 
     def cleanup(self) -> None:
         if self.scratch is not None:
@@ -67,16 +68,22 @@ def mine_tasks(
             f"checking which replay (want {want}) ..."
         )
         tasks_dir.mkdir(parents=True, exist_ok=True)
+        prepared_envs: dict[str, envs.PreparedEnv] = {}
         for cand in ranked:
             if len(out.built) >= want:
                 break
-            cand = mining.verify_candidate(repo, cand, scratch, test_timeout=test_timeout)
+            prepared = _env_for(repo, cand.runner.language, scratch, prepared_envs, out)
+            cand = mining.verify_candidate(
+                repo, cand, scratch, test_timeout=test_timeout, prepared=prepared
+            )
             if not cand.verified:
                 out.verified_skipped.append(cand)
                 _echo(f"  skip  {cand.short}  {cand.subject[:60]!r}: {cand.skip_reason}")
                 continue
             try:
-                root = taskgen.build_task(repo, cand, tasks_dir, hide_tests=hide_tests)
+                root = taskgen.build_task(
+                    repo, cand, tasks_dir, hide_tests=hide_tests, prepared=prepared
+                )
             except MineError as exc:
                 cand.skip_reason = f"could not build task: {exc}"
                 out.verified_skipped.append(cand)
@@ -98,10 +105,50 @@ def mine_tasks(
         raise
 
 
+def _env_for(
+    repo: Path,
+    language: str,
+    scratch: Path,
+    cache: dict[str, envs.PreparedEnv],
+    out: MineOutcome | None = None,
+) -> envs.PreparedEnv | None:
+    """Prepare (once) the dependency environment for ``language``, installing from a base worktree.
+
+    The base worktree is kept alive under ``scratch`` so an editable install's metadata is never
+    written into the user's own checkout, and the venv or node_modules it produces outlives every
+    per-candidate worktree.
+    """
+    if language in cache:
+        return cache[language]
+    if language not in ("python", "javascript"):
+        env = envs.prepare_env(repo, language, repo, scratch)
+        cache[language] = env
+        return env
+    head = mining._git(repo, "rev-parse", "HEAD").strip()
+    base = mining.add_worktree(repo, head, scratch / f"base-{language}")
+    _echo(f"preparing the {language} environment (installing dependencies, once) ...")
+    env = envs.prepare_env(repo, language, base.path, scratch / f"env-{language}")
+    cache[language] = env
+    if env.error:
+        note = f"{language}: dependency install failed: {env.error}"
+        _echo(f"  {note}")
+    else:
+        cmd = " ".join(env.install_cmd) if env.install_cmd else "no install needed"
+        note = f"{language}: {cmd} ({env.install_seconds}s)"
+        _echo(f"  installed in {env.install_seconds}s: {cmd}")
+    if out is not None:
+        out.env_notes.append(note)
+    return env
+
+
 def from_test_candidate(
     repo: Path, test_id: str, commit: str | None, scratch: Path, test_timeout: int
-) -> Candidate:
-    """Build and verify a single candidate for ``test_id`` (a repo-relative test file path)."""
+) -> tuple[Candidate, envs.PreparedEnv | None]:
+    """Build and verify a single candidate for ``test_id`` (a repo-relative test file path).
+
+    Returns the candidate and the prepared dependency environment so the caller can build the
+    task and run it against the same installed dependencies.
+    """
     test_file = test_id.split("::", 1)[0]
     if commit is None:
         commit = _last_commit_touching(repo, test_file)
@@ -126,7 +173,11 @@ def from_test_candidate(
     cand = Candidate(
         commit, parent, subject, body, source_files or test_files, test_files, runner, ins, dels
     )
-    return mining.verify_candidate(repo, cand, scratch, test_timeout=test_timeout)
+    prepared = _env_for(repo, runner.language, scratch, {})
+    cand = mining.verify_candidate(
+        repo, cand, scratch, test_timeout=test_timeout, prepared=prepared
+    )
+    return cand, prepared
 
 
 def _last_commit_touching(repo: Path, path: str) -> str | None:
@@ -147,10 +198,10 @@ def _commit_message(repo: Path, sha: str) -> tuple[str, str]:
 
 def summarize(out: MineOutcome) -> list[str]:
     """Plain lines describing what was mined and what was skipped and why (for stderr)."""
-    lines = [
-        "",
-        f"Mined {len(out.built)} task(s) from {out.repo}:",
-    ]
+    lines = [""]
+    for note in out.env_notes:
+        lines.append(f"Environment {note}")
+    lines.append(f"Mined {len(out.built)} task(s) from {out.repo}:")
     for tid, cand in out.built:
         lines.append(f"  {tid}")
         lines.append(f"      {cand.subject[:72]}")
