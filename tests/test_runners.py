@@ -66,3 +66,23 @@ def test_javascript_node_test_vs_npm(tmp_path):
 def test_non_test_file_refused(tmp_path):
     runner, reason = runners.detect_runner(tmp_path, "foo.py")
     assert runner is None and "test file" in reason
+
+
+def test_root_test_js_is_a_test_file():
+    assert runners.is_test_file("test.js")
+    assert runners.is_test_file("test.mjs")
+    assert not runners.is_test_file("src/index.js")
+
+
+def test_command_selectors_narrow_the_run():
+    pytest_runner = runners.Runner("pytest", "python", None)
+    cmd = pytest_runner.command("tests/test_x.py", ("test_a", "test_b"))
+    assert cmd[-2:] == ["-k", "test_a or test_b"]
+    assert pytest_runner.command("tests/test_x.py")[-1] == "tests/test_x.py"
+
+    node_runner = runners.Runner("node-test", "javascript", None)
+    cmd = node_runner.command("test.js", ("handles empty",))
+    assert "--test-name-pattern" in cmd and "handles empty" in cmd
+
+    go_runner = runners.Runner("go", "go", None)
+    assert go_runner.command("pkg/x_test.go", ("TestA", "TestB"))[-2:] == ["-run", "TestA|TestB"]

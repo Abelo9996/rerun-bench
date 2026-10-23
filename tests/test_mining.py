@@ -71,6 +71,25 @@ def fix_repo(tmp_path):
     return repo, fix
 
 
+def test_changed_test_names_python_and_js_and_go():
+    py_diff = (
+        "@@ -1,3 +1,8 @@ class TestThing:\n"
+        "     def test_old(self):\n"
+        "-        assert f() == 1\n"
+        "+        assert f() == 2\n"
+        "+\n"
+        "+    def test_new(self):\n"
+        "+        assert g() == 3\n"
+    )
+    assert mining.changed_test_names(py_diff, "python") == ("test_new", "test_old")
+    js_diff = "@@ -1 +1,3 @@\n+test('handles empty', () => {\n+  assert.equal(f(''), '')\n+})\n"
+    assert mining.changed_test_names(js_diff, "javascript") == ("handles empty",)
+    go_diff = "@@ -1 +1,3 @@\n+func TestFoo(t *testing.T) {\n+  if foo() != 1 { t.Fail() }\n+}\n"
+    assert mining.changed_test_names(go_diff, "go") == ("TestFoo",)
+    # No enclosing test and no test call: nothing to narrow to.
+    assert mining.changed_test_names("@@ -1 +1 @@\n+x = 1\n", "python") == ()
+
+
 def test_find_candidates_picks_the_fix_commit(fix_repo):
     repo, fix = fix_repo
     cands = mining.find_candidates(repo, 10)
