@@ -1,0 +1,15 @@
+--- a/index.js
++++ b/index.js
+@@ -8,9 +8,9 @@
+ 	.replaceAll(/([a-z\d]+)([A-Z]{2,})/g, '$1 $2')
+ 
+ 	.replaceAll(/([a-z\d])([A-Z])/g, '$1 $2')
+-	// `[a-rt-z]` matches all lowercase characters except `s`.
+-	// This avoids matching plural acronyms like `APIs`.
+-	.replaceAll(/([A-Z]+)([A-Z][a-rt-z\d]+)/g, '$1 $2');
++	// A lone `s` after an acronym is treated as a plural (like `APIs`), so it is
++	// only split off when followed by more lowercase letters (like `HTMLEscape`).
++	.replaceAll(/([A-Z]+)([A-Z](?:[a-rt-z\d]|s[a-z])[a-z\d]*)/g, '$1 $2');
+ 
+ const removeMootSeparators = (string, separator) => {
+ 	const escapedSeparator = escapeStringRegexp(separator);

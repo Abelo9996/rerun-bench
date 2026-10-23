@@ -1,0 +1,14 @@
+--- a/index.js
++++ b/index.js
+@@ -88,7 +88,10 @@
+ 	}
+ 
+ 	// Drop the apostrophe from contractions and possessives so that `Conway's Law` becomes `conways-law` rather than `conway-s-law`. Only a word-final `'t` or `'s` qualifies, and both straight and curly apostrophes are handled.
+-	string = string.replaceAll(/([a-zA-Z\d])['\u2019]([ts])(\s|$)/g, '$1$2$3');
++	// The contraction ends where the word does, so any following character that cannot be part of a word (punctuation, whitespace, or end of string) qualifies. Unicode letters and digits count as word characters only when transliteration is disabled, since otherwise they have already been transliterated or will be dropped.
++	const wordCharacter = options.transliterate ? String.raw`a-zA-Z\d` : String.raw`a-zA-Z\d\p{L}\p{N}`;
++	const contractionPattern = new RegExp(`([${wordCharacter}])['\u2019]([tsTS])(?![${wordCharacter}])`, options.transliterate ? 'g' : 'gu');
++	string = string.replaceAll(contractionPattern, '$1$2');
+ 
+ 	string = string.replace(patternSlug, options.separator);
+ 	string = string.replaceAll('\\', '');

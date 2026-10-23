@@ -26,6 +26,15 @@ All notable changes to this project are documented here. The format follows
   each flaky task one passing and one failing run side by side (the diff the agent made, the
   failing test output, wall time and tokens), then the aggregate pass^k, flip rate and cost.
   `--card` writes a shareable 1200x630 SVG whose headline is the fixed/flaky/never breakdown.
+- Dependency install: `mine` builds one isolated environment per repository (a uv virtualenv
+  for Python, an `npm ci`/`npm install` for JavaScript) once and reuses it for every worktree,
+  so repositories with third-party test dependencies replay instead of being skipped. Python
+  installs are non-editable so the per-commit worktree source (on `PYTHONPATH`) shadows the
+  copy in site-packages; the install command and time are reported, and a failed install skips
+  with the exact error, never silently. Go and Rust use their own module caches.
+- Each run is narrowed to the tests the fix commit actually touched (pytest `-k`, `node --test`
+  `--test-name-pattern`, `go test -run`), so an unrelated pre-existing failure elsewhere in a
+  monolithic test file does not make a real fix look unreplayable.
 
 
 - `docs/run-2026-10-06`: 10 tasks x 10 runs for Claude Code (pinned to `claude-opus-5-5`, and

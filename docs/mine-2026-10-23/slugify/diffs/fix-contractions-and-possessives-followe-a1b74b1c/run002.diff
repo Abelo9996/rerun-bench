@@ -1,0 +1,14 @@
+--- a/index.js
++++ b/index.js
+@@ -87,8 +87,9 @@
+ 		string = options.locale ? string.toLocaleLowerCase(options.locale) : string.toLowerCase();
+ 	}
+ 
+-	// Drop the apostrophe from contractions and possessives so that `Conway's Law` becomes `conways-law` rather than `conway-s-law`. Only a word-final `'t` or `'s` qualifies, and both straight and curly apostrophes are handled.
+-	string = string.replaceAll(/([a-zA-Z\d])['\u2019]([ts])(\s|$)/g, '$1$2$3');
++	// Drop the apostrophe from contractions and possessives so that `Conway's Law` becomes `conways-law` rather than `conway-s-law`. Only a word-final `'t` or `'s` (not followed by a letter or number) qualifies, and both straight and curly apostrophes are handled.
++	const wordCharacter = options.transliterate ? String.raw`[a-zA-Z\d]` : String.raw`[\p{L}\p{N}]`;
++	string = string.replaceAll(new RegExp(`(${wordCharacter})['\u2019]([tsTS])(?!${wordCharacter})`, 'gu'), '$1$2');
+ 
+ 	string = string.replace(patternSlug, options.separator);
+ 	string = string.replaceAll('\\', '');

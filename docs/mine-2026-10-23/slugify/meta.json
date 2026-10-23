@@ -1,0 +1,19 @@
+{
+  "schema_version": 1,
+  "run_id": "claude_default_20261023T102135Z",
+  "rerun_bench_version": "0.3.0",
+  "agent": "claude",
+  "model": null,
+  "agent_options": {},
+  "cli_version": "2.1.308 (Claude Code)",
+  "runs_per_task": 3,
+  "seed": 0,
+  "tasks": [
+    "fix-decamelization-of-acronyms-followed-a3b86ea9",
+    "fix-contractions-and-possessives-followe-a1b74b1c"
+  ],
+  "started_at": "2026-10-23T10:21:35+00:00",
+  "platform": "Darwin arm64 py3.13.15",
+  "finished_at": "2026-10-23T10:24:54+00:00",
+  "elapsed_s": 199.308
+}

@@ -18,12 +18,14 @@ which of your own fixes the agent reproduces reliably and which it flakes on. No
 authoring; it builds each task from the commit (workspace = the parent tree, hidden check =
 that test). Point it at a local path, a git URL, or `owner/repo`.
 
-In a real run on 2026-10-23, `rerun-bench mine` on two public Python libraries,
-[cachetools](https://github.com/tkem/cachetools) and
-[inflection](https://github.com/jpvanhal/inflection), replayed 3 mined fixes from each 3 times
-with Claude Code (claude-opus-5-5). It reproduced all 6 reliably: 18 of 18 runs passed, flip
-rate 0%, median cost $0.24/run on cachetools and $0.11/run on inflection. No fix flipped on
-either repo; when one does, the report shows the passing and failing run side by side.
+In real runs on 2026-10-23, `rerun-bench mine` replayed mined fixes from four public
+repositories with Claude Code (claude-opus-5-5): [cachetools](https://github.com/tkem/cachetools)
+and [inflection](https://github.com/jpvanhal/inflection) (pure Python),
+[furl](https://github.com/gruns/furl) (Python, dependencies installed with `uv pip install .`),
+and [sindresorhus/slugify](https://github.com/sindresorhus/slugify) (JavaScript, `npm install`).
+It reproduced every fix reliably: 30 of 30 runs passed, flip rate 0%, median cost $0.11 to
+$0.24 per run. No fix flipped; when one does, the report shows the passing and failing run side
+by side. Details: [docs/mine-2026-10-23](docs/mine-2026-10-23/README.md).
 
 [![rerun-bench mine card for cachetools: replayed 3 of your past fixes, 3 runs each, 3 fixed reliably, 0 flaky. Claude Code with claude-opus-5-5: pass rate 100% [70, 100], pass^3 100%, flip rate 0%, median cost $0.2367 per run.](docs/mine-2026-10-23/cachetools-card.png)](docs/mine-2026-10-23/README.md)
 
@@ -72,8 +74,15 @@ workspace is the parent tree and whose hidden check is that test. It prints what
 what it skipped and why, so you can see which of your fixes are replayable before spending
 anything. The report leads with the flip: per task `passed N/M`, each flaky task's passing and
 failing run side by side, then the aggregate pass^k, flip rate and cost. `--card out.svg`
-writes a shareable image. Detected runners: pytest (Python), `node --test` or `npm test`
-(JavaScript), `go test`, `cargo test`. A real run on two public repositories is in
+writes a shareable image.
+
+Repositories with third-party test dependencies are handled: mine builds one isolated
+environment per repository (a uv virtualenv for Python, `npm ci`/`npm install` for JavaScript)
+once and reuses it, and reports the install command and time. Each run is narrowed to the
+tests the fix commit touched (pytest `-k`, `node --test --test-name-pattern`, `go test -run`),
+so an unrelated failure elsewhere in a big test file does not hide a real fix. Detected
+runners: pytest (Python), `node --test` or `npm test` (JavaScript), `go test`, `cargo test`.
+Real runs on four public repositories, two of them with dependencies, are in
 [docs/mine-2026-10-23](docs/mine-2026-10-23/README.md).
 
 Useful flags: `-n` tasks to build (default 3), `--history` commits to scan (default 200),
