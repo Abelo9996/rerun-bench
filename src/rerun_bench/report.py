@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import html
 import json
+import re
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -440,6 +441,171 @@ def to_markdown(rep: dict) -> str:
 
 def to_json(rep: dict) -> str:
     return json.dumps(rep, indent=2, sort_keys=False, default=str)
+
+
+# ---- flip-first text (the `mine` and `from-test` headline) --------------------------------
+
+
+_ANSI = re.compile(r"\x1b\[[0-9;]*m")
+
+
+def _strip_ansi(text: str) -> str:
+    return _ANSI.sub("", text)
+
+
+def classify_task(t: dict) -> str:
+    """One of ``fixed`` (all runs pass), ``flaky`` (some pass, some fail), ``never``."""
+    if t["passes"] == t["n"]:
+        return "fixed"
+    if t["passes"] == 0:
+        return "never"
+    return "flaky"
+
+
+def flip_counts(entry: dict) -> dict[str, int]:
+    out = {"fixed": 0, "flaky": 0, "never": 0}
+    for t in entry["metrics"]["per_task"].values():
+        out[classify_task(t)] += 1
+    return out
+
+
+def flip_sentence(entry: dict) -> str:
+    """'replayed N of your past fixes, M runs each: A fixed reliably, B flaky, C never'."""
+    m = entry["metrics"]
+    c = flip_counts(entry)
+    runs = m["min_runs_per_task"]
+    run_word = "run" if runs == 1 else "runs"
+    n = m["n_tasks"]
+    parts = [f"{c['fixed']} fixed reliably", f"{c['flaky']} flaky"]
+    if c["never"]:
+        parts.append(f"{c['never']} never")
+    return f"replayed {n} of your past fixes, {runs} {run_word} each: " + ", ".join(parts)
+
+
+def _run_rows(primary_dir: Path) -> dict[tuple[str, int], dict]:
+    rows: dict[tuple[str, int], dict] = {}
+    from .runner import _read_runs
+
+    for r in _read_runs(primary_dir / "runs.jsonl"):
+        rows[(r["task_id"], r["run_index"])] = r
+    return rows
+
+
+def _truncate_diff(diff: str, limit: int = 32) -> str:
+    lines = [ln for ln in diff.splitlines() if not ln.startswith(("--- ", "+++ ", "@@"))]
+    body = [ln for ln in lines if ln and ln[0] in "+-"]
+    shown = body[:limit]
+    text = "\n".join("    " + ln for ln in shown)
+    if len(body) > limit:
+        text += f"\n    ... ({len(body) - limit} more changed lines)"
+    return text or "    (no file changes recorded)"
+
+
+def _run_facts(r: dict) -> str:
+    bits = [f"{r.get('wall_time_s', 0):.1f}s"]
+    tok = r.get("total_tokens")
+    if tok is not None:
+        bits.append(f"{tok:,} tokens")
+    cost = r.get("cost_usd")
+    if cost is not None:
+        bits.append(_usd(cost))
+    files = r.get("files_changed") or []
+    bits.append(f"{r.get('lines_added', 0)}+/{r.get('lines_removed', 0)}- in {len(files)} file(s)")
+    return ", ".join(bits)
+
+
+def to_flip_text(path: Path, k: int | None = None) -> str:
+    """Lead with the flip: per-task pass counts, then one pass/fail pair per flaky task.
+
+    Built for a single result set (what ``mine`` and ``from-test`` produce). The aggregate
+    reliability and cost numbers follow underneath.
+    """
+    rep = build(path, k=k)
+    if not rep["entries"]:
+        return "No runs found.\n"
+    entry = rep["entries"][0]
+    m = entry["metrics"]
+    primary_dir = None
+    for meta, runs in load_results(path):
+        if runs and meta["run_id"] == entry["run_id"]:
+            primary_dir = Path(meta["_dir"])
+            break
+    rows = _run_rows(primary_dir) if primary_dir else {}
+    k_s = _k(rep)
+    c = flip_counts(entry)
+    lines = [
+        f"rerun-bench: {_name(entry)} {flip_sentence(entry)}",
+        "",
+    ]
+    tw = max((len(t) for t in m["per_task"]), default=4)
+    label = {"fixed": "fixed reliably", "flaky": "FLAKY", "never": "never fixed"}
+    for tid, t in m["per_task"].items():
+        kind = classify_task(t)
+        lines.append(
+            f"  {tid.ljust(tw)}  passed {t['passes']}/{t['n']}  {_outcomes(t['outcomes'])}  "
+            f"{label[kind]}"
+        )
+    lines.append("")
+    flaky = [(tid, t) for tid, t in m["per_task"].items() if classify_task(t) == "flaky"]
+    if flaky:
+        lines.append(
+            f"{_plural(len(flaky), 'task')} flipped: passed on some runs and failed on others."
+        )
+        for tid, t in flaky:
+            lines += ["", f"Flip: {tid}"]
+            runs_sorted = sorted(
+                (rows.get((tid, i)) for i in range(len(t["outcomes"]))),
+                key=lambda r: (r is None, not (r or {}).get("passed")),
+            )
+            pass_run = next((r for r in runs_sorted if r and r["passed"]), None)
+            fail_run = next((r for r in runs_sorted if r and not r["passed"]), None)
+            if pass_run:
+                lines.append(f"  PASS  run {pass_run['run_index']}  {_run_facts(pass_run)}")
+                lines.append(_diff_for(primary_dir, pass_run))
+            if fail_run:
+                lines.append(f"  FAIL  run {fail_run['run_index']}  {_run_facts(fail_run)}")
+                tail = _strip_ansi((fail_run.get("verify_output_tail") or "").strip())
+                if tail:
+                    lines.append("    test output:")
+                    lines += ["      " + ln for ln in tail.splitlines()[-8:]]
+                lines.append(_diff_for(primary_dir, fail_run))
+    else:
+        settled = "every task" if c["flaky"] == 0 else ""
+        if c["never"] == 0 and c["fixed"] == m["n_tasks"]:
+            lines.append("No flips: the agent fixed every task on every run.")
+        elif c["fixed"] == 0 and c["never"] == m["n_tasks"]:
+            lines.append("No flips: the agent fixed none of the tasks on any run.")
+        elif settled:
+            lines.append("No flips: each task passed or failed the same way on every run.")
+    lines += [
+        "",
+        f"Aggregate ({_name(entry)}, k = {k_s})",
+        f"  Pass rate    {_pct(m['pass_rate'])}  {_ci(m['pass_rate_ci95'])}  "
+        f"{m['passes']} of {m['n_runs']} runs",
+        f"  pass^{k_s}       {_pct(m['pass_hat_k'])}  all {k_s} reruns of a task pass",
+        f"  Flip rate    {_pct(m['flip_rate'])}  two runs of a task disagree",
+    ]
+    if m["cost_reported_runs"]:
+        lines.append(
+            f"  Cost/run     {_usd(m['median_cost_usd'])} median, "
+            f"CV {_num(m['cost_cv_within_task'])}"
+        )
+    if m["tokens_median"] is not None:
+        lines.append(f"  Tokens/run   {int(m['tokens_median'] + 0.5):,} median")
+    lines.append(f"  Wall time    {_num(m['wall_time_median_s'], '{:.1f}s')} median")
+    for w in warnings(entry):
+        lines += _wrap(f"  ! {w}", indent="    ")
+    lines += ["", f"Full report:  rerun-bench report {path}", f"Definitions:  {METRICS_URL}"]
+    return "\n".join(lines) + "\n"
+
+
+def _diff_for(primary_dir: Path | None, run: dict) -> str:
+    if not primary_dir:
+        return "    (diff unavailable)"
+    p = primary_dir / run.get("diff_path", "")
+    if run.get("diff_path") and p.is_file():
+        return _truncate_diff(p.read_text(encoding="utf-8"))
+    return "    (no diff recorded)"
 
 
 # ---- html ---------------------------------------------------------------------------------

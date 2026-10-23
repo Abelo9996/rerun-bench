@@ -139,8 +139,12 @@ def _date(entries: list[dict]) -> str | None:
     return dates[0] if dates[0] == dates[-1] else f"{dates[0]} to {dates[-1]}"
 
 
-def card_model(rep: dict) -> dict:
-    """Everything the card shows, as plain values. Rows are in name order, not ranked."""
+def card_model(rep: dict, mined: bool = False) -> dict:
+    """Everything the card shows, as plain values. Rows are in name order, not ranked.
+
+    With ``mined=True`` and a single result set, the headline becomes the fixed/flaky/never
+    breakdown that ``mine`` leads with, instead of the generic pass-rate sentence.
+    """
     entries = rep["entries"]
     names = _display_names(entries)
     k = rep.get("k")
@@ -165,8 +169,13 @@ def card_model(rep: dict) -> dict:
         )
     n_tasks = sorted({e["metrics"]["n_tasks"] for e in entries})
     per_task = sorted({e["metrics"]["min_runs_per_task"] for e in entries})
+    head = sentence(rep)
+    if mined and len(entries) == 1:
+        from .report import flip_sentence
+
+        head = flip_sentence(entries[0]).capitalize()
     return {
-        "sentence": sentence(rep),
+        "sentence": head,
         "rows": rows[:MAX_ROWS],
         "more": max(0, len(rows) - MAX_ROWS),
         "k": k,
