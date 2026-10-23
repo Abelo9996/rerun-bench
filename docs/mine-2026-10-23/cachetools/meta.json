@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "run_id": "claude_default_20261023T095230Z",
+  "rerun_bench_version": "0.3.0",
+  "agent": "claude",
+  "model": null,
+  "agent_options": {},
+  "cli_version": "2.1.308 (Claude Code)",
+  "runs_per_task": 3,
+  "seed": 0,
+  "tasks": [
+    "fix-218-fix-and-properly-document-cached-18e5930c-2",
+    "fix-443-restore-autospec-calls-to-cached-95e6addb-2",
+    "fix-387-handle-obj-none-case-for-inspect-57d2e481-2"
+  ],
+  "started_at": "2026-10-23T09:52:30+00:00",
+  "platform": "Darwin arm64 py3.13.15",
+  "finished_at": "2026-10-23T09:57:34+00:00",
+  "elapsed_s": 303.337
+}

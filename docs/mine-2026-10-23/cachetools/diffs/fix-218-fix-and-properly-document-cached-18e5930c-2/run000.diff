@@ -1,0 +1,51 @@
+--- a/docs/index.rst
++++ b/docs/index.rst
+@@ -547,6 +547,10 @@
+    `key`, `lock` and `condition` parameters are also available as
+    :attr:`cache`, :attr:`cache_key`, :attr:`cache_lock` and
+    :attr:`cache_condition` attributes of the wrapped instance method.
++   Note that these attributes are bound to the respective instance,
++   i.e. :attr:`cache_key` is a function that has to be called without
++   :const:`self`, e.g. `obj.method.cache_key(*args, **kwargs)`, and
++   returns the same key as `key(obj, *args, **kwargs)`.
+    A :func:`cache_clear()` function will also be provided, as well as
+    an optional :func:`cache_info()` function reporting per-instance
+    cache statistics.
+--- a/src/cachetools/_cachedmethod.py
++++ b/src/cachetools/_cachedmethod.py
+@@ -48,7 +48,7 @@
+ 
+     @property
+     def cache_key(self):
+-        return self.__key
++        return functools.partial(self.__key, self._obj)
+ 
+     @property
+     def cache_lock(self):
+@@ -153,7 +153,7 @@
+                 cache = self.cache
+                 lock = self.cache_lock
+                 cond = self.cache_condition
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                key = self.cache_key(*args, **kwargs)
+ 
+                 with lock:
+                     cond.wait_for(lambda: key not in self.__pending)
+@@ -199,7 +199,7 @@
+             def __call__(self, *args, **kwargs):
+                 cache = self.cache
+                 lock = self.cache_lock
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                key = self.cache_key(*args, **kwargs)
+                 with lock:
+                     try:
+                         result = cache[key]
+@@ -238,7 +238,7 @@
+ 
+             def __call__(self, *args, **kwargs):
+                 cache = self.cache
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                key = self.cache_key(*args, **kwargs)
+                 try:
+                     result = cache[key]
+                     self.__hits += 1

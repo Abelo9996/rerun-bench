@@ -1,0 +1,7 @@
+--- a/inflection.py
++++ b/inflection.py
+@@ -420,3 +420,4 @@
+ _irregular('move', 'moves')
+ _irregular('cow', 'kine')
+ _irregular('zombie', 'zombies')
++_irregular('human', 'humans')

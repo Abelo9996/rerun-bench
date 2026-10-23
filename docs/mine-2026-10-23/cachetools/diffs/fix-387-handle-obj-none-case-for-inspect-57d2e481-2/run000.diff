@@ -1,0 +1,12 @@
+--- a/src/cachetools/_cachedmethod.py
++++ b/src/cachetools/_cachedmethod.py
+@@ -76,6 +76,9 @@
+             )
+ 
+     def __get__(self, obj, objtype=None):
++        if obj is None:
++            # accessed via the class, e.g. for inspection
++            return self
+         wrapper = self.Wrapper(obj)
+         if self.__attrname is not None:
+             # replace descriptor instance with wrapper in instance dict

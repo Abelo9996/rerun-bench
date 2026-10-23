@@ -1,0 +1,116 @@
+--- a/CHANGELOG.rst
++++ b/CHANGELOG.rst
+@@ -1,3 +1,11 @@
++Unreleased
++==========
++
++- Fix and properly document ``@cachedmethod.cache_key`` handling:
++  ``cache_key`` is now bound to the instance, so ``self`` no longer
++  has to be passed explicitly (#218).
++
++
+ v7.0.3 (2026-03-05)
+ ===================
+ 
+--- a/docs/index.rst
++++ b/docs/index.rst
+@@ -547,6 +547,11 @@
+    `key`, `lock` and `condition` parameters are also available as
+    :attr:`cache`, :attr:`cache_key`, :attr:`cache_lock` and
+    :attr:`cache_condition` attributes of the wrapped instance method.
++   Note that, like :attr:`cache`, :attr:`cache_lock` and
++   :attr:`cache_condition`, the :attr:`cache_key` attribute is bound
++   to the instance, i.e. :const:`self` is passed implicitly and
++   `obj.method.cache_key(*args, **kwargs)` will return the same key
++   as `key(obj, *args, **kwargs)`.
+    A :func:`cache_clear()` function will also be provided, as well as
+    an optional :func:`cache_info()` function reporting per-instance
+    cache statistics.
+--- a/src/cachetools/_cachedmethod.py
++++ b/src/cachetools/_cachedmethod.py
+@@ -48,7 +48,7 @@
+ 
+     @property
+     def cache_key(self):
+-        return self.__key
++        return functools.partial(self.__key, self._obj)
+ 
+     @property
+     def cache_lock(self):
+@@ -153,28 +153,28 @@
+                 cache = self.cache
+                 lock = self.cache_lock
+                 cond = self.cache_condition
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                k = key(self._obj, *args, **kwargs)
+ 
+                 with lock:
+-                    cond.wait_for(lambda: key not in self.__pending)
++                    cond.wait_for(lambda: k not in self.__pending)
+                     try:
+-                        result = cache[key]
++                        result = cache[k]
+                         self.__hits += 1
+                         return result
+                     except KeyError:
+-                        self.__pending.add(key)
++                        self.__pending.add(k)
+                         self.__misses += 1
+                 try:
+                     val = method(self._obj, *args, **kwargs)
+                     with lock:
+                         try:
+-                            cache[key] = val
++                            cache[k] = val
+                         except ValueError:
+                             pass  # value too large
+                         return val
+                 finally:
+                     with lock:
+-                        self.__pending.remove(key)
++                        self.__pending.remove(k)
+                         cond.notify_all()
+ 
+             def cache_clear(self):
+@@ -199,10 +199,10 @@
+             def __call__(self, *args, **kwargs):
+                 cache = self.cache
+                 lock = self.cache_lock
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                k = key(self._obj, *args, **kwargs)
+                 with lock:
+                     try:
+-                        result = cache[key]
++                        result = cache[k]
+                         self.__hits += 1
+                         return result
+                     except KeyError:
+@@ -213,7 +213,7 @@
+                         # In case of a race condition, i.e. if another thread
+                         # stored a value for this key while we were calling
+                         # method(), prefer the cached value.
+-                        return cache.setdefault(key, val)
++                        return cache.setdefault(k, val)
+                     except ValueError:
+                         return val  # value too large
+ 
+@@ -238,16 +238,16 @@
+ 
+             def __call__(self, *args, **kwargs):
+                 cache = self.cache
+-                key = self.cache_key(self._obj, *args, **kwargs)
++                k = key(self._obj, *args, **kwargs)
+                 try:
+-                    result = cache[key]
++                    result = cache[k]
+                     self.__hits += 1
+                     return result
+                 except KeyError:
+                     self.__misses += 1
+                 val = method(self._obj, *args, **kwargs)
+                 try:
+-                    cache[key] = val
++                    cache[k] = val
+                 except ValueError:
+                     pass  # value too large
+                 return val

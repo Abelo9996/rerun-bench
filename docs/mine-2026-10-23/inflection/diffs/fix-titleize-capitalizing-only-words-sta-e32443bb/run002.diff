@@ -1,0 +1,11 @@
+--- a/inflection.py
++++ b/inflection.py
+@@ -370,7 +370,7 @@
+ 
+     """
+     return re.sub(
+-        r"\b('?[a-z])",
++        r"\b('?\w)",
+         lambda match: match.group(1).capitalize(),
+         humanize(underscore(word))
+     )

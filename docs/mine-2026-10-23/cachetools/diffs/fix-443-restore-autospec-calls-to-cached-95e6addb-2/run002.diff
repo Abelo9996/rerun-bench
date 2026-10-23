@@ -1,0 +1,48 @@
+--- a/src/cachetools/_descriptor.py
++++ b/src/cachetools/_descriptor.py
+@@ -20,6 +20,27 @@
+         DeprecationWarning,
+         stacklevel=stacklevel,
+     )
++
++
++class _UnboundMethod:
++    """Callable object returned on class access of a @cachedmethod.
++
++    A callable object rather than a plain function is returned, so that
++    unittest.mock.create_autospec() does not mistake its signature for
++    the instance-call signature (see #443).
++    """
++
++    def __init__(self, descriptor):
++        functools.update_wrapper(self, descriptor.__wrapped__)
++        self.__descriptor = descriptor
++
++    def __call__(self, *args, **kwargs):
++        # The receiver is not part of __call__'s signature, so that autospec
++        # mocks accept calls without it.
++        if not args:
++            raise TypeError(f"{self.__qualname__}() missing 1 required argument")
++        obj, *args = args
++        return self.__descriptor.__get__(obj)(*args, **kwargs)
+ 
+ 
+ class _MethodDescriptor:
+@@ -96,16 +117,8 @@
+         # Created once and shared by all class accesses; objtype is not
+         # used for instance lookups, so it need not be bound here.
+         if self.__unbound is None:
+-            descriptor = self
+-
+-            # As in the previous function wrapper, the receiver is named self.
+-            @functools.wraps(self.__wrapped__)  # type: ignore
+-            def unbound(self, *args, **kwargs):
+-                return descriptor.__get__(self)(*args, **kwargs)
+-
+-            self.__unbound = unbound  # type: ignore
++            self.__unbound = _UnboundMethod(self)  # type: ignore
+         return self.__unbound
+-
+ 
+ class _ClassMethodDescriptor(_MethodDescriptor):
+     """Descriptor base class supporting deprecated @classmethod use."""

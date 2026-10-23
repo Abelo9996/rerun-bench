@@ -1,0 +1,20 @@
+{
+  "schema_version": 1,
+  "run_id": "claude_default_20261023T095750Z",
+  "rerun_bench_version": "0.3.0",
+  "agent": "claude",
+  "model": null,
+  "agent_options": {},
+  "cli_version": "2.1.308 (Claude Code)",
+  "runs_per_task": 3,
+  "seed": 0,
+  "tasks": [
+    "fix-incorrect-pluralisation-of-human-add-d85ee5df",
+    "fix-titleize-capitalizing-only-words-sta-e32443bb",
+    "fix-pluralization-of-potato-03b137cf"
+  ],
+  "started_at": "2026-10-23T09:57:51+00:00",
+  "platform": "Darwin arm64 py3.13.15",
+  "finished_at": "2026-10-23T10:00:47+00:00",
+  "elapsed_s": 176.682
+}

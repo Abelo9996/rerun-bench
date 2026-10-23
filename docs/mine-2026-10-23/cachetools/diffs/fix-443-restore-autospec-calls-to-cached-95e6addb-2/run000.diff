@@ -1,0 +1,37 @@
+--- a/src/cachetools/_descriptor.py
++++ b/src/cachetools/_descriptor.py
+@@ -96,15 +96,27 @@
+         # Created once and shared by all class accesses; objtype is not
+         # used for instance lookups, so it need not be bound here.
+         if self.__unbound is None:
+-            descriptor = self
++            self.__unbound = _UnboundMethod(self)
++        return self.__unbound
+ 
+-            # As in the previous function wrapper, the receiver is named self.
+-            @functools.wraps(self.__wrapped__)  # type: ignore
+-            def unbound(self, *args, **kwargs):
+-                return descriptor.__get__(self)(*args, **kwargs)
+ 
+-            self.__unbound = unbound  # type: ignore
+-        return self.__unbound
++class _UnboundMethod:
++    """Callable returned on class access, e.g. for Class.method(obj, ...)."""
++
++    # A callable object rather than a plain function, so that
++    # unittest.mock.create_autospec() does not take its signature,
++    # including the receiver, as the instance-call signature.
++
++    def __init__(self, descriptor):
++        functools.update_wrapper(self, descriptor.__wrapped__)
++        self.__descriptor = descriptor
++
++    def __call__(self, *args, **kwargs):
++        if not args:
++            msg = f"{self.__qualname__}() missing 1 required positional argument"
++            raise TypeError(msg)
++        obj, *args = args
++        return self.__descriptor.__get__(obj)(*args, **kwargs)
+ 
+ 
+ class _ClassMethodDescriptor(_MethodDescriptor):

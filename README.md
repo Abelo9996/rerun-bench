@@ -6,15 +6,30 @@ English | [简体中文](README.zh-CN.md)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
-**Does a coding agent pass the same task every time you rerun it?** In 200 runs on 2026-10-06
-(10 tasks, 10 runs each), Claude Code 2.1.292 with claude-opus-5-5 passed 100 of 100 and Codex
-CLI 0.160.0 with gpt-6-luna passed 96 of 100. All 4 Codex failures were the same: it read the
-file, changed nothing and exited cleanly, and in 3 of them its final message said it had made
-the change. The pass-rate intervals still overlap ([96, 100] vs [90, 98]), so the runs do not
-establish a difference in overall pass rate; they do show what a single run would have hidden.
-Setup, raw run records and diffs: [docs/run-2026-10-06](docs/run-2026-10-06/README.md).
+**Does your agent reproduce your own past bug fixes, or only sometimes?**
 
-[![Result card for the 2026-10-06 run. The 95% intervals of Claude Code and Codex CLI overlap, so these runs do not establish a difference in pass rate. Claude Code with claude-opus-5-5: pass rate 100% [96, 100], pass^10 100%, flip rate 0%, median cost $0.0899 per run. Codex CLI with gpt-6-luna: pass rate 96% [90, 98], pass^10 70%, flip rate 8%, cost not reported. 10 tasks, 10 runs each, 200 runs in all.](https://raw.githubusercontent.com/Abelo9996/rerun-bench/main/docs/run-2026-10-06/card.png)](https://github.com/Abelo9996/rerun-bench/tree/main/docs/run-2026-10-06)
+```sh
+uvx rerun-bench mine .     # mine this repo's fix commits, replay them against your agent, lead with the flip
+```
+
+`rerun-bench mine` scans a git repository for past commits that fixed a bug and added or
+changed a test, replays the top few as tasks against your agent, and leads with the flip:
+which of your own fixes the agent reproduces reliably and which it flakes on. No task
+authoring; it builds each task from the commit (workspace = the parent tree, hidden check =
+that test). Point it at a local path, a git URL, or `owner/repo`.
+
+In a real run on 2026-10-23, `rerun-bench mine` on two public Python libraries,
+[cachetools](https://github.com/tkem/cachetools) and
+[inflection](https://github.com/jpvanhal/inflection), replayed 3 mined fixes from each 3 times
+with Claude Code (claude-opus-5-5). It reproduced all 6 reliably: 18 of 18 runs passed, flip
+rate 0%, median cost $0.24/run on cachetools and $0.11/run on inflection. No fix flipped on
+either repo; when one does, the report shows the passing and failing run side by side.
+
+[![rerun-bench mine card for cachetools: replayed 3 of your past fixes, 3 runs each, 3 fixed reliably, 0 flaky. Claude Code with claude-opus-5-5: pass rate 100% [70, 100], pass^3 100%, flip rate 0%, median cost $0.2367 per run.](docs/mine-2026-10-23/cachetools-card.png)](docs/mine-2026-10-23/README.md)
+
+For a single test you keep seeing flake on:
+`uvx rerun-bench from-test . tests/test_thing.py`. Or benchmark a fixed suite instead of your
+own history (see [the 2026-10-06 study](#results) below):
 
 ```sh
 uvx rerun-bench run --agent mock --runs 5     # free demo: simulated agent, no API key, about 30 s
@@ -33,9 +48,38 @@ flips between pass and fail, and how much the bill varies from run to run.
 Most coding-agent benchmarks (SWE-bench, Terminal-Bench and its harbor harness) report a
 success rate from one attempt per task. That number hides what you live with day to day: the
 agent that fixed the bug on Monday fails the same task on Tuesday, at twice the token cost.
-rerun-bench runs a fixed suite of small, verifiable tasks several times per agent, model and CLI
-version, then reports reliability (pass^k, flip rate) and cost spread (coefficient of
-variation) next to the pass rate.
+rerun-bench runs tasks several times per agent, model and CLI version, then reports reliability
+(pass^k, flip rate) and cost spread (coefficient of variation) next to the pass rate. Tasks
+come either from your own git history (`mine`) or from a fixed suite (`run`).
+
+The reliability framing follows Abel Yagubyan, "How Consistent Are LLM Agents? Measuring
+Behavioral Reproducibility in Multi-Step Tool-Calling Pipelines" (arXiv:2605.28840).
+
+## Mine your own repo
+
+`rerun-bench mine <repo>` turns a repository's own past bug-fix commits into tasks and replays
+them against your agent. `<repo>` is a local path, a git URL, or `owner/repo` on GitHub.
+
+```sh
+uvx rerun-bench mine . --no-run          # just show what it would build; nothing is spent
+uvx rerun-bench mine . --runs 5 --agent claude   # replay against Claude Code; prints the cost, add --yes to start
+uvx rerun-bench from-test . tests/test_thing.py  # one task from the commit that last changed this test
+```
+
+For each commit it keeps, mine checks that the commit's test fails on the parent and passes on
+the commit (both by running the test in a throwaway `git worktree`), then builds a task whose
+workspace is the parent tree and whose hidden check is that test. It prints what it mined and
+what it skipped and why, so you can see which of your fixes are replayable before spending
+anything. The report leads with the flip: per task `passed N/M`, each flaky task's passing and
+failing run side by side, then the aggregate pass^k, flip rate and cost. `--card out.svg`
+writes a shareable image. Detected runners: pytest (Python), `node --test` or `npm test`
+(JavaScript), `go test`, `cargo test`. A real run on two public repositories is in
+[docs/mine-2026-10-23](docs/mine-2026-10-23/README.md).
+
+Useful flags: `-n` tasks to build (default 3), `--history` commits to scan (default 200),
+`--hide-tests` to keep the test out of the workspace the agent sees, `--tasks-out` where to
+write the built tasks (default `./rerun-bench-tasks`), `--keep-clone` to keep the scratch
+checkout. Mining needs `git`; clones go to a scratch directory and are removed afterward.
 
 ## Quickstart (free, about 30 seconds)
 
