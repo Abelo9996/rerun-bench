@@ -170,12 +170,15 @@ def card_model(rep: dict, mined: bool = False) -> dict:
     n_tasks = sorted({e["metrics"]["n_tasks"] for e in entries})
     per_task = sorted({e["metrics"]["min_runs_per_task"] for e in entries})
     head = sentence(rep)
+    command = COMMAND
     if mined and len(entries) == 1:
         from .report import flip_sentence
 
         head = flip_sentence(entries[0]).capitalize()
+        command = f"{COMMAND} mine ."
     return {
         "sentence": head,
+        "command": command,
         "rows": rows[:MAX_ROWS],
         "more": max(0, len(rows) - MAX_ROWS),
         "k": k,
@@ -357,14 +360,14 @@ def _logo(x: float, y: float, s: float) -> str:
     return out
 
 
-def _footer() -> str:
+def _footer(command: str = COMMAND) -> str:
     y = 568
     h = HEIGHT - y
     base = y + h / 2 + 8
     size = 20
     left = "measured with rerun-bench"
     left_w = mono_width(left, size)
-    cmd_w = mono_width(COMMAND, size) + 24
+    cmd_w = mono_width(command, size) + 24
     gap = (RIGHT - PAD - left_w - cmd_w - mono_width(REPO, size)) / 2
     cmd_x = PAD + left_w + gap
     dot = lambda x: _text("·", x, base, size, "bg", mono=True, anchor="middle")  # noqa: E731
@@ -375,7 +378,7 @@ def _footer() -> str:
             dot(cmd_x - gap / 2),
             f'<rect x="{_n(cmd_x)}" y="{_n(base - 25)}" width="{_n(cmd_w)}" height="36" rx="4" '
             f"{_fill('signal')}/>",
-            _text(COMMAND, cmd_x + cmd_w / 2, base, size, "signalInk", 700, True, "middle"),
+            _text(command, cmd_x + cmd_w / 2, base, size, "signalInk", 700, True, "middle"),
             dot(cmd_x + cmd_w + gap / 2),
             _text(REPO, RIGHT, base, size, "bg", mono=True, anchor="end"),
         ]
@@ -528,7 +531,7 @@ def render_svg(model: dict) -> str:
         _text(_fit_mono(" · ".join(parts), 20, RIGHT - PAD), PAD, 548, 20, "muted", mono=True)
     )
 
-    out.append(_footer())
+    out.append(_footer(model.get("command", COMMAND)))
 
     names = "; ".join(
         f"{r['name']} ({r['model']}{', simulated' if r['simulated'] else ''}): pass rate "

@@ -95,5 +95,9 @@ def test_mined_card_uses_the_flip_headline(tmp_path):
     rep = report_mod.build(d)
     model = card_mod.card_model(rep, mined=True)
     assert model["sentence"].startswith("Replayed 2 of your past fixes")
+    assert model["command"] == "uvx rerun-bench mine ."
     svg = card_mod.render_svg(model)
     assert svg.startswith("<svg") and "1200" in svg
+    assert "uvx rerun-bench mine ." in svg
+    # The non-mined card keeps the plain command.
+    assert card_mod.card_model(rep)["command"] == "uvx rerun-bench"
