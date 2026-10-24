@@ -269,6 +269,26 @@ Use a key with a spending limit, set it only on the action step (not for the who
 not run real agents on events that untrusted people can trigger. Secrets are not passed to
 workflows started from forks.
 
+## The lab
+
+rerun-bench owns the engine and the published lab. The lab is a static site under
+[`site/`](site/): it builds from the result sets in `site/data/results/` and deploys to GitHub
+Pages at **https://abelo9996.github.io/rerun-bench/**. Every number on it comes from a
+rerun-bench JSON report.
+
+- Site: https://abelo9996.github.io/rerun-bench/
+- Findings (short write-ups of a result set): https://abelo9996.github.io/rerun-bench/findings/
+- Submit a result set: run the suite, then open a pull request adding your
+  `site/data/results/<YYYY-MM-DD>-<label>.json` with the CLI versions, models and machine. Steps
+  and the required metadata are in [site/CONTRIBUTING.md](site/CONTRIBUTING.md#submitting-results).
+
+Build it locally with `cd site && node scripts/build.mjs` (no dependencies; output in
+`site/_site/`) and test it with `cd site && npm test`.
+
+The nerf-watch regression watch and the plugin marketplace stay in
+[open-agent-lab](https://github.com/Abelo9996/open-agent-lab), because published nerf-watch
+versions open their regression-report issues there.
+
 ## Results
 
 ### 2026-10-06: 10 runs per task

@@ -13,6 +13,8 @@ from .metrics import agent_metrics
 from .runner import load_results
 
 METRICS_URL = "https://github.com/Abelo9996/rerun-bench/blob/main/docs/METRICS.md"
+# The published lab: result sets, findings and how to submit your own.
+LAB_URL = "https://abelo9996.github.io/rerun-bench/"
 
 
 def build(results_path: Path, k: int | None = None) -> dict:
@@ -827,6 +829,7 @@ over tasks.</dd>
 runs. 1.0 means every passing run made the same edit.</dd>
 <dt>Full definitions</dt><dd><a href="{METRICS_URL}">docs/METRICS.md</a></dd>
 </dl>
+<p class="lab">Part of the <a href="{LAB_URL}">rerun-bench lab</a>: published result sets, findings and how to submit your own.</p>
 </main><script>{JS}</script></body></html>
 """
 
