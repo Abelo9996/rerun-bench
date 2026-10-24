@@ -1,0 +1,806 @@
+{
+  "generated_at": "2026-10-23T10:24:54+00:00",
+  "rerun_bench_version": "0.3.0",
+  "k": 3,
+  "entries": [
+    {
+      "run_id": "claude",
+      "agent": "claude",
+      "model": "claude-opus-5-5",
+      "models_reported": [
+        "claude-opus-5-5"
+      ],
+      "cli_version": "2.1.308 (Claude Code)",
+      "started_at": "2026-10-23T09:52:30+00:00",
+      "simulated": false,
+      "metrics": {
+        "n_tasks": 10,
+        "n_runs": 30,
+        "min_runs_per_task": 3,
+        "passes": 30,
+        "agent_error_runs": 0,
+        "timeout_runs": 0,
+        "pass_rate": 1.0,
+        "pass_rate_ci95": [
+          0.8864866068260312,
+          1.0
+        ],
+        "macro_pass_rate": 1.0,
+        "macro_pass_rate_task_bootstrap_ci95": [
+          1.0,
+          1.0
+        ],
+        "k": 3,
+        "pass_at_k": 1.0,
+        "pass_hat_k": 1.0,
+        "flip_rate": 0.0,
+        "flaky_task_fraction": 0.0,
+        "total_cost_usd": 5.0156354,
+        "cost_reported_runs": 30,
+        "mean_cost_usd": 0.16718784666666667,
+        "median_cost_usd": 0.1491759,
+        "cost_per_success_usd": 0.16718784666666667,
+        "cost_cv_within_task": 0.10099450051489715,
+        "tokens_mean": 130578.6,
+        "tokens_median": 114103.0,
+        "output_tokens_median": 1710.5,
+        "tokens_cv_within_task": 0.15557925459867045,
+        "wall_time_mean_s": 27.8895,
+        "wall_time_median_s": 26.7825,
+        "wall_time_total_s": 836.6850000000001,
+        "wall_time_cv_within_task": 0.28305692920967773,
+        "approach_similarity": 0.5975238425179797,
+        "per_task": {
+          "add-ll-url-components-scheme-host-port-p-2cecf21e": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.20307913333333336,
+              "median": 0.2002078,
+              "std": 0.018959179241025546,
+              "cv": 0.09335857864779253,
+              "min": 0.18571939999999998,
+              "max": 0.22331020000000001,
+              "iqr": 0.018795400000000018
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 176923.66666666666,
+              "median": 172357.0,
+              "std": 29085.134662458302,
+              "cv": 0.16439369141753207,
+              "min": 150392.0,
+              "max": 208022.0,
+              "iqr": 28815.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 3137.0,
+              "median": 3119.0,
+              "std": 282.4305224298535,
+              "cv": 0.09003204412810122,
+              "min": 2864.0,
+              "max": 3428.0,
+              "iqr": 282.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 35.12433333333333,
+              "median": 36.374,
+              "std": 3.380422508109501,
+              "cv": 0.09624161335758215,
+              "min": 31.297,
+              "max": 37.702,
+              "iqr": 3.2024999999999935
+            },
+            "approach_similarity": 0.7333333333333334,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "export-metadata-variables-properly-furl-b4b7a71d": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.14125126666666668,
+              "median": 0.1439828,
+              "std": 0.02124898636107929,
+              "cv": 0.15043395264712164,
+              "min": 0.1187686,
+              "max": 0.16100240000000002,
+              "iqr": 0.021116900000000022
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 137815.33333333334,
+              "median": 139259.0,
+              "std": 23382.948495288896,
+              "cv": 0.16966870035232337,
+              "min": 113744.0,
+              "max": 160443.0,
+              "iqr": 23349.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1709.6666666666667,
+              "median": 1827.0,
+              "std": 393.35141201390564,
+              "cv": 0.23007491441640024,
+              "min": 1271.0,
+              "max": 2031.0,
+              "iqr": 380.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 23.041666666666668,
+              "median": 23.575,
+              "std": 3.540258935916034,
+              "cv": 0.15364595743577725,
+              "min": 19.265,
+              "max": 26.285,
+              "iqr": 3.509999999999998
+            },
+            "approach_similarity": 0.6,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-218-fix-and-properly-document-cached-18e5930c-2": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.2506214,
+              "median": 0.2366806,
+              "std": 0.03635067416596286,
+              "cv": 0.14504217982168666,
+              "min": 0.22330460000000002,
+              "max": 0.291879,
+              "iqr": 0.03428720000000002
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 198738.66666666666,
+              "median": 171206.0,
+              "std": 63395.905872014584,
+              "cv": 0.31899130116609375,
+              "min": 153764.0,
+              "max": 271246.0,
+              "iqr": 58741.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 2936.6666666666665,
+              "median": 2877.0,
+              "std": 678.4705839852847,
+              "cv": 0.23103425107330924,
+              "min": 2290.0,
+              "max": 3643.0,
+              "iqr": 676.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 39.723333333333336,
+              "median": 34.648,
+              "std": 14.58601111796276,
+              "cv": 0.36719000884357034,
+              "min": 28.353,
+              "max": 56.169,
+              "iqr": 13.908000000000001
+            },
+            "approach_similarity": 0.18708801349997364,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-387-handle-obj-none-case-for-inspect-57d2e481-2": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.1537724,
+              "median": 0.151955,
+              "std": 0.008432486795720458,
+              "cv": 0.05483745324726971,
+              "min": 0.1463968,
+              "max": 0.16296539999999998,
+              "iqr": 0.008284299999999994
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 112791.33333333333,
+              "median": 111500.0,
+              "std": 7594.787708246579,
+              "cv": 0.06733485174611448,
+              "min": 105925.0,
+              "max": 120949.0,
+              "iqr": 7512.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1598.0,
+              "median": 1577.0,
+              "std": 91.32907532653553,
+              "cv": 0.057152112219358904,
+              "min": 1519.0,
+              "max": 1698.0,
+              "iqr": 89.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 20.304666666666666,
+              "median": 17.944,
+              "std": 5.67036871229141,
+              "cv": 0.27926430930285695,
+              "min": 16.196,
+              "max": 26.774,
+              "iqr": 5.2890000000000015
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-443-restore-autospec-calls-to-cached-95e6addb-2": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.24852719999999998,
+              "median": 0.24002880000000004,
+              "std": 0.01749245309726453,
+              "cv": 0.07038446132763147,
+              "min": 0.23690759999999997,
+              "max": 0.2686452,
+              "iqr": 0.015868800000000016
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 155159.0,
+              "median": 153723.0,
+              "std": 2552.4523501918698,
+              "cv": 0.01645055942737366,
+              "min": 153648.0,
+              "max": 158106.0,
+              "iqr": 2229.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 3467.0,
+              "median": 3364.0,
+              "std": 438.66502026033487,
+              "cv": 0.12652582066926302,
+              "min": 3089.0,
+              "max": 3948.0,
+              "iqr": 429.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 40.50900000000001,
+              "median": 41.883,
+              "std": 6.137454521216431,
+              "cv": 0.15150841840619195,
+              "min": 33.801,
+              "max": 45.843,
+              "iqr": 6.021000000000001
+            },
+            "approach_similarity": 0.47115694762753585,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-contractions-and-possessives-followe-a1b74b1c": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.19748980000000002,
+              "median": 0.1720858,
+              "std": 0.046515879671785214,
+              "cv": 0.23553560574665228,
+              "min": 0.16920759999999999,
+              "max": 0.251176,
+              "iqr": 0.040984200000000026
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 165056.33333333334,
+              "median": 109891.0,
+              "std": 98386.78052631528,
+              "cv": 0.596080008197092,
+              "min": 106630.0,
+              "max": 278648.0,
+              "iqr": 86009.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 2622.0,
+              "median": 2400.0,
+              "std": 915.4168449400524,
+              "cv": 0.3491292314798064,
+              "min": 1838.0,
+              "max": 3628.0,
+              "iqr": 895.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 35.79933333333333,
+              "median": 31.292,
+              "std": 13.531259229404089,
+              "cv": 0.3779751735433832,
+              "min": 25.097,
+              "max": 51.009,
+              "iqr": 12.956
+            },
+            "approach_similarity": 0.09477124183006536,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-decamelization-of-acronyms-followed-a3b86ea9": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.13718546666666667,
+              "median": 0.136915,
+              "std": 0.002075161625833841,
+              "cv": 0.015126687077400627,
+              "min": 0.13525879999999998,
+              "max": 0.1393826,
+              "iqr": 0.0020619000000000054
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 83808.33333333333,
+              "median": 83885.0,
+              "std": 320.9428817302751,
+              "cv": 0.0038294865076695843,
+              "min": 83456.0,
+              "max": 84084.0,
+              "iqr": 314.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1591.6666666666667,
+              "median": 1562.0,
+              "std": 119.299343390202,
+              "cv": 0.07495246705143581,
+              "min": 1490.0,
+              "max": 1723.0,
+              "iqr": 116.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 26.294333333333338,
+              "median": 26.257,
+              "std": 4.347120234515412,
+              "cv": 0.16532536419185673,
+              "min": 21.966,
+              "max": 30.66,
+              "iqr": 4.347000000000001
+            },
+            "approach_similarity": 0.3333333333333333,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-incorrect-pluralisation-of-human-add-d85ee5df": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.12478513333333334,
+              "median": 0.12417340000000002,
+              "std": 0.0024700813778767076,
+              "cv": 0.019794676752706446,
+              "min": 0.1226784,
+              "max": 0.1275036,
+              "iqr": 0.0024126000000000147
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 114644.66666666667,
+              "median": 114189.0,
+              "std": 942.1275568272766,
+              "cv": 0.008217805365220739,
+              "min": 114017.0,
+              "max": 115728.0,
+              "iqr": 855.5
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1390.3333333333333,
+              "median": 1386.0,
+              "std": 47.64801499887832,
+              "cv": 0.034270929032998075,
+              "min": 1345.0,
+              "max": 1440.0,
+              "iqr": 47.5
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 25.077333333333332,
+              "median": 26.791,
+              "std": 7.327365852291895,
+              "cv": 0.2921907905794833,
+              "min": 17.045,
+              "max": 31.396,
+              "iqr": 7.1754999999999995
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-pluralization-of-potato-03b137cf": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.11206013333333333,
+              "median": 0.1050436,
+              "std": 0.015267162102150265,
+              "cv": 0.13624079900687489,
+              "min": 0.1015626,
+              "max": 0.1295742,
+              "iqr": 0.014005799999999985
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 80346.66666666667,
+              "median": 77904.0,
+              "std": 5108.567835835533,
+              "cv": 0.06358157777757466,
+              "min": 76918.0,
+              "max": 86218.0,
+              "iqr": 4650.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 731.0,
+              "median": 733.0,
+              "std": 36.0416425818802,
+              "cv": 0.04930457261543118,
+              "min": 694.0,
+              "max": 766.0,
+              "iqr": 36.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 15.760333333333334,
+              "median": 10.518,
+              "std": 9.769477689893833,
+              "cv": 0.619877605585362,
+              "min": 9.731,
+              "max": 27.032,
+              "iqr": 8.650499999999997
+            },
+            "approach_similarity": 1.0,
+            "timeouts": 0,
+            "agent_errors": 0
+          },
+          "fix-titleize-capitalizing-only-words-sta-e32443bb": {
+            "n": 3,
+            "passes": 3,
+            "pass_rate": 1.0,
+            "pass_rate_ci95": [
+              0.4385029682449546,
+              1.0
+            ],
+            "pass_at_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "pass_hat_k": {
+              "1": 1.0,
+              "2": 1.0,
+              "3": 1.0
+            },
+            "flip_rate": 0.0,
+            "outcomes": [
+              true,
+              true,
+              true
+            ],
+            "cost_usd": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 0.10310653333333332,
+              "median": 0.0990306,
+              "std": 0.009196134693083464,
+              "cv": 0.08919061087383533,
+              "min": 0.0966528,
+              "max": 0.11363619999999999,
+              "iqr": 0.008491699999999991
+            },
+            "total_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 80502.0,
+              "median": 73726.0,
+              "std": 11853.481893519727,
+              "cv": 0.14724456402971015,
+              "min": 73591.0,
+              "max": 94189.0,
+              "iqr": 10299.0
+            },
+            "output_tokens": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 1037.6666666666667,
+              "median": 999.0,
+              "std": 175.2293734889597,
+              "cv": 0.1688686541814581,
+              "min": 885.0,
+              "max": 1229.0,
+              "iqr": 172.0
+            },
+            "wall_time_s": {
+              "n": 3,
+              "n_missing": 0,
+              "mean": 17.260666666666665,
+              "median": 14.668,
+              "std": 5.650280111050543,
+              "cv": 0.3273500508507132,
+              "min": 13.372,
+              "max": 23.742,
+              "iqr": 5.184999999999999
+            },
+            "approach_similarity": 0.5555555555555555,
+            "timeouts": 0,
+            "agent_errors": 0
+          }
+        }
+      }
+    }
+  ],
+  "tasks": [
+    "add-ll-url-components-scheme-host-port-p-2cecf21e",
+    "export-metadata-variables-properly-furl-b4b7a71d",
+    "fix-218-fix-and-properly-document-cached-18e5930c-2",
+    "fix-387-handle-obj-none-case-for-inspect-57d2e481-2",
+    "fix-443-restore-autospec-calls-to-cached-95e6addb-2",
+    "fix-contractions-and-possessives-followe-a1b74b1c",
+    "fix-decamelization-of-acronyms-followed-a3b86ea9",
+    "fix-incorrect-pluralisation-of-human-add-d85ee5df",
+    "fix-pluralization-of-potato-03b137cf",
+    "fix-titleize-capitalizing-only-words-sta-e32443bb"
+  ],
+  "comparison": [],
+  "lab": {
+    "title": "rerun-bench mine: 10 real bug fixes from four public repositories, replayed",
+    "pilot": false,
+    "feature": false,
+    "date": "2026-10-23",
+    "source_url": "https://github.com/Abelo9996/rerun-bench/tree/main/docs/mine-2026-10-23",
+    "harness_commit": "c0de987",
+    "machine": "macOS, Apple Silicon (arm64), Python 3.13.15",
+    "notes": [
+      "rerun-bench mine replayed each repository's own past bug-fix commits against Claude Code (2.1.308, default model, reported as claude-opus-5-5), 3 runs per fix, 30 agent runs in all.",
+      "Four public repositories: cachetools and inflection (pure Python, no third-party deps), furl (uv pip install .) and sindresorhus/slugify (npm install). mine built one dependency environment per repository automatically.",
+      "Claude Code reproduced every mined fix: 30 of 30 runs passed, flip rate 0%. The 95% interval is wide because the suite is small; it is not evidence of flakiness.",
+      "Tasks pooled from all four repositories. Per-repository cards, raw run records and diffs are under docs/mine-2026-10-23/ in the rerun-bench repository."
+    ]
+  }
+}
