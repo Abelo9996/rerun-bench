@@ -198,14 +198,18 @@ test("aggregate output passes the site's data validator and renders escaped", ()
   for (const d of ["scripts", "src", "data"]) cpSync(join(root, d), join(dir, d), { recursive: true });
   const issues = [issue(payload([cacheWrites(), mismatch()]), { user: { id: 7 } }), issue(payload([cacheWrites()]), { user: { id: 8 } })];
   writeFileSync(join(dir, "issues.json"), JSON.stringify(issues));
+  // Both runs must resolve the same repository, or the issue URLs they write differ
+  // and the second run sees a change. CI sets GITHUB_REPOSITORY to the host repo, so
+  // pin it for both runs instead of letting the second fall back to the default.
+  const env = { ...process.env, GITHUB_REPOSITORY: "Abelo9996/open-agent-lab" };
   const run = spawnSync(process.execPath, [join(dir, "scripts", "aggregate-regressions.mjs"), "--issues", join(dir, "issues.json")], {
     encoding: "utf8",
-    env: { ...process.env, GITHUB_REPOSITORY: "Abelo9996/open-agent-lab" },
+    env,
   });
   assert.equal(run.status, 0, run.stderr);
   assert.match(run.stdout, /accepted: 2; rejected: 0; aggregate rows: 2/);
   assert.match(run.stdout, /data\/regressions.json updated/);
-  const again = spawnSync(process.execPath, [join(dir, "scripts", "aggregate-regressions.mjs"), "--issues", join(dir, "issues.json")], { encoding: "utf8" });
+  const again = spawnSync(process.execPath, [join(dir, "scripts", "aggregate-regressions.mjs"), "--issues", join(dir, "issues.json")], { encoding: "utf8", env });
   assert.match(again.stdout, /unchanged/);
   assert.deepEqual(loadAll(dir).errors, []);
   const build = spawnSync(process.execPath, [join(dir, "scripts", "build.mjs")], { encoding: "utf8", cwd: dir });
