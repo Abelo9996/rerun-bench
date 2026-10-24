@@ -550,9 +550,7 @@ def _add_mine_build_args(s) -> None:
         default=120,
         help="seconds to allow each test run while mining (default 120)",
     )
-    s.add_argument(
-        "--keep-clone", action="store_true", help="keep the scratch clone and worktrees"
-    )
+    s.add_argument("--keep-clone", action="store_true", help="keep the scratch clone and worktrees")
     s.add_argument("--no-run", action="store_true", help="only build the tasks, do not run them")
 
 
@@ -651,9 +649,7 @@ def build_parser() -> argparse.ArgumentParser:
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     s.add_argument("repo", help="a local git repo path, a git URL, or owner/repo on GitHub")
-    s.add_argument(
-        "-n", "--max", type=int, default=3, help="how many tasks to build (default 3)"
-    )
+    s.add_argument("-n", "--max", type=int, default=3, help="how many tasks to build (default 3)")
     s.add_argument(
         "--history", type=int, default=200, help="how many commits to scan (default 200)"
     )

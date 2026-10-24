@@ -72,8 +72,7 @@ def _prompt(cand: Candidate, hide_tests: bool, cmd_human: str) -> str:
         )
     else:
         lines.append(
-            "A test in this repository fails. Change the source code so it passes. "
-            "Run it with:"
+            "A test in this repository fails. Change the source code so it passes. Run it with:"
         )
     lines.append(f"  {cmd_human}")
     if not hide_tests and cand.test_files:

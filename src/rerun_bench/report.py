@@ -829,7 +829,8 @@ over tasks.</dd>
 runs. 1.0 means every passing run made the same edit.</dd>
 <dt>Full definitions</dt><dd><a href="{METRICS_URL}">docs/METRICS.md</a></dd>
 </dl>
-<p class="lab">Part of the <a href="{LAB_URL}">rerun-bench lab</a>: published result sets, findings and how to submit your own.</p>
+<p class="lab">Part of the <a href="{LAB_URL}">rerun-bench lab</a>: published result sets,
+findings and how to submit your own.</p>
 </main><script>{JS}</script></body></html>
 """
 

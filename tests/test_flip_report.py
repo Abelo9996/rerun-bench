@@ -87,10 +87,9 @@ def test_no_flips_states_it_plainly(tmp_path):
 
 
 def test_mined_card_uses_the_flip_headline(tmp_path):
-    rows = (
-        [_run_rec("fixed-one", i, True) for i in range(3)]
-        + [_run_rec("flaky-one", i, i != 1) for i in range(3)]
-    )
+    rows = [_run_rec("fixed-one", i, True) for i in range(3)] + [
+        _run_rec("flaky-one", i, i != 1) for i in range(3)
+    ]
     d = _write_results(tmp_path, rows)
     rep = report_mod.build(d)
     model = card_mod.card_model(rep, mined=True)
