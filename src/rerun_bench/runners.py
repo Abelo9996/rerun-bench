@@ -12,9 +12,25 @@ a repository.
 
 from __future__ import annotations
 
+import os
 import re
+import shutil
 from dataclasses import dataclass
 from pathlib import Path, PurePosixPath
+
+
+def resolve_exe(name: str) -> str:
+    """Resolve a bare command name to something runnable on the current platform.
+
+    Windows process creation appends ``.exe`` but not ``.cmd``/``.bat``, so a Node shim
+    installed as ``npm.cmd`` is not found when invoked as ``npm`` and raises
+    ``FileNotFoundError``. On Windows, resolve such a name through ``PATH`` (trying the
+    ``.cmd`` shim). Elsewhere, and for a name that already carries a path, return it unchanged
+    so there is no behavior change on macOS and Linux.
+    """
+    if os.name != "nt" or os.sep in name or (os.altsep and os.altsep in name):
+        return name
+    return shutil.which(name) or shutil.which(name + ".cmd") or name
 
 
 @dataclass(frozen=True)

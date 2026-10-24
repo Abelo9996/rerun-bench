@@ -19,6 +19,8 @@ import tomllib
 from dataclasses import dataclass
 from pathlib import Path
 
+from .runners import resolve_exe
+
 # Extras names, in preference order, that usually carry test dependencies.
 TEST_EXTRAS = ("test", "tests", "testing", "dev", "develop")
 # Requirements files, in preference order, that usually carry test dependencies.
@@ -121,14 +123,14 @@ def prepare_env(repo: Path, language: str, base: Path, cache_root: Path) -> Prep
 def _prepare_python(base: Path, cache_root: Path) -> PreparedEnv:
     env = PreparedEnv("python")
     venv = cache_root / "venv"
-    proc = subprocess.run(
-        ["uv", "venv", str(venv)], capture_output=True, text=True, timeout=180
-    )
+    proc = subprocess.run(["uv", "venv", str(venv)], capture_output=True, text=True, timeout=180)
     if proc.returncode != 0:
         env.error = f"uv venv failed: {proc.stderr.strip()[-300:]}"
         return env
-    python = venv / ("Scripts" if os.name == "nt" else "bin") / (
-        "python.exe" if os.name == "nt" else "python"
+    python = (
+        venv
+        / ("Scripts" if os.name == "nt" else "bin")
+        / ("python.exe" if os.name == "nt" else "python")
     )
     env.python = str(python)
     t0 = time.perf_counter()
@@ -159,12 +161,7 @@ def _prepare_python(base: Path, cache_root: Path) -> PreparedEnv:
 
 
 def _has_pytest(python: Path) -> bool:
-    return (
-        subprocess.run(
-            [str(python), "-c", "import pytest"], capture_output=True
-        ).returncode
-        == 0
-    )
+    return subprocess.run([str(python), "-c", "import pytest"], capture_output=True).returncode == 0
 
 
 def _prepare_js(base: Path, cache_root: Path) -> PreparedEnv:
@@ -172,7 +169,9 @@ def _prepare_js(base: Path, cache_root: Path) -> PreparedEnv:
     t0 = time.perf_counter()
     last = "npm not run"
     for cmd in js_install_plan(base):
-        proc = subprocess.run(cmd, cwd=base, capture_output=True, text=True, timeout=600)
+        # On Windows, npm is a .cmd shim that a bare name does not resolve to.
+        full = [resolve_exe(cmd[0]), *cmd[1:]]
+        proc = subprocess.run(full, cwd=base, capture_output=True, text=True, timeout=600)
         if proc.returncode == 0:
             env.install_cmd = cmd
             env.node_modules = str(base / "node_modules")

@@ -20,7 +20,7 @@ import time
 from dataclasses import dataclass, field
 from pathlib import Path
 
-from .runners import Runner, detect_runner, is_source_file, is_test_file
+from .runners import Runner, detect_runner, is_source_file, is_test_file, resolve_exe
 
 # Narrow a run to the tests a commit actually touched, so an unrelated pre-existing failure in
 # the same (often monolithic) test file does not make the task look unreplayable.
@@ -238,8 +238,16 @@ def find_candidates(repo: Path, limit: int) -> list[Candidate]:
         if runner is None:
             out.append(
                 Candidate(
-                    sha, parent, subject, body, source_files, test_files,
-                    Runner("none", "?", None), 0, 0, skip_reason=reason or "no runner",
+                    sha,
+                    parent,
+                    subject,
+                    body,
+                    source_files,
+                    test_files,
+                    Runner("none", "?", None),
+                    0,
+                    0,
+                    skip_reason=reason or "no runner",
                 )
             )
             continue
@@ -318,6 +326,9 @@ def _run_test(
     interpreter = (prepared.python if prepared and prepared.python else None) or sys.executable
     if cmd and cmd[0] == "python":
         cmd = [interpreter, *cmd[1:]]
+    elif cmd:
+        # On Windows, npm is a .cmd shim that a bare name does not resolve to.
+        cmd = [resolve_exe(cmd[0]), *cmd[1:]]
     if prepared and prepared.node_modules:
         envs.link_node_modules(prepared.node_modules, worktree)
     env = _test_env(worktree)

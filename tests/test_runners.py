@@ -51,16 +51,34 @@ def test_go_needs_go_mod(tmp_path):
 def test_javascript_node_test_vs_npm(tmp_path):
     runner, _ = runners.detect_runner(tmp_path, "app.test.js")  # no package.json
     assert runner.name == "node-test"
-    (tmp_path / "package.json").write_text(
-        '{"scripts": {"test": "jest"}}', encoding="utf-8"
-    )
+    (tmp_path / "package.json").write_text('{"scripts": {"test": "jest"}}', encoding="utf-8")
     runner, _ = runners.detect_runner(tmp_path, "app.test.js")
     assert runner.name == "npm"
-    (tmp_path / "package.json").write_text(
-        '{"scripts": {"test": "node --test"}}', encoding="utf-8"
-    )
+    (tmp_path / "package.json").write_text('{"scripts": {"test": "node --test"}}', encoding="utf-8")
     runner, _ = runners.detect_runner(tmp_path, "app.test.js")
     assert runner.name == "node-test"
+
+
+def test_resolve_exe_is_identity_off_windows(monkeypatch):
+    monkeypatch.setattr(runners.os, "name", "posix")
+    assert runners.resolve_exe("npm") == "npm"
+    assert runners.resolve_exe("node") == "node"
+
+
+def test_resolve_exe_finds_the_npm_cmd_shim_on_windows(monkeypatch):
+    monkeypatch.setattr(runners.os, "name", "nt")
+    monkeypatch.setattr(runners.os, "sep", "\\")
+    monkeypatch.setattr(runners.os, "altsep", "/")
+    # node resolves on its own; npm only via the .cmd shim.
+    monkeypatch.setattr(
+        runners.shutil,
+        "which",
+        lambda n: {"node": "C:\\node.exe", "npm.cmd": "C:\\npm.cmd"}.get(n),
+    )
+    assert runners.resolve_exe("node") == "C:\\node.exe"
+    assert runners.resolve_exe("npm") == "C:\\npm.cmd"
+    # An already-resolved path is returned unchanged, never re-resolved.
+    assert runners.resolve_exe("C:\\Python\\python.exe") == "C:\\Python\\python.exe"
 
 
 def test_non_test_file_refused(tmp_path):
