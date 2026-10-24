@@ -1,0 +1,106 @@
+{
+  "suite": "rerun-bench default suite",
+  "source_url": "https://github.com/Abelo9996/rerun-bench/tree/main/tasks",
+  "tasks": [
+    {
+      "id": "add-cli-flag",
+      "title": "Add a flag to a small CLI without changing its default output",
+      "tags": [
+        "cli",
+        "feature",
+        "python"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "edit-config",
+      "title": "Make three precise edits to a TOML config",
+      "tags": [
+        "config",
+        "toml",
+        "precision"
+      ],
+      "timeout_s": 300
+    },
+    {
+      "id": "fix-failing-test",
+      "title": "Fix the bug behind a failing unit test",
+      "tags": [
+        "bugfix",
+        "python",
+        "tests"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "follow-agents-md",
+      "title": "Add a function while following the repo's AGENTS.md conventions",
+      "tags": [
+        "instructions",
+        "agents-md",
+        "python"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "implement-lru-cache",
+      "title": "Implement a small data structure to spec",
+      "tags": [
+        "implement",
+        "data-structure",
+        "python"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "implement-slugify",
+      "title": "Implement a function from its docstring spec",
+      "tags": [
+        "implement",
+        "python",
+        "spec"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "minimal-fix",
+      "title": "Fix one bug in legacy code without touching anything else",
+      "tags": [
+        "bugfix",
+        "over-edit-trap",
+        "minimal-diff"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "multi-file-rename",
+      "title": "Rename a function across a package",
+      "tags": [
+        "refactor",
+        "multi-file",
+        "python"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "refactor-extract-helper",
+      "title": "Refactor duplicated logic without changing behavior",
+      "tags": [
+        "refactor",
+        "python",
+        "behavior-preserving"
+      ],
+      "timeout_s": 600
+    },
+    {
+      "id": "write-tests",
+      "title": "Write unit tests strong enough to catch injected bugs",
+      "tags": [
+        "tests",
+        "mutation",
+        "python"
+      ],
+      "timeout_s": 600
+    }
+  ]
+}

@@ -10,3 +10,8 @@ results/
 .coverage
 .DS_Store
 !docs/pilot-*/results/
+# The lab site's published result sets are committed data, not run output.
+!site/data/results/
+!site/data/results/*.json
+# The lab site build output.
+site/_site/

@@ -1,0 +1,19 @@
+{
+  "name": "open-agent-lab",
+  "version": "0.1.1",
+  "private": true,
+  "description": "Static site and data for an independent, reproducible evaluation lab for coding agents.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20"
+  },
+  "scripts": {
+    "validate": "node scripts/validate.mjs",
+    "build": "node scripts/build.mjs",
+    "serve": "node scripts/serve.mjs",
+    "test": "node --test tests/validate.test.mjs tests/regressions.test.mjs tests/build.test.mjs",
+    "social": "node scripts/social.mjs",
+    "aggregate": "node scripts/aggregate-regressions.mjs"
+  }
+}

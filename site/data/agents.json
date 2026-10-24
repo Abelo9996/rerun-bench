@@ -1,0 +1,24 @@
+{
+  "agents": [
+    {
+      "id": "claude",
+      "name": "Claude Code",
+      "homepage": "https://github.com/anthropics/claude-code"
+    },
+    {
+      "id": "codex",
+      "name": "Codex CLI",
+      "homepage": "https://github.com/openai/codex"
+    },
+    {
+      "id": "opencode",
+      "name": "OpenCode",
+      "homepage": "https://opencode.ai"
+    },
+    {
+      "id": "deepseek-harness",
+      "name": "DeepSeek Harness",
+      "homepage": null
+    }
+  ]
+}
