@@ -27,13 +27,13 @@ nerf-watch versions open their issues there.
 | Path | What it is |
 |---|---|
 | `data/results/<YYYY-MM-DD>-<label>.json` | One result set each: a rerun-bench JSON report, optionally with a `lab` block of metadata. |
-| `data/regressions.json` | Regression watch data: `aggregates`, written by the `regressions` workflow from open regression-report issues, and hand-reviewed `reports`. |
+| `data/regressions.json` | Regression watch data: hand-reviewed `reports`, plus `aggregates` that the pages workflow fills from open regression-report issues in open-agent-lab at build time. |
 | `data/launches.json` | Launch-day log: model launches and the result sets published for them. |
 | `data/agents.json` | Display names and links for agent ids used in result files. |
 | `data/tasks.json` | The task suite (ids, titles, tags, timeouts), copied from rerun-bench. |
 | `scripts/build.mjs` | Builds `_site/` from `data/`. No dependencies. |
 | `scripts/validate.mjs` | Validates every data file. CI runs it on every pull request. |
-| `scripts/aggregate-regressions.mjs` | Validates and aggregates regression-report issues into `data/regressions.json`. Runs daily in the open-agent-lab repository. |
+| `scripts/aggregate-regressions.mjs` | Validates and aggregates open-agent-lab's regression-report issues into `data/regressions.json`. The pages workflow runs it before every build and hourly. |
 | `src/` | Stylesheet, the page script (tooltips, theme, copy buttons, demo playback, chart entrance), the favicon, the tool demo recordings and still frames, and the social preview image, copied to `_site/assets/`. |
 | `scripts/social.mjs` | Renders `src/social-preview.png` (and `docs/social-preview.png`) from the latest result set with headless Chrome. |
 

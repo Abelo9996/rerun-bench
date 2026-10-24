@@ -918,11 +918,11 @@ function regressionsPage() {
 <section aria-labelledby="g-how">
   ${sectionHead("4.2", "Report", "How to report", "g-how")}
   <ol class="steps">
-    <li>Run <code>npx nerf-watch share</code> (Node.js 20 or newer). It prints the anonymized JSON and a link to a prefilled report on this repository. Add <code>--open</code> to open the link in your browser.</li>
+    <li>Run <code>npx nerf-watch share</code> (Node.js 20 or newer). It prints the anonymized JSON and a link to a prefilled report in the open-agent-lab repository. Add <code>--open</code> to open the link in your browser.</li>
     <li>Read the JSON. The issue is public.</li>
     <li>Open the link, say what you observed, and submit. If the JSON was too long for the link, paste it into the report field.</li>
   </ol>
-  <p>A scheduled job reads open issues labeled <code>regression-report</code> once a day and whenever one is opened, edited, closed or relabeled. It validates the JSON against a strict schema, rejects anything that is not valid, too large, or contains path-like or email-like text, and aggregates the findings per agent, CLI version, model and signal. Closing an issue removes it from the table at the next run.</p>
+  <p>Every hour, the site build reads open issues labeled <code>regression-report</code> in the <a href="${REGRESSION_REPO}/issues?q=is%3Aissue+is%3Aopen+label%3Aregression-report">open-agent-lab repository</a>. It validates the JSON against a strict schema, rejects anything that is not valid, too large, or contains path-like or email-like text, and aggregates the findings per agent, CLI version, model and signal. Closing an issue removes it from the table within the hour.</p>
 </section>
 
 <section aria-labelledby="g-list">

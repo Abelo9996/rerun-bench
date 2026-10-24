@@ -2,11 +2,20 @@ name: pages
 
 # Builds the lab site under site/ and deploys it to GitHub Pages for rerun-bench.
 # Set the Pages source to "GitHub Actions" in the repository settings once.
+#
+# The regression watch is fed by regression-report issues in open-agent-lab,
+# where published nerf-watch versions open them. Every build aggregates those
+# issues first, and an hourly run rebuilds the site so new, edited and closed
+# issues show up. Issue bodies are untrusted: they are only read through the API
+# by site/scripts/aggregate-regressions.mjs, parsed as JSON and validated. No
+# issue field is ever interpolated into a shell command here.
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
+  schedule:
+    - cron: "41 * * * *"
 
 permissions:
   contents: read
@@ -20,6 +29,8 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    outputs:
+      deploy: ${{ steps.compare.outputs.deploy }}
     defaults:
       run:
         working-directory: site
@@ -28,19 +39,45 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: 22
-      - name: Validate data files
-        run: node scripts/validate.mjs
       - name: Test the site
         run: npm test
+      - name: Aggregate regression-report issues from open-agent-lab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/aggregate-regressions.mjs --repo Abelo9996/open-agent-lab
+      - name: Validate data files
+        run: node scripts/validate.mjs
       - name: Build the site
         run: node scripts/build.mjs
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      # Hourly runs deploy only when the regression data differs from the live
+      # site. Pushes and manual runs always deploy.
+      - name: Compare regression data with the live site
+        id: compare
+        env:
+          EVENT: ${{ github.event_name }}
+        run: |
+          if [ "$EVENT" != "schedule" ]; then
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if curl -fsSL --retry 3 -o "$RUNNER_TEMP/live-regressions.json" \
+              https://abelo9996.github.io/rerun-bench/data/regressions.json \
+            && cmp -s "$RUNNER_TEMP/live-regressions.json" _site/data/regressions.json; then
+            echo "Regression data matches the live site; skipping deploy"
+            echo "deploy=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "deploy=true" >> "$GITHUB_OUTPUT"
+          fi
+      - if: steps.compare.outputs.deploy == 'true'
+        uses: actions/configure-pages@v5
+      - if: steps.compare.outputs.deploy == 'true'
+        uses: actions/upload-pages-artifact@v3
         with:
           path: site/_site
 
   deploy:
     needs: build
+    if: needs.build.outputs.deploy == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages

@@ -88,11 +88,13 @@ factual: no claims beyond what the numbers show.
 
 ### How reports are aggregated
 
-The `regressions` workflow (`.github/workflows/regressions.yml`) runs daily, on manual
-dispatch, and whenever an issue with the `regression-report` label is opened, edited,
-closed, reopened, deleted or relabeled. It:
+The issues live in [open-agent-lab](https://github.com/Abelo9996/open-agent-lab/issues?q=is%3Aissue+label%3Aregression-report),
+because published nerf-watch versions open them there. The `pages` workflow
+(`.github/workflows/pages.yml` at the rerun-bench root) aggregates them before every build:
+on each push to main, on manual dispatch, and every hour. The hourly run deploys only when
+the result differs from the live site. It:
 
-1. reads open issues with that label through the GitHub API, with a read-only issues token;
+1. reads open issues with that label in open-agent-lab through the GitHub API;
 2. takes the first JSON code block in each body and validates it strictly
    (`scripts/lib/regressions.mjs`): exact keys, known detectors and signals, anchored
    patterns for agent ids, versions and model ids, bounded sizes and numbers, valid dates,
@@ -102,10 +104,11 @@ closed, reopened, deleted or relabeled. It:
    signal, and counts independent reports as distinct GitHub accounts (one account's newest
    issue per row). Each row has the median effect size, the dates the change was seen, and
    links to the source issues;
-4. writes `aggregates` in `data/regressions.json`, commits only if it changed, and the pages
-   workflow publishes it.
+4. writes `aggregates` into `data/regressions.json` for that build, and the site publishes
+   it (also as `data/regressions.json` on the site). The committed file holds only the
+   hand-reviewed `reports`; aggregates are not committed back.
 
-Closing an issue, or removing its label, removes it at the next run. Run the aggregator
+Closing an issue, or removing its label, removes it within the hour. Run the aggregator
 locally against saved API output with
 `node scripts/aggregate-regressions.mjs --issues issues.json --out /tmp/regressions.json`.
 

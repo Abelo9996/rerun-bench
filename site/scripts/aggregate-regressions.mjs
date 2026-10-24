@@ -3,8 +3,11 @@
 // in each, and writes the aggregate to data/regressions.json. The file is
 // only rewritten when its content changes.
 //
+// The issues live in open-agent-lab, because published nerf-watch versions
+// open them there. The pages workflow runs this before every build.
+//
 // Usage:
-//   GITHUB_TOKEN=... GITHUB_REPOSITORY=owner/repo node scripts/aggregate-regressions.mjs
+//   GITHUB_TOKEN=... node scripts/aggregate-regressions.mjs [--repo owner/repo]
 //   node scripts/aggregate-regressions.mjs --issues issues.json [--out file]   (offline, for testing)
 //
 // Issue content is untrusted. It is parsed as JSON and validated by
@@ -34,7 +37,7 @@ async function fetchIssues(repo, token) {
       headers: {
         accept: "application/vnd.github+json",
         "x-github-api-version": "2022-11-28",
-        "user-agent": "open-agent-lab-regression-aggregator",
+        "user-agent": "rerun-bench-regression-aggregator",
         ...(token ? { authorization: `Bearer ${token}` } : {}),
       },
     });
@@ -48,8 +51,8 @@ async function fetchIssues(repo, token) {
 }
 
 async function main() {
-  const repo = process.env.GITHUB_REPOSITORY || "Abelo9996/open-agent-lab";
-  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(repo)) throw new Error("GITHUB_REPOSITORY is not owner/repo");
+  const repo = arg("--repo") || process.env.REGRESSION_REPO || "Abelo9996/open-agent-lab";
+  if (!/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(repo)) throw new Error("the issue repository is not owner/repo");
   const repoUrl = `https://github.com/${repo}`;
   const file = arg("--issues");
   const issues = file ? JSON.parse(readFileSync(file, "utf8")) : await fetchIssues(repo, process.env.GITHUB_TOKEN);
